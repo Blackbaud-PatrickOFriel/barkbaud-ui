@@ -76,5 +76,5 @@
         .run(run)
         .controller('MainController', MainController);
 
-    angular.bootstrap(document.body, ['barkbaud'], {strictDi: true});
+    
 }());

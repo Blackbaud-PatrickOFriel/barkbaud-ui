@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" ng-app="barkbaud">
+<html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
   <title>Barkbaud</title>
@@ -9,23 +9,34 @@
   <link rel="stylesheet" type="text/css" href="css/app.css">
 </head>
 
-<body ng-controller="MainController as mainController">
-  <bb-navbar>
-    <div class="container-fluid">
-      <ul class="nav navbar-nav navbar-left">
-        <li ui-sref-active="bb-navbar-active">
-          <a ui-sref="dashboard">Dashboard</a>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-          <a ng-click="mainController.logout()">Logout</a>
-        </li>
-      </ul>
-    </div>
-  </bb-navbar>
-  <div ui-view></div>
+<body>
+  <div ng-controller="MainController as mainController">
+    <bb-navbar>
+      <div class="container-fluid">
+        <ul class="nav navbar-nav navbar-left">
+          <li ui-sref-active="bb-navbar-active">
+            <a ui-sref="dashboard">Dashboard</a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a ng-click="mainController.logout()">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </bb-navbar>
+    <div ui-view></div>
+  </div>
+
   <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>
   <script src="js/app.min.js"></script>
+  <script>
+    import { upgradeAdapter } from './upgrade_adapter';
+
+    /* .... */
+
+    upgradeAdapter.bootstrap(document.body, ['barkbaud'], {strictDi: true});
+  </script>
+
 </body>
 </html>

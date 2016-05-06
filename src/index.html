@@ -28,11 +28,15 @@
     <div ui-view></div>
   </div>
 
-  <script src="../node_modules/systemjs/dist/system.src.js"></script>
   <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>
-  <script src="systemjs.config.js"></script>
+  <script src="js/app.min.js"></script>
   <script>
-    System.import('js/app.module');
+    import { upgradeAdapter } from './upgrade_adapter';
+
+    /* .... */
+
+    upgradeAdapter.bootstrap(document.body, ['barkbaud'], {strictDi: true});
   </script>
+
 </body>
 </html>

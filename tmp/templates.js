@@ -227,7 +227,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '');
     $templateCache.put('index.html',
         '<!DOCTYPE html>\n' +
-        '<html xmlns="http://www.w3.org/1999/xhtml" ng-app="barkbaud">\n' +
+        '<html xmlns="http://www.w3.org/1999/xhtml">\n' +
         '\n' +
         '<head>\n' +
         '  <title>Barkbaud</title>\n' +
@@ -237,24 +237,35 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '  <link rel="stylesheet" type="text/css" href="css/app.css">\n' +
         '</head>\n' +
         '\n' +
-        '<body ng-controller="MainController as mainController">\n' +
-        '  <bb-navbar>\n' +
-        '    <div class="container-fluid">\n' +
-        '      <ul class="nav navbar-nav navbar-left">\n' +
-        '        <li ui-sref-active="bb-navbar-active">\n' +
-        '          <a ui-sref="dashboard">Dashboard</a>\n' +
-        '        </li>\n' +
-        '      </ul>\n' +
-        '      <ul class="nav navbar-nav navbar-right">\n' +
-        '        <li>\n' +
-        '          <a ng-click="mainController.logout()">Logout</a>\n' +
-        '        </li>\n' +
-        '      </ul>\n' +
-        '    </div>\n' +
-        '  </bb-navbar>\n' +
-        '  <div ui-view></div>\n' +
+        '<body>\n' +
+        '  <div ng-controller="MainController as mainController">\n' +
+        '    <bb-navbar>\n' +
+        '      <div class="container-fluid">\n' +
+        '        <ul class="nav navbar-nav navbar-left">\n' +
+        '          <li ui-sref-active="bb-navbar-active">\n' +
+        '            <a ui-sref="dashboard">Dashboard</a>\n' +
+        '          </li>\n' +
+        '        </ul>\n' +
+        '        <ul class="nav navbar-nav navbar-right">\n' +
+        '          <li>\n' +
+        '            <a ng-click="mainController.logout()">Logout</a>\n' +
+        '          </li>\n' +
+        '        </ul>\n' +
+        '      </div>\n' +
+        '    </bb-navbar>\n' +
+        '    <div ui-view></div>\n' +
+        '  </div>\n' +
+        '\n' +
         '  <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>\n' +
         '  <script src="js/app.min.js"></script>\n' +
+        '  <script>\n' +
+        '    import { upgradeAdapter } from \'./upgrade_adapter\';\n' +
+        '\n' +
+        '    /* .... */\n' +
+        '\n' +
+        '    upgradeAdapter.bootstrap(document.body, [\'barkbaud\'], {strictDi: true});\n' +
+        '  </script>\n' +
+        '\n' +
         '</body>\n' +
         '</html>\n' +
         '');
