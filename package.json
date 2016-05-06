@@ -1,6 +1,10 @@
 {
   "name": "barkbaud-ui",
   "version": "1.0.0",
+  "scripts": {
+    "typings": "typings",
+    "tsc": "tsc -p . -w"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-bump": "~0.3.0",
@@ -10,6 +14,11 @@
     "grunt-contrib-uglify": "~0.7.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-html2js": "^0.3.2",
-    "grunt-skylint": "git+https://github.com/blackbaud/grunt-skylint"
+    "grunt-skylint": "git+https://github.com/blackbaud/grunt-skylint",
+    "typescript": "^1.8.10",
+    "typings": "^0.8.1"
+  },
+  "dependencies": {
+    "systemjs": "^0.19.27"
   }
 }

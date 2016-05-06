@@ -1,5 +1,5 @@
 /*jshint browser: true */
-/*globals angular, ng */
+/*globals angular */
 
 (function () {
     'use strict';
@@ -75,4 +75,6 @@
         .config(config)
         .run(run)
         .controller('MainController', MainController);
+
+    angular.bootstrap(document.body, ['barkbaud'], {strictDi: true});
 }());
