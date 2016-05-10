@@ -258,13 +258,6 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '\n' +
         '  <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>\n' +
         '  <script src="js/app.min.js"></script>\n' +
-        '  <script>\n' +
-        '    import { upgradeAdapter } from \'./upgrade_adapter\';\n' +
-        '\n' +
-        '    /* .... */\n' +
-        '\n' +
-        '    upgradeAdapter.bootstrap(document.body, [\'barkbaud\'], {strictDi: true});\n' +
-        '  </script>\n' +
         '\n' +
         '</body>\n' +
         '</html>\n' +
