@@ -3,6 +3,8 @@
 (function () {
     'use strict';
 
+    var noteAddFactory = require('./noteadd.factory.js');
+
     function DogNotesTileController($scope, bbData, bbMoment, barkNoteAdd, dogId) {
         var self = this;
 
@@ -40,6 +42,6 @@
         'dogId'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.note.tile', [noteAddFactory.name])
         .controller('DogNotesTileController', DogNotesTileController);
 }());

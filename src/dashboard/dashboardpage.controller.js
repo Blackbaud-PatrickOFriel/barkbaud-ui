@@ -25,6 +25,6 @@
         'bbWindow'
     ];
 
-    angular.module('barkbaud')
+    exports.module = angular.module('barkbaud.dashboard.controller', [])
         .controller('DashboardPageController', DashboardPageController);
 }());

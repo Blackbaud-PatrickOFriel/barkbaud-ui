@@ -8,5 +8,11 @@
     "nonew": true,
     "strict": true,
     "undef": true,
-    "unused": true
+    "unused": true,
+    "globals": {
+      "angular": true,
+      "console": true
+    },
+    "node": "true",
+    "esnext": true
 }

@@ -39,6 +39,6 @@
         'dogId'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.home.previous', [])
         .controller('DogPreviousHomesTileController', DogPreviousHomesTileController);
 }());

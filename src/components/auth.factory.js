@@ -3,6 +3,9 @@
 (function () {
     'use strict';
 
+    var appConfig = require('../app.config.js'),
+        loginController = require('../login/loginpage.controller.js');
+
     function barkbaudAuthService(barkbaudConfig, bbData, bbModal, $q, $window) {
         var modal,
             service = {};
@@ -45,7 +48,7 @@
             if (!modal) {
                 modal = bbModal.open({
                     controller: 'LoginPageController as loginPage',
-                    templateUrl: 'login/loginpage.html',
+                    template: require('login/loginpage.html'),
                     resolve: {
                         barkbaudRedirect: function () {
                             return redirect;
@@ -68,6 +71,6 @@
         '$window'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.components.authfactory', [appConfig.name, loginController.name])
         .factory('barkbaudAuthService', barkbaudAuthService);
 }());

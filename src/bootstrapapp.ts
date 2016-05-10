@@ -1,5 +1,5 @@
-/// <reference path="../typings/main.d.ts" />
-
 import { upgradeAdapter } from './upgrade_adapter';
 
-upgradeAdapter.bootstrap(document.body, ['barkbaud'], {strictDi: true});
+var barkbaud = require('./app.main');
+
+upgradeAdapter.bootstrap(document.body, [barkbaud.name], {strictDi: true});

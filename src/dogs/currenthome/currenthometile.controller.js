@@ -3,6 +3,8 @@
 (function () {
     'use strict';
 
+    var findHome = require('./findhome.factory.js');
+
     function DogCurrentHomeTileController($rootScope, $scope, bbData, bbMoment, barkFindHome, dogId) {
         var self = this;
 
@@ -44,6 +46,6 @@
         'dogId'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.home.current', [findHome.name])
         .controller('DogCurrentHomeTileController', DogCurrentHomeTileController);
 }());

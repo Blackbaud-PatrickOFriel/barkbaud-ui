@@ -3,6 +3,8 @@
 (function () {
     'use strict';
 
+    var authFactory = require('./auth.factory.js');
+
     function constituentUrlFilter(barkbaudAuthService) {
         return function (constituentId) {
             return [
@@ -16,7 +18,7 @@
 
     constituentUrlFilter.$inject = ['barkbaudAuthService'];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.components.constituentUrl', [authFactory.name])
         .filter('barkConstituentUrl', constituentUrlFilter);
 
 }());

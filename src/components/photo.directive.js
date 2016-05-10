@@ -48,7 +48,7 @@
                 });
             },
             replace: true,
-            templateUrl: 'components/photo.directive.html'
+            template: require('./photo.directive.html')
         };
     }
 
@@ -56,6 +56,6 @@
         'gravatarService'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.components.photo', 'ui.gravatar')
         .directive('barkPhoto', barkPhoto);
 }());

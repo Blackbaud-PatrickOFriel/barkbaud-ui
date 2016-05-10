@@ -26,6 +26,6 @@
         'dogId'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.notes.add.controller', [])
         .controller('NoteAddController', NoteAddController);
 }());

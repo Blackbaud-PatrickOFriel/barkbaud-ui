@@ -40,6 +40,6 @@
         'dogId'
     ];
 
-    angular.module('barkbaud')
+    module.exports = angular.module('barkbaud.home.find.controller', [])
         .controller('FindHomeController', FindHomeController);
 }());

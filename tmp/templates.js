@@ -256,8 +256,11 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '    <div ui-view></div>\n' +
         '  </div>\n' +
         '\n' +
+        '\n' +
         '  <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>\n' +
-        '  <script src="js/app.min.js"></script>\n' +
+        '  <script src="polyfills.bundle.js"></script>\n' +
+        '  <script src="vendor.bundle.js"></script>\n' +
+        '  <script src="app.bundle.js"></script>\n' +
         '\n' +
         '</body>\n' +
         '</html>\n' +
