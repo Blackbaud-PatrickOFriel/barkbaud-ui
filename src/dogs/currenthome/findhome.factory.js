@@ -21,6 +21,6 @@
 
     barkFindHome.$inject = ['bbModal'];
 
-    module.exports = angular.module('barkbaud.home.find.factory', [])
+    angular.module('barkbaud')
         .factory('barkFindHome', barkFindHome);
 }());

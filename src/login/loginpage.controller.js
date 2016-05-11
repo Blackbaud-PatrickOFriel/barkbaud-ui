@@ -3,8 +3,6 @@
 (function () {
     'use strict';
 
-    var authService = require('../components/auth.factory.js');
-
     function LoginPageController($location, $window, bbWait, bbWindow, barkbaudAuthService, barkbaudRedirect) {
         var self = this;
 
@@ -36,6 +34,6 @@
         'barkbaudRedirect'
     ];
 
-    module.exports = angular.module('barkbaud.login', [authService.name])
+    angular.module('barkbaud')
         .controller('LoginPageController', LoginPageController);
 }());

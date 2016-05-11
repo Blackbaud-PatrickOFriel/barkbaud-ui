@@ -21,6 +21,6 @@
 
     DogSummaryTileController.$inject = ['$timeout', 'bbData', 'bbMoment', 'dogId'];
 
-    module.exports = angular.module('barkbaud.summary', [])
+    angular.module('barkbaud')
         .controller('DogSummaryTileController', DogSummaryTileController);
 }());

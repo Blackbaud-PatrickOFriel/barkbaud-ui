@@ -21,6 +21,6 @@
 
     barkNoteAdd.$inject = ['bbModal'];
 
-    module.exports = angular.module('barkbaud.notes.add.factory', [])
+    angular.module('barkbaud')
         .factory('barkNoteAdd', barkNoteAdd);
 }());

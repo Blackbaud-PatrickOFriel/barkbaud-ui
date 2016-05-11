@@ -18,18 +18,6 @@ webpackConfig = {
             {
                 test: /\.ts$/,
                 loader: 'awesome-typescript-loader'
-            },
-            {
-                test: /\.js$/,
-                loader: 'babel',
-                query: {
-                    presets: ['es2015']
-                },
-                exclude: /node_modules/
-            },
-            {
-                test: /\.html$/,
-                loader: 'raw'
             }
         ]
     },
@@ -82,7 +70,8 @@ defaultConfig = {
             'angular2/platform/browser': path.join(__dirname, 'node_modules', '@angular', 'platform-browser', 'index.js'),
             'angular2/router': path.join(__dirname, 'node_modules', '@angular', 'router-deprecated', 'index.js'),
             'angular2/http': path.join(__dirname, 'node_modules', '@angular', 'http', 'index.js'),
-            'angular2/http/testing': path.join(__dirname, 'node_modules', '@angular', 'http', 'testing.js')
+            'angular2/http/testing': path.join(__dirname, 'node_modules', '@angular', 'http', 'testing.js'),
+            'skyux2': path.join(__dirname, 'node_modules', 'blackbaud-skyux2', 'src', 'modules', 'core.ts')
 
         }
     },

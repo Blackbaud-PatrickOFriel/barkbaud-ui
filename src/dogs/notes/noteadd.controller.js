@@ -1,4 +1,4 @@
-/*global angular */
+//*global angular */
 
 (function () {
     'use strict';
@@ -26,6 +26,6 @@
         'dogId'
     ];
 
-    module.exports = angular.module('barkbaud.notes.add.controller', [])
+    angular.module('barkbaud')
         .controller('NoteAddController', NoteAddController);
 }());

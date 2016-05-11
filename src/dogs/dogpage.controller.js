@@ -60,6 +60,6 @@
         'dogId'
     ];
 
-    module.exports = angular.module('barkbaud.dog.controller', [])
+    angular.module('barkbaud')
         .controller('DogPageController', DogPageController);
 }());

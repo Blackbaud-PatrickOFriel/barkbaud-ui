@@ -1,12 +1,12 @@
+/*jshint browser: true */
+/*globals angular, ng */
 
 (function () {
     'use strict';
-    var appConfig = require('./app.config.js'),
-        appController = require('./app.controller.js'),
-        dogModule = require('./dogs/dogpage.config.js'),
-        componentsModule = require('./components/barkbaud.components.js'),
-        dashboardModule = require('./dashboard/barkbaud.dashboard.js'),
-        loginModule = require('./login/loginpage.controller.js');
+
+    var barkbaudConfig = {
+        apiUrl: 'https://barkbaud.herokuapp.com/'
+    };
 
     function config($locationProvider, $urlRouterProvider, bbWindowConfig) {
         $locationProvider.html5Mode(false);
@@ -21,7 +21,7 @@
 
     config.$inject = ['$locationProvider', '$urlRouterProvider', 'bbWindowConfig'];
 
-    function run(barkbaudConfig, bbDataConfig, bbWait, barkbaudAuthService, $rootScope, $state) {
+    function run(bbDataConfig, bbWait, barkbaudAuthService, $rootScope, $state) {
 
         function addBaseUrl(url) {
             return barkbaudConfig.apiUrl + url;
@@ -61,9 +61,18 @@
         bbDataConfig.resourceUrlFilter = addBaseUrl;
     }
 
-    run.$inject = ['barkbaudConfig', 'bbDataConfig', 'bbWait', 'barkbaudAuthService', '$rootScope', '$state'];
+    run.$inject = ['bbDataConfig', 'bbWait', 'barkbaudAuthService', '$rootScope', '$state'];
 
-    module.exports = angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', appConfig.name, appController.name, dogModule.name, componentsModule.name, dashboardModule.name, loginModule.name])
+    function MainController(barkbaudAuthService) {
+        var self = this;
+        self.logout = barkbaudAuthService.logout;
+    }
+
+    MainController.$inject = ['barkbaudAuthService'];
+
+    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
+        .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
-        .run(run);
+        .run(run)
+        .controller('MainController', MainController);
 }());

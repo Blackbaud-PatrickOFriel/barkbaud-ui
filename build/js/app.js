@@ -483,41 +483,15 @@ angular.module('md5', []).constant('md5', (function() {
 
 }).call(this);
 
-/*global angular */
+/*jshint browser: true */
+/*globals angular, ng */
+
 (function () {
     'use strict';
-
 
     var barkbaudConfig = {
-            apiUrl: 'https://barkbaud.herokuapp.com/'
-        };
-
-    angular
-        .module('barkbaud.config', [])
-        .constant('barkbaudConfig', barkbaudConfig);
-}());
-
-/* global angular */
-(function () {
-    'use strict';
-
-    function MainController(barkbaudAuthService) {
-        var self = this;
-        self.logout = barkbaudAuthService.logout;
-    }
-
-    MainController.$inject = ['barkbaudAuthService'];
-
-    angular.module('barkbaud.controller', [])
-        .controller('MainController', MainController);
-
-}());
-
-/*jshint browser: true */
-/*globals angular */
-
-(function () {
-    'use strict';
+        apiUrl: 'https://barkbaud.herokuapp.com/'
+    };
 
     function config($locationProvider, $urlRouterProvider, bbWindowConfig) {
         $locationProvider.html5Mode(false);
@@ -532,7 +506,7 @@ angular.module('md5', []).constant('md5', (function() {
 
     config.$inject = ['$locationProvider', '$urlRouterProvider', 'bbWindowConfig'];
 
-    function run(barkbaudConfig, bbDataConfig, bbWait, barkbaudAuthService, $rootScope, $state) {
+    function run(bbDataConfig, bbWait, barkbaudAuthService, $rootScope, $state) {
 
         function addBaseUrl(url) {
             return barkbaudConfig.apiUrl + url;
@@ -572,11 +546,20 @@ angular.module('md5', []).constant('md5', (function() {
         bbDataConfig.resourceUrlFilter = addBaseUrl;
     }
 
-    run.$inject = ['barkbaudConfig', 'bbDataConfig', 'bbWait', 'barkbaudAuthService', '$rootScope', '$state'];
+    run.$inject = ['bbDataConfig', 'bbWait', 'barkbaudAuthService', '$rootScope', '$state'];
 
-    angular.module('barkbaud', ['barkbaud.config', 'barkbaud.controller', 'sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
+    function MainController(barkbaudAuthService) {
+        var self = this;
+        self.logout = barkbaudAuthService.logout;
+    }
+
+    MainController.$inject = ['barkbaudAuthService'];
+
+    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
+        .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
-        .run(run);
+        .run(run)
+        .controller('MainController', MainController);
 }());
 
 /*global angular */
@@ -1021,7 +1004,7 @@ angular.module('md5', []).constant('md5', (function() {
         .controller('DogPageController', DogPageController);
 }());
 
-/*global angular */
+//*global angular */
 
 (function () {
     'use strict';
@@ -1171,7 +1154,6 @@ angular.module('md5', []).constant('md5', (function() {
         .controller('DogPreviousHomesTileController', DogPreviousHomesTileController);
 }());
 
-
 /*global angular */
 
 (function () {
@@ -1239,10 +1221,6 @@ angular.module('md5', []).constant('md5', (function() {
         .controller('LoginPageController', LoginPageController);
 }());
 
-"use strict";
-var upgrade_1 = require('@angular/upgrade');
-exports.upgradeAdapter = new upgrade_1.UpgradeAdapter();
-//
 angular.module('barkbaud.templates', []).run(['$templateCache', function($templateCache) {
     $templateCache.put('components/photo.directive.html',
         '<div class="bark-photo img-circle center-block">\n' +
@@ -1503,6 +1481,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '\n' +
         '\n' +
         '  <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>\n' +
+        '  <script src="js/app.min.js"></script>\n' +
         '  <script src="polyfills.bundle.js"></script>\n' +
         '  <script src="vendor.bundle.js"></script>\n' +
         '  <script src="app.bundle.js"></script>\n' +
