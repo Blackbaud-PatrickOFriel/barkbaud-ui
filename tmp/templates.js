@@ -23,6 +23,9 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '          </div>\n' +
         '      </div>\n' +
         '    </div>\n' +
+        '    <sky-alert [alertType]="\'info\'" [closeable]="alertCloseable">\n' +
+        '      Info alert\n' +
+        '    </sky-alert>\n' +
         '  </section>\n' +
         '  <div bb-tile-section class="text-danger" ng-show="dashboardPage.error">\n' +
         '    Error loading dogs.\n' +

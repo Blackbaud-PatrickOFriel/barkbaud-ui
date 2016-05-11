@@ -18,6 +18,40 @@ webpackConfig = {
             {
                 test: /\.ts$/,
                 loader: 'awesome-typescript-loader'
+            },
+            {
+                test: /\.html$/,
+                loader: 'raw-loader'
+            },
+            /*
+            * Raw loader support for *.css files
+            * Returns file content as string
+            *
+            * See: https://github.com/webpack/raw-loader
+            */
+            {
+                test: /\.css$/,
+                loader: 'raw-loader'
+            },
+
+            /*
+            * Raw loader support for *.css files
+            * Returns file content as string
+            *
+            * See: https://github.com/webpack/raw-loader
+            */
+            {
+                test: /\.scss$/,
+                loader: 'raw-loader!sass-loader'
+            },
+            /*
+            * Json loader support for *.json files.
+            *
+            * See: https://github.com/webpack/json-loader
+            */
+            {
+                test: /\.json$/,
+                loader: 'json-loader'
             }
         ]
     },
@@ -64,15 +98,7 @@ defaultConfig = {
             '.js'
         ],
         alias: {
-            'angular2/testing': path.join(__dirname, 'node_modules', '@angular', 'core', 'testing.js'),
-            '@angular2/testing': path.join(__dirname, 'node_modules', '@angular', 'core', 'testing.js'),
-            'angular2/core': path.join(__dirname, 'node_modules', '@angular', 'core', 'index.js'),
-            'angular2/platform/browser': path.join(__dirname, 'node_modules', '@angular', 'platform-browser', 'index.js'),
-            'angular2/router': path.join(__dirname, 'node_modules', '@angular', 'router-deprecated', 'index.js'),
-            'angular2/http': path.join(__dirname, 'node_modules', '@angular', 'http', 'index.js'),
-            'angular2/http/testing': path.join(__dirname, 'node_modules', '@angular', 'http', 'testing.js'),
-            'skyux2': path.join(__dirname, 'node_modules', 'blackbaud-skyux2', 'src', 'modules', 'core.ts')
-
+            'blackbaud-skyux2': path.join(__dirname, 'node_modules', 'blackbaud-skyux2', 'src', 'modules', 'core.ts')
         }
     },
 
@@ -84,12 +110,12 @@ defaultConfig = {
         }
     },
     node: {
-        global: 1,
+        global: 'window',
         crypto: 'empty',
-        module: 0,
-        Buffer: 0,
-        clearImmediate: 0,
-        setImmediate: 0
+        process: true,
+        module: false,
+        clearImmediate: false,
+        setImmediate: false
     }
 };
 

@@ -17,6 +17,9 @@
           </div>
       </div>
     </div>
+    <sky-alert [alertType]="'info'" [closeable]="alertCloseable">
+      Info alert
+    </sky-alert>
   </section>
   <div bb-tile-section class="text-danger" ng-show="dashboardPage.error">
     Error loading dogs.
