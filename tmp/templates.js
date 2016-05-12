@@ -23,7 +23,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '          </div>\n' +
         '      </div>\n' +
         '    </div>\n' +
-        '    <sky-alert [alertType]="\'info\'" [closeable]="alertCloseable">\n' +
+        '    <sky-alert [alert-type]="\'info\'">\n' +
         '      Info alert\n' +
         '    </sky-alert>\n' +
         '  </section>\n' +
@@ -236,7 +236,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '  <title>Barkbaud</title>\n' +
         '  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n' +
         '  <link rel="icon" type="image/png" href="images/favicon.ico">\n' +
-        '  <link rel="stylesheet" type="text/css" href="https://sky.blackbaudcdn.net/skyux/1.4.2/css/sky-bundle.css">\n' +
+        '  <link rel="stylesheet" type="text/css" href="https://sky.blackbaudcdn.net/skyux/1.5.21/css/sky-bundle.css">\n' +
         '  <link rel="stylesheet" type="text/css" href="css/app.css">\n' +
         '</head>\n' +
         '\n' +
@@ -256,11 +256,17 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '        </ul>\n' +
         '      </div>\n' +
         '    </bb-navbar>\n' +
+        '    <sky-alert [alert-type]="\'info\'">\n' +
+        '      Info alert\n' +
+        '    </sky-alert>\n' +
+        '    <sky-alert [alert-type]="\'success\'" [closeable]="mainController.isClosable">\n' +
+        '      Success alert\n' +
+        '    </sky-alert>\n' +
         '    <div ui-view></div>\n' +
         '  </div>\n' +
         '\n' +
         '\n' +
-        '  <script src="https://sky.blackbaudcdn.net/skyux/1.4.2/js/sky-bundle.min.js"></script>\n' +
+        '  <script src="https://sky.blackbaudcdn.net/skyux/1.5.21/js/sky-bundle.min.js"></script>\n' +
         '  <script src="js/app.min.js"></script>\n' +
         '  <script src="polyfills.bundle.js"></script>\n' +
         '  <script src="vendor.bundle.js"></script>\n' +

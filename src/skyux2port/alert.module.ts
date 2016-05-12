@@ -1,6 +1,6 @@
 /* global angular */
-import {SkyAlertComponent} from 'blackbaud-skyux2';
+import { SkyAlertComponent } from 'blackbaud-skyux2';
 import { upgradeAdapter } from '../upgrade_adapter';
 
-export default angular.module('barkbaud')
+module.exports = angular.module('barkbaud.skyux2', [])
   .directive('skyAlert', <angular.IDirectiveFactory>upgradeAdapter.downgradeNg2Component(SkyAlertComponent));

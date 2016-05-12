@@ -7,5 +7,7 @@
 // CoreJS has all the polyfills you need
 
 import 'core-js';
-import 'zone.js/dist/zone';
-import 'zone.js/dist/long-stack-trace-zone';
+require('zone.js/dist/zone');
+
+// Typescript emit helpers polyfill
+import 'ts-helpers';

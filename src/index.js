@@ -66,11 +66,13 @@
     function MainController(barkbaudAuthService) {
         var self = this;
         self.logout = barkbaudAuthService.logout;
+        self.isClosable = true;
+        self.successType = 'success';
     }
 
     MainController.$inject = ['barkbaudAuthService'];
 
-    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
+    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar', 'barkbaud.skyux2'])
         .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
         .run(run)

@@ -51,613 +51,20 @@
 	__webpack_require__(168);
 	__webpack_require__(4);
 	__webpack_require__(96);
-	__webpack_require__(546);
-	__webpack_require__(561);
-	// RxJS
-	__webpack_require__(592);
 	__webpack_require__(594);
+	__webpack_require__(609);
+	// RxJS
+	__webpack_require__(640);
+	__webpack_require__(642);
 	// For vendors for example jQuery, Lodash, angular2-jwt import them here
 	// Also see src/typings.d.ts as you also need to run `typings install x` where `x` is your module
-	__webpack_require__(601);
+	//import './skyux2port/alert.module.ts';
 	
 
 /***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var upgrade_1 = __webpack_require__(2);
-	exports.upgradeAdapter = new upgrade_1.UpgradeAdapter();
-	
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	/**
-	 * @module
-	 * @description
-	 * Adapter allowing AngularJS v1 and Angular v2 to run side by side in the same application.
-	 */
-	var upgrade_adapter_1 = __webpack_require__(3);
-	exports.UpgradeAdapter = upgrade_adapter_1.UpgradeAdapter;
-	exports.UpgradeAdapterRef = upgrade_adapter_1.UpgradeAdapterRef;
-	
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	var core_1 = __webpack_require__(4);
-	var lang_1 = __webpack_require__(7);
-	var async_1 = __webpack_require__(42);
-	var browser_1 = __webpack_require__(93);
-	var metadata_1 = __webpack_require__(238);
-	var util_1 = __webpack_require__(239);
-	var constants_1 = __webpack_require__(240);
-	var downgrade_ng2_adapter_1 = __webpack_require__(241);
-	var upgrade_ng1_adapter_1 = __webpack_require__(242);
-	var angular = __webpack_require__(243);
-	var upgradeCount = 0;
-	/**
-	 * Use `UpgradeAdapter` to allow AngularJS v1 and Angular v2 to coexist in a single application.
-	 *
-	 * The `UpgradeAdapter` allows:
-	 * 1. creation of Angular v2 component from AngularJS v1 component directive
-	 *    (See [UpgradeAdapter#upgradeNg1Component()])
-	 * 2. creation of AngularJS v1 directive from Angular v2 component.
-	 *    (See [UpgradeAdapter#downgradeNg2Component()])
-	 * 3. Bootstrapping of a hybrid Angular application which contains both of the frameworks
-	 *    coexisting in a single application.
-	 *
-	 * ## Mental Model
-	 *
-	 * When reasoning about how a hybrid application works it is useful to have a mental model which
-	 * describes what is happening and explains what is happening at the lowest level.
-	 *
-	 * 1. There are two independent frameworks running in a single application, each framework treats
-	 *    the other as a black box.
-	 * 2. Each DOM element on the page is owned exactly by one framework. Whichever framework
-	 *    instantiated the element is the owner. Each framework only updates/interacts with its own
-	 *    DOM elements and ignores others.
-	 * 3. AngularJS v1 directives always execute inside AngularJS v1 framework codebase regardless of
-	 *    where they are instantiated.
-	 * 4. Angular v2 components always execute inside Angular v2 framework codebase regardless of
-	 *    where they are instantiated.
-	 * 5. An AngularJS v1 component can be upgraded to an Angular v2 component. This creates an
-	 *    Angular v2 directive, which bootstraps the AngularJS v1 component directive in that location.
-	 * 6. An Angular v2 component can be downgraded to an AngularJS v1 component directive. This creates
-	 *    an AngularJS v1 directive, which bootstraps the Angular v2 component in that location.
-	 * 7. Whenever an adapter component is instantiated the host element is owned by the framework
-	 *    doing the instantiation. The other framework then instantiates and owns the view for that
-	 *    component. This implies that component bindings will always follow the semantics of the
-	 *    instantiation framework. The syntax is always that of Angular v2 syntax.
-	 * 8. AngularJS v1 is always bootstrapped first and owns the bottom most view.
-	 * 9. The new application is running in Angular v2 zone, and therefore it no longer needs calls to
-	 *    `$apply()`.
-	 *
-	 * ### Example
-	 *
-	 * ```
-	 * var adapter = new UpgradeAdapter();
-	 * var module = angular.module('myExample', []);
-	 * module.directive('ng2', adapter.downgradeNg2Component(Ng2));
-	 *
-	 * module.directive('ng1', function() {
-	 *   return {
-	 *      scope: { title: '=' },
-	 *      template: 'ng1[Hello {{title}}!](<span ng-transclude></span>)'
-	 *   };
-	 * });
-	 *
-	 *
-	 * @Component({
-	 *   selector: 'ng2',
-	 *   inputs: ['name'],
-	 *   template: 'ng2[<ng1 [title]="name">transclude</ng1>](<ng-content></ng-content>)',
-	 *   directives: [adapter.upgradeNg1Component('ng1')]
-	 * })
-	 * class Ng2 {
-	 * }
-	 *
-	 * document.body.innerHTML = '<ng2 name="World">project</ng2>';
-	 *
-	 * adapter.bootstrap(document.body, ['myExample']).ready(function() {
-	 *   expect(document.body.textContent).toEqual(
-	 *       "ng2[ng1[Hello World!](transclude)](project)");
-	 * });
-	 * ```
-	 */
-	var UpgradeAdapter = (function () {
-	    function UpgradeAdapter() {
-	        /* @internal */
-	        this.idPrefix = "NG2_UPGRADE_" + upgradeCount++ + "_";
-	        /* @internal */
-	        this.upgradedComponents = [];
-	        /* @internal */
-	        this.downgradedComponents = {};
-	        /* @internal */
-	        this.providers = [];
-	    }
-	    /**
-	     * Allows Angular v2 Component to be used from AngularJS v1.
-	     *
-	     * Use `downgradeNg2Component` to create an AngularJS v1 Directive Definition Factory from
-	     * Angular v2 Component. The adapter will bootstrap Angular v2 component from within the
-	     * AngularJS v1 template.
-	     *
-	     * ## Mental Model
-	     *
-	     * 1. The component is instantiated by being listed in AngularJS v1 template. This means that the
-	     *    host element is controlled by AngularJS v1, but the component's view will be controlled by
-	     *    Angular v2.
-	     * 2. Even thought the component is instantiated in AngularJS v1, it will be using Angular v2
-	     *    syntax. This has to be done, this way because we must follow Angular v2 components do not
-	     *    declare how the attributes should be interpreted.
-	     *
-	     * ## Supported Features
-	     *
-	     * - Bindings:
-	     *   - Attribute: `<comp name="World">`
-	     *   - Interpolation:  `<comp greeting="Hello {{name}}!">`
-	     *   - Expression:  `<comp [name]="username">`
-	     *   - Event:  `<comp (close)="doSomething()">`
-	     * - Content projection: yes
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * var adapter = new UpgradeAdapter();
-	     * var module = angular.module('myExample', []);
-	     * module.directive('greet', adapter.downgradeNg2Component(Greeter));
-	     *
-	     * @Component({
-	     *   selector: 'greet',
-	     *   template: '{{salutation}} {{name}}! - <ng-content></ng-content>'
-	     * })
-	     * class Greeter {
-	     *   @Input() salutation: string;
-	     *   @Input() name: string;
-	     * }
-	     *
-	     * document.body.innerHTML =
-	     *   'ng1 template: <greet salutation="Hello" [name]="world">text</greet>';
-	     *
-	     * adapter.bootstrap(document.body, ['myExample']).ready(function() {
-	     *   expect(document.body.textContent).toEqual("ng1 template: Hello world! - text");
-	     * });
-	     * ```
-	     */
-	    UpgradeAdapter.prototype.downgradeNg2Component = function (type) {
-	        this.upgradedComponents.push(type);
-	        var info = metadata_1.getComponentInfo(type);
-	        return ng1ComponentDirective(info, "" + this.idPrefix + info.selector + "_c");
-	    };
-	    /**
-	     * Allows AngularJS v1 Component to be used from Angular v2.
-	     *
-	     * Use `upgradeNg1Component` to create an Angular v2 component from AngularJS v1 Component
-	     * directive. The adapter will bootstrap AngularJS v1 component from within the Angular v2
-	     * template.
-	     *
-	     * ## Mental Model
-	     *
-	     * 1. The component is instantiated by being listed in Angular v2 template. This means that the
-	     *    host element is controlled by Angular v2, but the component's view will be controlled by
-	     *    AngularJS v1.
-	     *
-	     * ## Supported Features
-	     *
-	     * - Bindings:
-	     *   - Attribute: `<comp name="World">`
-	     *   - Interpolation:  `<comp greeting="Hello {{name}}!">`
-	     *   - Expression:  `<comp [name]="username">`
-	     *   - Event:  `<comp (close)="doSomething()">`
-	     * - Transclusion: yes
-	     * - Only some of the features of
-	     *   [Directive Definition Object](https://docs.angularjs.org/api/ng/service/$compile) are
-	     *   supported:
-	     *   - `compile`: not supported because the host element is owned by Angular v2, which does
-	     *     not allow modifying DOM structure during compilation.
-	     *   - `controller`: supported. (NOTE: injection of `$attrs` and `$transclude` is not supported.)
-	     *   - `controllerAs': supported.
-	     *   - `bindToController': supported.
-	     *   - `link': supported. (NOTE: only pre-link function is supported.)
-	     *   - `name': supported.
-	     *   - `priority': ignored.
-	     *   - `replace': not supported.
-	     *   - `require`: supported.
-	     *   - `restrict`: must be set to 'E'.
-	     *   - `scope`: supported.
-	     *   - `template`: supported.
-	     *   - `templateUrl`: supported.
-	     *   - `terminal`: ignored.
-	     *   - `transclude`: supported.
-	     *
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * var adapter = new UpgradeAdapter();
-	     * var module = angular.module('myExample', []);
-	     *
-	     * module.directive('greet', function() {
-	     *   return {
-	     *     scope: {salutation: '=', name: '=' },
-	     *     template: '{{salutation}} {{name}}! - <span ng-transclude></span>'
-	     *   };
-	     * });
-	     *
-	     * module.directive('ng2', adapter.downgradeNg2Component(Ng2));
-	     *
-	     * @Component({
-	     *   selector: 'ng2',
-	     *   template: 'ng2 template: <greet salutation="Hello" [name]="world">text</greet>'
-	     *   directives: [adapter.upgradeNg1Component('greet')]
-	     * })
-	     * class Ng2 {
-	     * }
-	     *
-	     * document.body.innerHTML = '<ng2></ng2>';
-	     *
-	     * adapter.bootstrap(document.body, ['myExample']).ready(function() {
-	     *   expect(document.body.textContent).toEqual("ng2 template: Hello world! - text");
-	     * });
-	     * ```
-	     */
-	    UpgradeAdapter.prototype.upgradeNg1Component = function (name) {
-	        if (this.downgradedComponents.hasOwnProperty(name)) {
-	            return this.downgradedComponents[name].type;
-	        }
-	        else {
-	            return (this.downgradedComponents[name] = new upgrade_ng1_adapter_1.UpgradeNg1ComponentAdapterBuilder(name)).type;
-	        }
-	    };
-	    /**
-	     * Bootstrap a hybrid AngularJS v1 / Angular v2 application.
-	     *
-	     * This `bootstrap` method is a direct replacement (takes same arguments) for AngularJS v1
-	     * [`bootstrap`](https://docs.angularjs.org/api/ng/function/angular.bootstrap) method. Unlike
-	     * AngularJS v1, this bootstrap is asynchronous.
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * var adapter = new UpgradeAdapter();
-	     * var module = angular.module('myExample', []);
-	     * module.directive('ng2', adapter.downgradeNg2Component(Ng2));
-	     *
-	     * module.directive('ng1', function() {
-	     *   return {
-	     *      scope: { title: '=' },
-	     *      template: 'ng1[Hello {{title}}!](<span ng-transclude></span>)'
-	     *   };
-	     * });
-	     *
-	     *
-	     * @Component({
-	     *   selector: 'ng2',
-	     *   inputs: ['name'],
-	     *   template: 'ng2[<ng1 [title]="name">transclude</ng1>](<ng-content></ng-content>)',
-	     *   directives: [adapter.upgradeNg1Component('ng1')]
-	     * })
-	     * class Ng2 {
-	     * }
-	     *
-	     * document.body.innerHTML = '<ng2 name="World">project</ng2>';
-	     *
-	     * adapter.bootstrap(document.body, ['myExample']).ready(function() {
-	     *   expect(document.body.textContent).toEqual(
-	     *       "ng2[ng1[Hello World!](transclude)](project)");
-	     * });
-	     * ```
-	     */
-	    UpgradeAdapter.prototype.bootstrap = function (element, modules, config) {
-	        var _this = this;
-	        var upgrade = new UpgradeAdapterRef();
-	        var ng1Injector = null;
-	        var platformRef = browser_1.browserPlatform();
-	        var applicationRef = core_1.ReflectiveInjector.resolveAndCreate([
-	            browser_1.BROWSER_APP_PROVIDERS,
-	            core_1.provide(constants_1.NG1_INJECTOR, { useFactory: function () { return ng1Injector; } }),
-	            core_1.provide(constants_1.NG1_COMPILE, { useFactory: function () { return ng1Injector.get(constants_1.NG1_COMPILE); } }),
-	            this.providers
-	        ], platformRef.injector)
-	            .get(core_1.ApplicationRef);
-	        var injector = applicationRef.injector;
-	        var ngZone = injector.get(core_1.NgZone);
-	        var compiler = injector.get(core_1.ComponentResolver);
-	        var delayApplyExps = [];
-	        var original$applyFn;
-	        var rootScopePrototype;
-	        var rootScope;
-	        var componentFactoryRefMap = {};
-	        var ng1Module = angular.module(this.idPrefix, modules);
-	        var ng1BootstrapPromise = null;
-	        var ng1compilePromise = null;
-	        ng1Module.value(constants_1.NG2_INJECTOR, injector)
-	            .value(constants_1.NG2_ZONE, ngZone)
-	            .value(constants_1.NG2_COMPILER, compiler)
-	            .value(constants_1.NG2_COMPONENT_FACTORY_REF_MAP, componentFactoryRefMap)
-	            .config([
-	            '$provide',
-	            function (provide) {
-	                provide.decorator(constants_1.NG1_ROOT_SCOPE, [
-	                    '$delegate',
-	                    function (rootScopeDelegate) {
-	                        rootScopePrototype = rootScopeDelegate.constructor.prototype;
-	                        if (rootScopePrototype.hasOwnProperty('$apply')) {
-	                            original$applyFn = rootScopePrototype.$apply;
-	                            rootScopePrototype.$apply = function (exp) { return delayApplyExps.push(exp); };
-	                        }
-	                        else {
-	                            throw new Error("Failed to find '$apply' on '$rootScope'!");
-	                        }
-	                        return rootScope = rootScopeDelegate;
-	                    }
-	                ]);
-	                provide.decorator(constants_1.NG1_TESTABILITY, [
-	                    '$delegate',
-	                    function (testabilityDelegate) {
-	                        var _this = this;
-	                        var ng2Testability = injector.get(core_1.Testability);
-	                        var origonalWhenStable = testabilityDelegate.whenStable;
-	                        var newWhenStable = function (callback) {
-	                            var whenStableContext = _this;
-	                            origonalWhenStable.call(_this, function () {
-	                                if (ng2Testability.isStable()) {
-	                                    callback.apply(this, arguments);
-	                                }
-	                                else {
-	                                    ng2Testability.whenStable(newWhenStable.bind(whenStableContext, callback));
-	                                }
-	                            });
-	                        };
-	                        testabilityDelegate.whenStable = newWhenStable;
-	                        return testabilityDelegate;
-	                    }
-	                ]);
-	            }
-	        ]);
-	        ng1compilePromise = new Promise(function (resolve, reject) {
-	            ng1Module.run([
-	                '$injector',
-	                '$rootScope',
-	                function (injector, rootScope) {
-	                    ng1Injector = injector;
-	                    async_1.ObservableWrapper.subscribe(ngZone.onMicrotaskEmpty, function (_) { return ngZone.runOutsideAngular(function () { return rootScope.$apply(); }); });
-	                    upgrade_ng1_adapter_1.UpgradeNg1ComponentAdapterBuilder.resolve(_this.downgradedComponents, injector)
-	                        .then(resolve, reject);
-	                }
-	            ]);
-	        });
-	        // Make sure resumeBootstrap() only exists if the current bootstrap is deferred
-	        var windowAngular = lang_1.global.angular;
-	        windowAngular.resumeBootstrap = undefined;
-	        angular.element(element).data(util_1.controllerKey(constants_1.NG2_INJECTOR), injector);
-	        ngZone.run(function () { angular.bootstrap(element, [_this.idPrefix], config); });
-	        ng1BootstrapPromise = new Promise(function (resolve, reject) {
-	            if (windowAngular.resumeBootstrap) {
-	                var originalResumeBootstrap = windowAngular.resumeBootstrap;
-	                windowAngular.resumeBootstrap = function () {
-	                    windowAngular.resumeBootstrap = originalResumeBootstrap;
-	                    windowAngular.resumeBootstrap.apply(this, arguments);
-	                    resolve();
-	                };
-	            }
-	            else {
-	                resolve();
-	            }
-	        });
-	        Promise.all([
-	            this.compileNg2Components(compiler, componentFactoryRefMap),
-	            ng1BootstrapPromise,
-	            ng1compilePromise
-	        ])
-	            .then(function () {
-	            ngZone.run(function () {
-	                if (rootScopePrototype) {
-	                    rootScopePrototype.$apply = original$applyFn; // restore original $apply
-	                    while (delayApplyExps.length) {
-	                        rootScope.$apply(delayApplyExps.shift());
-	                    }
-	                    upgrade._bootstrapDone(applicationRef, ng1Injector);
-	                    rootScopePrototype = null;
-	                }
-	            });
-	        }, util_1.onError);
-	        return upgrade;
-	    };
-	    /**
-	     * Adds a provider to the top level environment of a hybrid AngularJS v1 / Angular v2 application.
-	     *
-	     * In hybrid AngularJS v1 / Angular v2 application, there is no one root Angular v2 component,
-	     * for this reason we provide an application global way of registering providers which is
-	     * consistent with single global injection in AngularJS v1.
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * class Greeter {
-	     *   greet(name) {
-	     *     alert('Hello ' + name + '!');
-	     *   }
-	     * }
-	     *
-	     * @Component({
-	     *   selector: 'app',
-	     *   template: ''
-	     * })
-	     * class App {
-	     *   constructor(greeter: Greeter) {
-	     *     this.greeter('World');
-	     *   }
-	     * }
-	     *
-	     * var adapter = new UpgradeAdapter();
-	     * adapter.addProvider(Greeter);
-	     *
-	     * var module = angular.module('myExample', []);
-	     * module.directive('app', adapter.downgradeNg2Component(App));
-	     *
-	     * document.body.innerHTML = '<app></app>'
-	     * adapter.bootstrap(document.body, ['myExample']);
-	     *```
-	     */
-	    UpgradeAdapter.prototype.addProvider = function (provider) { this.providers.push(provider); };
-	    /**
-	     * Allows AngularJS v1 service to be accessible from Angular v2.
-	     *
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * class Login { ... }
-	     * class Server { ... }
-	     *
-	     * @Injectable()
-	     * class Example {
-	     *   constructor(@Inject('server') server, login: Login) {
-	     *     ...
-	     *   }
-	     * }
-	     *
-	     * var module = angular.module('myExample', []);
-	     * module.service('server', Server);
-	     * module.service('login', Login);
-	     *
-	     * var adapter = new UpgradeAdapter();
-	     * adapter.upgradeNg1Provider('server');
-	     * adapter.upgradeNg1Provider('login', {asToken: Login});
-	     * adapter.addProvider(Example);
-	     *
-	     * adapter.bootstrap(document.body, ['myExample']).ready((ref) => {
-	     *   var example: Example = ref.ng2Injector.get(Example);
-	     * });
-	     *
-	     * ```
-	     */
-	    UpgradeAdapter.prototype.upgradeNg1Provider = function (name, options) {
-	        var token = options && options.asToken || name;
-	        this.providers.push(core_1.provide(token, {
-	            useFactory: function (ng1Injector) { return ng1Injector.get(name); },
-	            deps: [constants_1.NG1_INJECTOR]
-	        }));
-	    };
-	    /**
-	     * Allows Angular v2 service to be accessible from AngularJS v1.
-	     *
-	     *
-	     * ### Example
-	     *
-	     * ```
-	     * class Example {
-	     * }
-	     *
-	     * var adapter = new UpgradeAdapter();
-	     * adapter.addProvider(Example);
-	     *
-	     * var module = angular.module('myExample', []);
-	     * module.factory('example', adapter.downgradeNg2Provider(Example));
-	     *
-	     * adapter.bootstrap(document.body, ['myExample']).ready((ref) => {
-	     *   var example: Example = ref.ng1Injector.get('example');
-	     * });
-	     *
-	     * ```
-	     */
-	    UpgradeAdapter.prototype.downgradeNg2Provider = function (token) {
-	        var factory = function (injector) { return injector.get(token); };
-	        factory.$inject = [constants_1.NG2_INJECTOR];
-	        return factory;
-	    };
-	    /* @internal */
-	    UpgradeAdapter.prototype.compileNg2Components = function (compiler, componentFactoryRefMap) {
-	        var _this = this;
-	        var promises = [];
-	        var types = this.upgradedComponents;
-	        for (var i = 0; i < types.length; i++) {
-	            promises.push(compiler.resolveComponent(types[i]));
-	        }
-	        return Promise.all(promises).then(function (componentFactories) {
-	            var types = _this.upgradedComponents;
-	            for (var i = 0; i < componentFactories.length; i++) {
-	                componentFactoryRefMap[metadata_1.getComponentInfo(types[i]).selector] = componentFactories[i];
-	            }
-	            return componentFactoryRefMap;
-	        }, util_1.onError);
-	    };
-	    return UpgradeAdapter;
-	}());
-	exports.UpgradeAdapter = UpgradeAdapter;
-	function ng1ComponentDirective(info, idPrefix) {
-	    directiveFactory.$inject = [constants_1.NG2_COMPONENT_FACTORY_REF_MAP, constants_1.NG1_PARSE];
-	    function directiveFactory(componentFactoryRefMap, parse) {
-	        var componentFactory = componentFactoryRefMap[info.selector];
-	        if (!componentFactory)
-	            throw new Error('Expecting ComponentFactory for: ' + info.selector);
-	        var idCount = 0;
-	        return {
-	            restrict: 'E',
-	            require: constants_1.REQUIRE_INJECTOR,
-	            link: {
-	                post: function (scope, element, attrs, parentInjector, transclude) {
-	                    var domElement = element[0];
-	                    var facade = new downgrade_ng2_adapter_1.DowngradeNg2ComponentAdapter(idPrefix + (idCount++), info, element, attrs, scope, parentInjector, parse, componentFactory);
-	                    facade.setupInputs();
-	                    facade.bootstrapNg2();
-	                    facade.projectContent();
-	                    facade.setupOutputs();
-	                    facade.registerCleanup();
-	                }
-	            }
-	        };
-	    }
-	    return directiveFactory;
-	}
-	/**
-	 * Use `UgradeAdapterRef` to control a hybrid AngularJS v1 / Angular v2 application.
-	 */
-	var UpgradeAdapterRef = (function () {
-	    function UpgradeAdapterRef() {
-	        /* @internal */
-	        this._readyFn = null;
-	        this.ng1RootScope = null;
-	        this.ng1Injector = null;
-	        this.ng2ApplicationRef = null;
-	        this.ng2Injector = null;
-	    }
-	    /* @internal */
-	    UpgradeAdapterRef.prototype._bootstrapDone = function (applicationRef, ng1Injector) {
-	        this.ng2ApplicationRef = applicationRef;
-	        this.ng2Injector = applicationRef.injector;
-	        this.ng1Injector = ng1Injector;
-	        this.ng1RootScope = ng1Injector.get(constants_1.NG1_ROOT_SCOPE);
-	        this._readyFn && this._readyFn(this);
-	    };
-	    /**
-	     * Register a callback function which is notified upon successful hybrid AngularJS v1 / Angular v2
-	     * application has been bootstrapped.
-	     *
-	     * The `ready` callback function is invoked inside the Angular v2 zone, therefore it does not
-	     * require a call to `$apply()`.
-	     */
-	    UpgradeAdapterRef.prototype.ready = function (fn) { this._readyFn = fn; };
-	    /**
-	     * Dispose of running hybrid AngularJS v1 / Angular v2 application.
-	     */
-	    UpgradeAdapterRef.prototype.dispose = function () {
-	        this.ng1Injector.get(constants_1.NG1_ROOT_SCOPE).$destroy();
-	        this.ng2ApplicationRef.dispose();
-	    };
-	    return UpgradeAdapterRef;
-	}());
-	exports.UpgradeAdapterRef = UpgradeAdapterRef;
-	
-
-/***/ },
+/* 1 */,
+/* 2 */,
+/* 3 */,
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -35193,599 +34600,12 @@
 	
 
 /***/ },
-/* 238 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	var compiler_1 = __webpack_require__(176);
-	var COMPONENT_SELECTOR = /^[\w|-]*$/;
-	var SKEWER_CASE = /-(\w)/g;
-	var directiveResolver = new compiler_1.DirectiveResolver();
-	function getComponentInfo(type) {
-	    var resolvedMetadata = directiveResolver.resolve(type);
-	    var selector = resolvedMetadata.selector;
-	    if (!selector.match(COMPONENT_SELECTOR)) {
-	        throw new Error('Only selectors matching element names are supported, got: ' + selector);
-	    }
-	    var selector = selector.replace(SKEWER_CASE, function (all, letter) { return letter.toUpperCase(); });
-	    return {
-	        type: type,
-	        selector: selector,
-	        inputs: parseFields(resolvedMetadata.inputs),
-	        outputs: parseFields(resolvedMetadata.outputs)
-	    };
-	}
-	exports.getComponentInfo = getComponentInfo;
-	function parseFields(names) {
-	    var attrProps = [];
-	    if (names) {
-	        for (var i = 0; i < names.length; i++) {
-	            var parts = names[i].split(':');
-	            var prop = parts[0].trim();
-	            var attr = (parts[1] || parts[0]).trim();
-	            var capitalAttr = attr.charAt(0).toUpperCase() + attr.substr(1);
-	            attrProps.push({
-	                prop: prop,
-	                attr: attr,
-	                bracketAttr: "[" + attr + "]",
-	                parenAttr: "(" + attr + ")",
-	                bracketParenAttr: "[(" + attr + ")]",
-	                onAttr: "on" + capitalAttr,
-	                bindAttr: "bind" + capitalAttr,
-	                bindonAttr: "bindon" + capitalAttr
-	            });
-	        }
-	    }
-	    return attrProps;
-	}
-	exports.parseFields = parseFields;
-	
-
-/***/ },
-/* 239 */
-/***/ function(module, exports) {
-
-	'use strict';"use strict";
-	function stringify(obj) {
-	    if (typeof obj == 'function')
-	        return obj.name || obj.toString();
-	    return '' + obj;
-	}
-	exports.stringify = stringify;
-	function onError(e) {
-	    // TODO: (misko): We seem to not have a stack trace here!
-	    console.log(e, e.stack);
-	    throw e;
-	}
-	exports.onError = onError;
-	function controllerKey(name) {
-	    return '$' + name + 'Controller';
-	}
-	exports.controllerKey = controllerKey;
-	
-
-/***/ },
-/* 240 */
-/***/ function(module, exports) {
-
-	'use strict';"use strict";
-	exports.NG2_COMPILER = 'ng2.Compiler';
-	exports.NG2_INJECTOR = 'ng2.Injector';
-	exports.NG2_COMPONENT_FACTORY_REF_MAP = 'ng2.ComponentFactoryRefMap';
-	exports.NG2_ZONE = 'ng2.NgZone';
-	exports.NG1_CONTROLLER = '$controller';
-	exports.NG1_SCOPE = '$scope';
-	exports.NG1_ROOT_SCOPE = '$rootScope';
-	exports.NG1_COMPILE = '$compile';
-	exports.NG1_HTTP_BACKEND = '$httpBackend';
-	exports.NG1_INJECTOR = '$injector';
-	exports.NG1_PARSE = '$parse';
-	exports.NG1_TEMPLATE_CACHE = '$templateCache';
-	exports.NG1_TESTABILITY = '$$testability';
-	exports.REQUIRE_INJECTOR = '^' + exports.NG2_INJECTOR;
-	
-
-/***/ },
-/* 241 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	var core_1 = __webpack_require__(4);
-	var constants_1 = __webpack_require__(240);
-	var INITIAL_VALUE = {
-	    __UNINITIALIZED__: true
-	};
-	var DowngradeNg2ComponentAdapter = (function () {
-	    function DowngradeNg2ComponentAdapter(id, info, element, attrs, scope, parentInjector, parse, componentFactory) {
-	        this.id = id;
-	        this.info = info;
-	        this.element = element;
-	        this.attrs = attrs;
-	        this.scope = scope;
-	        this.parentInjector = parentInjector;
-	        this.parse = parse;
-	        this.componentFactory = componentFactory;
-	        this.component = null;
-	        this.inputChangeCount = 0;
-	        this.inputChanges = null;
-	        this.componentRef = null;
-	        this.changeDetector = null;
-	        this.contentInsertionPoint = null;
-	        this.element[0].id = id;
-	        this.componentScope = scope.$new();
-	        this.childNodes = element.contents();
-	    }
-	    DowngradeNg2ComponentAdapter.prototype.bootstrapNg2 = function () {
-	        var childInjector = core_1.ReflectiveInjector.resolveAndCreate([core_1.provide(constants_1.NG1_SCOPE, { useValue: this.componentScope })], this.parentInjector);
-	        this.contentInsertionPoint = document.createComment('ng1 insertion point');
-	        this.componentRef =
-	            this.componentFactory.create(childInjector, [[this.contentInsertionPoint]], '#' + this.id);
-	        this.changeDetector = this.componentRef.changeDetectorRef;
-	        this.component = this.componentRef.instance;
-	    };
-	    DowngradeNg2ComponentAdapter.prototype.setupInputs = function () {
-	        var _this = this;
-	        var attrs = this.attrs;
-	        var inputs = this.info.inputs;
-	        for (var i = 0; i < inputs.length; i++) {
-	            var input = inputs[i];
-	            var expr = null;
-	            if (attrs.hasOwnProperty(input.attr)) {
-	                var observeFn = (function (prop) {
-	                    var prevValue = INITIAL_VALUE;
-	                    return function (value) {
-	                        if (_this.inputChanges !== null) {
-	                            _this.inputChangeCount++;
-	                            _this.inputChanges[prop] =
-	                                new Ng1Change(value, prevValue === INITIAL_VALUE ? value : prevValue);
-	                            prevValue = value;
-	                        }
-	                        _this.component[prop] = value;
-	                    };
-	                })(input.prop);
-	                attrs.$observe(input.attr, observeFn);
-	            }
-	            else if (attrs.hasOwnProperty(input.bindAttr)) {
-	                expr = attrs[input.bindAttr];
-	            }
-	            else if (attrs.hasOwnProperty(input.bracketAttr)) {
-	                expr = attrs[input.bracketAttr];
-	            }
-	            else if (attrs.hasOwnProperty(input.bindonAttr)) {
-	                expr = attrs[input.bindonAttr];
-	            }
-	            else if (attrs.hasOwnProperty(input.bracketParenAttr)) {
-	                expr = attrs[input.bracketParenAttr];
-	            }
-	            if (expr != null) {
-	                var watchFn = (function (prop) { return function (value, prevValue) {
-	                    if (_this.inputChanges != null) {
-	                        _this.inputChangeCount++;
-	                        _this.inputChanges[prop] = new Ng1Change(prevValue, value);
-	                    }
-	                    _this.component[prop] = value;
-	                }; })(input.prop);
-	                this.componentScope.$watch(expr, watchFn);
-	            }
-	        }
-	        var prototype = this.info.type.prototype;
-	        if (prototype && prototype.ngOnChanges) {
-	            // Detect: OnChanges interface
-	            this.inputChanges = {};
-	            this.componentScope.$watch(function () { return _this.inputChangeCount; }, function () {
-	                var inputChanges = _this.inputChanges;
-	                _this.inputChanges = {};
-	                _this.component.ngOnChanges(inputChanges);
-	            });
-	        }
-	        this.componentScope.$watch(function () { return _this.changeDetector && _this.changeDetector.detectChanges(); });
-	    };
-	    DowngradeNg2ComponentAdapter.prototype.projectContent = function () {
-	        var childNodes = this.childNodes;
-	        var parent = this.contentInsertionPoint.parentNode;
-	        if (parent) {
-	            for (var i = 0, ii = childNodes.length; i < ii; i++) {
-	                parent.insertBefore(childNodes[i], this.contentInsertionPoint);
-	            }
-	        }
-	    };
-	    DowngradeNg2ComponentAdapter.prototype.setupOutputs = function () {
-	        var _this = this;
-	        var attrs = this.attrs;
-	        var outputs = this.info.outputs;
-	        for (var j = 0; j < outputs.length; j++) {
-	            var output = outputs[j];
-	            var expr = null;
-	            var assignExpr = false;
-	            var bindonAttr = output.bindonAttr ? output.bindonAttr.substring(0, output.bindonAttr.length - 6) : null;
-	            var bracketParenAttr = output.bracketParenAttr ?
-	                "[(" + output.bracketParenAttr.substring(2, output.bracketParenAttr.length - 8) + ")]" :
-	                null;
-	            if (attrs.hasOwnProperty(output.onAttr)) {
-	                expr = attrs[output.onAttr];
-	            }
-	            else if (attrs.hasOwnProperty(output.parenAttr)) {
-	                expr = attrs[output.parenAttr];
-	            }
-	            else if (attrs.hasOwnProperty(bindonAttr)) {
-	                expr = attrs[bindonAttr];
-	                assignExpr = true;
-	            }
-	            else if (attrs.hasOwnProperty(bracketParenAttr)) {
-	                expr = attrs[bracketParenAttr];
-	                assignExpr = true;
-	            }
-	            if (expr != null && assignExpr != null) {
-	                var getter = this.parse(expr);
-	                var setter = getter.assign;
-	                if (assignExpr && !setter) {
-	                    throw new Error("Expression '" + expr + "' is not assignable!");
-	                }
-	                var emitter = this.component[output.prop];
-	                if (emitter) {
-	                    emitter.subscribe({
-	                        next: assignExpr ? (function (setter) { return function (value) { return setter(_this.scope, value); }; })(setter) :
-	                            (function (getter) { return function (value) { return getter(_this.scope, { $event: value }); }; })(getter)
-	                    });
-	                }
-	                else {
-	                    throw new Error("Missing emitter '" + output.prop + "' on component '" + this.info.selector + "'!");
-	                }
-	            }
-	        }
-	    };
-	    DowngradeNg2ComponentAdapter.prototype.registerCleanup = function () {
-	        var _this = this;
-	        this.element.bind('$destroy', function () {
-	            _this.componentScope.$destroy();
-	            _this.componentRef.destroy();
-	        });
-	    };
-	    return DowngradeNg2ComponentAdapter;
-	}());
-	exports.DowngradeNg2ComponentAdapter = DowngradeNg2ComponentAdapter;
-	var Ng1Change = (function () {
-	    function Ng1Change(previousValue, currentValue) {
-	        this.previousValue = previousValue;
-	        this.currentValue = currentValue;
-	    }
-	    Ng1Change.prototype.isFirstChange = function () { return this.previousValue === this.currentValue; };
-	    return Ng1Change;
-	}());
-	
-
-/***/ },
-/* 242 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	var core_1 = __webpack_require__(4);
-	var constants_1 = __webpack_require__(240);
-	var util_1 = __webpack_require__(239);
-	var angular = __webpack_require__(243);
-	var CAMEL_CASE = /([A-Z])/g;
-	var INITIAL_VALUE = {
-	    __UNINITIALIZED__: true
-	};
-	var NOT_SUPPORTED = 'NOT_SUPPORTED';
-	var UpgradeNg1ComponentAdapterBuilder = (function () {
-	    function UpgradeNg1ComponentAdapterBuilder(name) {
-	        this.name = name;
-	        this.inputs = [];
-	        this.inputsRename = [];
-	        this.outputs = [];
-	        this.outputsRename = [];
-	        this.propertyOutputs = [];
-	        this.checkProperties = [];
-	        this.propertyMap = {};
-	        this.linkFn = null;
-	        this.directive = null;
-	        this.$controller = null;
-	        var selector = name.replace(CAMEL_CASE, function (all, next) { return '-' + next.toLowerCase(); });
-	        var self = this;
-	        this.type =
-	            core_1.Directive({ selector: selector, inputs: this.inputsRename, outputs: this.outputsRename })
-	                .Class({
-	                constructor: [
-	                    new core_1.Inject(constants_1.NG1_SCOPE),
-	                    core_1.ElementRef,
-	                    function (scope, elementRef) {
-	                        return new UpgradeNg1ComponentAdapter(self.linkFn, scope, self.directive, elementRef, self.$controller, self.inputs, self.outputs, self.propertyOutputs, self.checkProperties, self.propertyMap);
-	                    }
-	                ],
-	                ngOnInit: function () { },
-	                ngOnChanges: function () { },
-	                ngDoCheck: function () { }
-	            });
-	    }
-	    UpgradeNg1ComponentAdapterBuilder.prototype.extractDirective = function (injector) {
-	        var directives = injector.get(this.name + 'Directive');
-	        if (directives.length > 1) {
-	            throw new Error('Only support single directive definition for: ' + this.name);
-	        }
-	        var directive = directives[0];
-	        if (directive.replace)
-	            this.notSupported('replace');
-	        if (directive.terminal)
-	            this.notSupported('terminal');
-	        var link = directive.link;
-	        if (typeof link == 'object') {
-	            if (link.post)
-	                this.notSupported('link.post');
-	        }
-	        return directive;
-	    };
-	    UpgradeNg1ComponentAdapterBuilder.prototype.notSupported = function (feature) {
-	        throw new Error("Upgraded directive '" + this.name + "' does not support '" + feature + "'.");
-	    };
-	    UpgradeNg1ComponentAdapterBuilder.prototype.extractBindings = function () {
-	        var btcIsObject = typeof this.directive.bindToController === 'object';
-	        if (btcIsObject && Object.keys(this.directive.scope).length) {
-	            throw new Error("Binding definitions on scope and controller at the same time are not supported.");
-	        }
-	        var context = (btcIsObject) ? this.directive.bindToController : this.directive.scope;
-	        if (typeof context == 'object') {
-	            for (var name in context) {
-	                if (context.hasOwnProperty(name)) {
-	                    var localName = context[name];
-	                    var type = localName.charAt(0);
-	                    localName = localName.substr(1) || name;
-	                    var outputName = 'output_' + name;
-	                    var outputNameRename = outputName + ': ' + name;
-	                    var outputNameRenameChange = outputName + ': ' + name + 'Change';
-	                    var inputName = 'input_' + name;
-	                    var inputNameRename = inputName + ': ' + name;
-	                    switch (type) {
-	                        case '=':
-	                            this.propertyOutputs.push(outputName);
-	                            this.checkProperties.push(localName);
-	                            this.outputs.push(outputName);
-	                            this.outputsRename.push(outputNameRenameChange);
-	                            this.propertyMap[outputName] = localName;
-	                        // don't break; let it fall through to '@'
-	                        case '@':
-	                        // handle the '<' binding of angular 1.5 components
-	                        case '<':
-	                            this.inputs.push(inputName);
-	                            this.inputsRename.push(inputNameRename);
-	                            this.propertyMap[inputName] = localName;
-	                            break;
-	                        case '&':
-	                            this.outputs.push(outputName);
-	                            this.outputsRename.push(outputNameRename);
-	                            this.propertyMap[outputName] = localName;
-	                            break;
-	                        default:
-	                            var json = JSON.stringify(context);
-	                            throw new Error("Unexpected mapping '" + type + "' in '" + json + "' in '" + this.name + "' directive.");
-	                    }
-	                }
-	            }
-	        }
-	    };
-	    UpgradeNg1ComponentAdapterBuilder.prototype.compileTemplate = function (compile, templateCache, httpBackend) {
-	        var _this = this;
-	        if (this.directive.template !== undefined) {
-	            this.linkFn = compileHtml(this.directive.template);
-	        }
-	        else if (this.directive.templateUrl) {
-	            var url = this.directive.templateUrl;
-	            var html = templateCache.get(url);
-	            if (html !== undefined) {
-	                this.linkFn = compileHtml(html);
-	            }
-	            else {
-	                return new Promise(function (resolve, err) {
-	                    httpBackend('GET', url, null, function (status, response) {
-	                        if (status == 200) {
-	                            resolve(_this.linkFn = compileHtml(templateCache.put(url, response)));
-	                        }
-	                        else {
-	                            err("GET " + url + " returned " + status + ": " + response);
-	                        }
-	                    });
-	                });
-	            }
-	        }
-	        else {
-	            throw new Error("Directive '" + this.name + "' is not a component, it is missing template.");
-	        }
-	        return null;
-	        function compileHtml(html) {
-	            var div = document.createElement('div');
-	            div.innerHTML = html;
-	            return compile(div.childNodes);
-	        }
-	    };
-	    UpgradeNg1ComponentAdapterBuilder.resolve = function (exportedComponents, injector) {
-	        var promises = [];
-	        var compile = injector.get(constants_1.NG1_COMPILE);
-	        var templateCache = injector.get(constants_1.NG1_TEMPLATE_CACHE);
-	        var httpBackend = injector.get(constants_1.NG1_HTTP_BACKEND);
-	        var $controller = injector.get(constants_1.NG1_CONTROLLER);
-	        for (var name in exportedComponents) {
-	            if (exportedComponents.hasOwnProperty(name)) {
-	                var exportedComponent = exportedComponents[name];
-	                exportedComponent.directive = exportedComponent.extractDirective(injector);
-	                exportedComponent.$controller = $controller;
-	                exportedComponent.extractBindings();
-	                var promise = exportedComponent.compileTemplate(compile, templateCache, httpBackend);
-	                if (promise)
-	                    promises.push(promise);
-	            }
-	        }
-	        return Promise.all(promises);
-	    };
-	    return UpgradeNg1ComponentAdapterBuilder;
-	}());
-	exports.UpgradeNg1ComponentAdapterBuilder = UpgradeNg1ComponentAdapterBuilder;
-	var UpgradeNg1ComponentAdapter = (function () {
-	    function UpgradeNg1ComponentAdapter(linkFn, scope, directive, elementRef, $controller, inputs, outputs, propOuts, checkProperties, propertyMap) {
-	        this.linkFn = linkFn;
-	        this.directive = directive;
-	        this.inputs = inputs;
-	        this.outputs = outputs;
-	        this.propOuts = propOuts;
-	        this.checkProperties = checkProperties;
-	        this.propertyMap = propertyMap;
-	        this.destinationObj = null;
-	        this.checkLastValues = [];
-	        this.element = elementRef.nativeElement;
-	        this.componentScope = scope.$new(!!directive.scope);
-	        var $element = angular.element(this.element);
-	        var controllerType = directive.controller;
-	        var controller = null;
-	        if (controllerType) {
-	            var locals = { $scope: this.componentScope, $element: $element };
-	            controller = $controller(controllerType, locals, null, directive.controllerAs);
-	            $element.data(util_1.controllerKey(directive.name), controller);
-	        }
-	        var link = directive.link;
-	        if (typeof link == 'object')
-	            link = link.pre;
-	        if (link) {
-	            var attrs = NOT_SUPPORTED;
-	            var transcludeFn = NOT_SUPPORTED;
-	            var linkController = this.resolveRequired($element, directive.require);
-	            directive.link(this.componentScope, $element, attrs, linkController, transcludeFn);
-	        }
-	        this.destinationObj =
-	            directive.bindToController && controller ? controller : this.componentScope;
-	        for (var i = 0; i < inputs.length; i++) {
-	            this[inputs[i]] = null;
-	        }
-	        for (var j = 0; j < outputs.length; j++) {
-	            var emitter = this[outputs[j]] = new core_1.EventEmitter();
-	            this.setComponentProperty(outputs[j], (function (emitter) { return function (value) { return emitter.emit(value); }; })(emitter));
-	        }
-	        for (var k = 0; k < propOuts.length; k++) {
-	            this[propOuts[k]] = new core_1.EventEmitter();
-	            this.checkLastValues.push(INITIAL_VALUE);
-	        }
-	    }
-	    UpgradeNg1ComponentAdapter.prototype.ngOnInit = function () {
-	        var _this = this;
-	        var childNodes = [];
-	        var childNode;
-	        while (childNode = this.element.firstChild) {
-	            this.element.removeChild(childNode);
-	            childNodes.push(childNode);
-	        }
-	        this.linkFn(this.componentScope, function (clonedElement, scope) {
-	            for (var i = 0, ii = clonedElement.length; i < ii; i++) {
-	                _this.element.appendChild(clonedElement[i]);
-	            }
-	        }, { parentBoundTranscludeFn: function (scope, cloneAttach) { cloneAttach(childNodes); } });
-	        if (this.destinationObj.$onInit) {
-	            this.destinationObj.$onInit();
-	        }
-	    };
-	    UpgradeNg1ComponentAdapter.prototype.ngOnChanges = function (changes) {
-	        for (var name in changes) {
-	            if (changes.hasOwnProperty(name)) {
-	                var change = changes[name];
-	                this.setComponentProperty(name, change.currentValue);
-	            }
-	        }
-	    };
-	    UpgradeNg1ComponentAdapter.prototype.ngDoCheck = function () {
-	        var count = 0;
-	        var destinationObj = this.destinationObj;
-	        var lastValues = this.checkLastValues;
-	        var checkProperties = this.checkProperties;
-	        for (var i = 0; i < checkProperties.length; i++) {
-	            var value = destinationObj[checkProperties[i]];
-	            var last = lastValues[i];
-	            if (value !== last) {
-	                if (typeof value == 'number' && isNaN(value) && typeof last == 'number' && isNaN(last)) {
-	                }
-	                else {
-	                    var eventEmitter = this[this.propOuts[i]];
-	                    eventEmitter.emit(lastValues[i] = value);
-	                }
-	            }
-	        }
-	        return count;
-	    };
-	    UpgradeNg1ComponentAdapter.prototype.setComponentProperty = function (name, value) {
-	        this.destinationObj[this.propertyMap[name]] = value;
-	    };
-	    UpgradeNg1ComponentAdapter.prototype.resolveRequired = function ($element, require) {
-	        if (!require) {
-	            return undefined;
-	        }
-	        else if (typeof require == 'string') {
-	            var name = require;
-	            var isOptional = false;
-	            var startParent = false;
-	            var searchParents = false;
-	            var ch;
-	            if (name.charAt(0) == '?') {
-	                isOptional = true;
-	                name = name.substr(1);
-	            }
-	            if (name.charAt(0) == '^') {
-	                searchParents = true;
-	                name = name.substr(1);
-	            }
-	            if (name.charAt(0) == '^') {
-	                startParent = true;
-	                name = name.substr(1);
-	            }
-	            var key = util_1.controllerKey(name);
-	            if (startParent)
-	                $element = $element.parent();
-	            var dep = searchParents ? $element.inheritedData(key) : $element.data(key);
-	            if (!dep && !isOptional) {
-	                throw new Error("Can not locate '" + require + "' in '" + this.directive.name + "'.");
-	            }
-	            return dep;
-	        }
-	        else if (require instanceof Array) {
-	            var deps = [];
-	            for (var i = 0; i < require.length; i++) {
-	                deps.push(this.resolveRequired($element, require[i]));
-	            }
-	            return deps;
-	        }
-	        throw new Error("Directive '" + this.directive.name + "' require syntax unrecognized: " + this.directive.require);
-	    };
-	    return UpgradeNg1ComponentAdapter;
-	}());
-	
-
-/***/ },
-/* 243 */
-/***/ function(module, exports) {
-
-	'use strict';"use strict";
-	function noNg() {
-	    throw new Error('AngularJS v1.x is not loaded!');
-	}
-	var angular = {
-	    bootstrap: noNg,
-	    module: noNg,
-	    element: noNg,
-	    version: noNg,
-	    resumeBootstrap: noNg,
-	    getTestability: noNg
-	};
-	try {
-	    if (window.hasOwnProperty('angular')) {
-	        angular = window.angular;
-	    }
-	}
-	catch (e) {
-	}
-	exports.bootstrap = angular.bootstrap;
-	exports.module = angular.module;
-	exports.element = angular.element;
-	exports.version = angular.version;
-	exports.resumeBootstrap = angular.resumeBootstrap;
-	exports.getTestability = angular.getTestability;
-	
-
-/***/ },
+/* 238 */,
+/* 239 */,
+/* 240 */,
+/* 241 */,
+/* 242 */,
+/* 243 */,
 /* 244 */,
 /* 245 */,
 /* 246 */,
@@ -36088,7 +34908,55 @@
 /* 543 */,
 /* 544 */,
 /* 545 */,
-/* 546 */
+/* 546 */,
+/* 547 */,
+/* 548 */,
+/* 549 */,
+/* 550 */,
+/* 551 */,
+/* 552 */,
+/* 553 */,
+/* 554 */,
+/* 555 */,
+/* 556 */,
+/* 557 */,
+/* 558 */,
+/* 559 */,
+/* 560 */,
+/* 561 */,
+/* 562 */,
+/* 563 */,
+/* 564 */,
+/* 565 */,
+/* 566 */,
+/* 567 */,
+/* 568 */,
+/* 569 */,
+/* 570 */,
+/* 571 */,
+/* 572 */,
+/* 573 */,
+/* 574 */,
+/* 575 */,
+/* 576 */,
+/* 577 */,
+/* 578 */,
+/* 579 */,
+/* 580 */,
+/* 581 */,
+/* 582 */,
+/* 583 */,
+/* 584 */,
+/* 585 */,
+/* 586 */,
+/* 587 */,
+/* 588 */,
+/* 589 */,
+/* 590 */,
+/* 591 */,
+/* 592 */,
+/* 593 */,
+/* 594 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -36099,44 +34967,44 @@
 	 * class.
 	 */
 	var core_1 = __webpack_require__(4);
-	var http_1 = __webpack_require__(547);
-	var xhr_backend_1 = __webpack_require__(555);
-	var jsonp_backend_1 = __webpack_require__(559);
-	var browser_xhr_1 = __webpack_require__(558);
-	var browser_jsonp_1 = __webpack_require__(560);
-	var base_request_options_1 = __webpack_require__(553);
-	var base_response_options_1 = __webpack_require__(557);
-	var static_request_1 = __webpack_require__(549);
+	var http_1 = __webpack_require__(595);
+	var xhr_backend_1 = __webpack_require__(603);
+	var jsonp_backend_1 = __webpack_require__(607);
+	var browser_xhr_1 = __webpack_require__(606);
+	var browser_jsonp_1 = __webpack_require__(608);
+	var base_request_options_1 = __webpack_require__(601);
+	var base_response_options_1 = __webpack_require__(605);
+	var static_request_1 = __webpack_require__(597);
 	exports.Request = static_request_1.Request;
-	var static_response_1 = __webpack_require__(556);
+	var static_response_1 = __webpack_require__(604);
 	exports.Response = static_response_1.Response;
-	var interfaces_1 = __webpack_require__(548);
+	var interfaces_1 = __webpack_require__(596);
 	exports.Connection = interfaces_1.Connection;
 	exports.ConnectionBackend = interfaces_1.ConnectionBackend;
-	var browser_xhr_2 = __webpack_require__(558);
+	var browser_xhr_2 = __webpack_require__(606);
 	exports.BrowserXhr = browser_xhr_2.BrowserXhr;
-	var base_request_options_2 = __webpack_require__(553);
+	var base_request_options_2 = __webpack_require__(601);
 	exports.BaseRequestOptions = base_request_options_2.BaseRequestOptions;
 	exports.RequestOptions = base_request_options_2.RequestOptions;
-	var base_response_options_2 = __webpack_require__(557);
+	var base_response_options_2 = __webpack_require__(605);
 	exports.BaseResponseOptions = base_response_options_2.BaseResponseOptions;
 	exports.ResponseOptions = base_response_options_2.ResponseOptions;
-	var xhr_backend_2 = __webpack_require__(555);
+	var xhr_backend_2 = __webpack_require__(603);
 	exports.XHRBackend = xhr_backend_2.XHRBackend;
 	exports.XHRConnection = xhr_backend_2.XHRConnection;
-	var jsonp_backend_2 = __webpack_require__(559);
+	var jsonp_backend_2 = __webpack_require__(607);
 	exports.JSONPBackend = jsonp_backend_2.JSONPBackend;
 	exports.JSONPConnection = jsonp_backend_2.JSONPConnection;
-	var http_2 = __webpack_require__(547);
+	var http_2 = __webpack_require__(595);
 	exports.Http = http_2.Http;
 	exports.Jsonp = http_2.Jsonp;
-	var headers_1 = __webpack_require__(550);
+	var headers_1 = __webpack_require__(598);
 	exports.Headers = headers_1.Headers;
-	var enums_1 = __webpack_require__(552);
+	var enums_1 = __webpack_require__(600);
 	exports.ResponseType = enums_1.ResponseType;
 	exports.ReadyState = enums_1.ReadyState;
 	exports.RequestMethod = enums_1.RequestMethod;
-	var url_search_params_1 = __webpack_require__(554);
+	var url_search_params_1 = __webpack_require__(602);
 	exports.URLSearchParams = url_search_params_1.URLSearchParams;
 	/**
 	 * Provides a basic set of injectables to use the {@link Http} service in any application.
@@ -36405,7 +35273,7 @@
 	
 
 /***/ },
-/* 547 */
+/* 595 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -36426,10 +35294,10 @@
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
 	var core_1 = __webpack_require__(4);
-	var interfaces_1 = __webpack_require__(548);
-	var static_request_1 = __webpack_require__(549);
-	var base_request_options_1 = __webpack_require__(553);
-	var enums_1 = __webpack_require__(552);
+	var interfaces_1 = __webpack_require__(596);
+	var static_request_1 = __webpack_require__(597);
+	var base_request_options_1 = __webpack_require__(601);
+	var enums_1 = __webpack_require__(600);
 	function httpRequest(backend, request) {
 	    return backend.createConnection(request).response;
 	}
@@ -36615,7 +35483,7 @@
 	
 
 /***/ },
-/* 548 */
+/* 596 */
 /***/ function(module, exports) {
 
 	'use strict';"use strict";
@@ -36643,12 +35511,12 @@
 	
 
 /***/ },
-/* 549 */
+/* 597 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
-	var headers_1 = __webpack_require__(550);
-	var http_utils_1 = __webpack_require__(551);
+	var headers_1 = __webpack_require__(598);
+	var http_utils_1 = __webpack_require__(599);
 	var lang_1 = __webpack_require__(7);
 	// TODO(jeffbcross): properly implement body accessors
 	/**
@@ -36723,7 +35591,7 @@
 	
 
 /***/ },
-/* 550 */
+/* 598 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -36863,12 +35731,12 @@
 	
 
 /***/ },
-/* 551 */
+/* 599 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
-	var enums_1 = __webpack_require__(552);
+	var enums_1 = __webpack_require__(600);
 	var exceptions_1 = __webpack_require__(14);
 	function normalizeMethodName(method) {
 	    if (lang_1.isString(method)) {
@@ -36900,7 +35768,7 @@
 	
 
 /***/ },
-/* 552 */
+/* 600 */
 /***/ function(module, exports) {
 
 	'use strict';"use strict";
@@ -36946,7 +35814,7 @@
 	
 
 /***/ },
-/* 553 */
+/* 601 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -36965,11 +35833,11 @@
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
 	var lang_1 = __webpack_require__(7);
-	var headers_1 = __webpack_require__(550);
-	var enums_1 = __webpack_require__(552);
+	var headers_1 = __webpack_require__(598);
+	var enums_1 = __webpack_require__(600);
 	var core_1 = __webpack_require__(4);
-	var url_search_params_1 = __webpack_require__(554);
-	var http_utils_1 = __webpack_require__(551);
+	var url_search_params_1 = __webpack_require__(602);
+	var http_utils_1 = __webpack_require__(599);
 	/**
 	 * Creates a request options object to be optionally provided when instantiating a
 	 * {@link Request}.
@@ -37104,7 +35972,7 @@
 	
 
 /***/ },
-/* 554 */
+/* 602 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37237,7 +36105,7 @@
 	
 
 /***/ },
-/* 555 */
+/* 603 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37250,15 +36118,15 @@
 	var __metadata = (this && this.__metadata) || function (k, v) {
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
-	var enums_1 = __webpack_require__(552);
-	var static_response_1 = __webpack_require__(556);
-	var headers_1 = __webpack_require__(550);
-	var base_response_options_1 = __webpack_require__(557);
+	var enums_1 = __webpack_require__(600);
+	var static_response_1 = __webpack_require__(604);
+	var headers_1 = __webpack_require__(598);
+	var base_response_options_1 = __webpack_require__(605);
 	var core_1 = __webpack_require__(4);
-	var browser_xhr_1 = __webpack_require__(558);
+	var browser_xhr_1 = __webpack_require__(606);
 	var lang_1 = __webpack_require__(7);
 	var Observable_1 = __webpack_require__(45);
-	var http_utils_1 = __webpack_require__(551);
+	var http_utils_1 = __webpack_require__(599);
 	/**
 	* Creates connections using `XMLHttpRequest`. Given a fully-qualified
 	* request, an `XHRConnection` will immediately create an `XMLHttpRequest` object and send the
@@ -37371,13 +36239,13 @@
 	
 
 /***/ },
-/* 556 */
+/* 604 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
-	var http_utils_1 = __webpack_require__(551);
+	var http_utils_1 = __webpack_require__(599);
 	/**
 	 * Creates `Response` instances from provided values.
 	 *
@@ -37441,7 +36309,7 @@
 	
 
 /***/ },
-/* 557 */
+/* 605 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37461,8 +36329,8 @@
 	};
 	var core_1 = __webpack_require__(4);
 	var lang_1 = __webpack_require__(7);
-	var headers_1 = __webpack_require__(550);
-	var enums_1 = __webpack_require__(552);
+	var headers_1 = __webpack_require__(598);
+	var enums_1 = __webpack_require__(600);
 	/**
 	 * Creates a response options object to be optionally provided when instantiating a
 	 * {@link Response}.
@@ -37597,7 +36465,7 @@
 	
 
 /***/ },
-/* 558 */
+/* 606 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37630,7 +36498,7 @@
 	
 
 /***/ },
-/* 559 */
+/* 607 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37648,12 +36516,12 @@
 	var __metadata = (this && this.__metadata) || function (k, v) {
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
-	var interfaces_1 = __webpack_require__(548);
-	var enums_1 = __webpack_require__(552);
-	var static_response_1 = __webpack_require__(556);
-	var base_response_options_1 = __webpack_require__(557);
+	var interfaces_1 = __webpack_require__(596);
+	var enums_1 = __webpack_require__(600);
+	var static_response_1 = __webpack_require__(604);
+	var base_response_options_1 = __webpack_require__(605);
 	var core_1 = __webpack_require__(4);
-	var browser_jsonp_1 = __webpack_require__(560);
+	var browser_jsonp_1 = __webpack_require__(608);
 	var exceptions_1 = __webpack_require__(14);
 	var lang_1 = __webpack_require__(7);
 	var Observable_1 = __webpack_require__(45);
@@ -37781,7 +36649,7 @@
 	
 
 /***/ },
-/* 560 */
+/* 608 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37843,7 +36711,7 @@
 	
 
 /***/ },
-/* 561 */
+/* 609 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';/**
@@ -37855,33 +36723,33 @@
 	function __export(m) {
 	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	}
-	var router_1 = __webpack_require__(562);
+	var router_1 = __webpack_require__(610);
 	exports.Router = router_1.Router;
-	var router_outlet_1 = __webpack_require__(586);
+	var router_outlet_1 = __webpack_require__(634);
 	exports.RouterOutlet = router_outlet_1.RouterOutlet;
-	var router_link_1 = __webpack_require__(588);
+	var router_link_1 = __webpack_require__(636);
 	exports.RouterLink = router_link_1.RouterLink;
-	var instruction_1 = __webpack_require__(574);
+	var instruction_1 = __webpack_require__(622);
 	exports.RouteParams = instruction_1.RouteParams;
 	exports.RouteData = instruction_1.RouteData;
-	var route_registry_1 = __webpack_require__(570);
+	var route_registry_1 = __webpack_require__(618);
 	exports.RouteRegistry = route_registry_1.RouteRegistry;
 	exports.ROUTER_PRIMARY_COMPONENT = route_registry_1.ROUTER_PRIMARY_COMPONENT;
-	__export(__webpack_require__(583));
-	var lifecycle_annotations_1 = __webpack_require__(587);
+	__export(__webpack_require__(631));
+	var lifecycle_annotations_1 = __webpack_require__(635);
 	exports.CanActivate = lifecycle_annotations_1.CanActivate;
-	var instruction_2 = __webpack_require__(574);
+	var instruction_2 = __webpack_require__(622);
 	exports.Instruction = instruction_2.Instruction;
 	exports.ComponentInstruction = instruction_2.ComponentInstruction;
 	var core_1 = __webpack_require__(4);
 	exports.OpaqueToken = core_1.OpaqueToken;
-	var router_providers_common_1 = __webpack_require__(589);
+	var router_providers_common_1 = __webpack_require__(637);
 	exports.ROUTER_PROVIDERS_COMMON = router_providers_common_1.ROUTER_PROVIDERS_COMMON;
-	var router_providers_1 = __webpack_require__(590);
+	var router_providers_1 = __webpack_require__(638);
 	exports.ROUTER_PROVIDERS = router_providers_1.ROUTER_PROVIDERS;
 	exports.ROUTER_BINDINGS = router_providers_1.ROUTER_BINDINGS;
-	var router_outlet_2 = __webpack_require__(586);
-	var router_link_2 = __webpack_require__(588);
+	var router_outlet_2 = __webpack_require__(634);
+	var router_link_2 = __webpack_require__(636);
 	var lang_1 = __webpack_require__(7);
 	/**
 	 * A list of directives. To use the router directives like {@link RouterOutlet} and
@@ -37909,7 +36777,7 @@
 	
 
 /***/ },
-/* 562 */
+/* 610 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -37934,10 +36802,10 @@
 	var collection_1 = __webpack_require__(17);
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
-	var common_1 = __webpack_require__(563);
+	var common_1 = __webpack_require__(611);
 	var core_1 = __webpack_require__(4);
-	var route_registry_1 = __webpack_require__(570);
-	var route_lifecycle_reflector_1 = __webpack_require__(584);
+	var route_registry_1 = __webpack_require__(618);
+	var route_lifecycle_reflector_1 = __webpack_require__(632);
 	var _resolveToTrue = async_1.PromiseWrapper.resolve(true);
 	var _resolveToFalse = async_1.PromiseWrapper.resolve(false);
 	/**
@@ -38459,7 +37327,7 @@
 	
 
 /***/ },
-/* 563 */
+/* 611 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -38470,26 +37338,26 @@
 	 * Platform agnostic services.
 	 * Can be used both in the browser and on the server.
 	 */
-	__export(__webpack_require__(564));
+	__export(__webpack_require__(612));
 	
 
 /***/ },
-/* 564 */
+/* 612 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	function __export(m) {
 	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	}
-	__export(__webpack_require__(565));
-	__export(__webpack_require__(566));
-	__export(__webpack_require__(567));
-	__export(__webpack_require__(569));
-	__export(__webpack_require__(568));
+	__export(__webpack_require__(613));
+	__export(__webpack_require__(614));
+	__export(__webpack_require__(615));
+	__export(__webpack_require__(617));
+	__export(__webpack_require__(616));
 	
 
 /***/ },
-/* 565 */
+/* 613 */
 /***/ function(module, exports) {
 
 	'use strict';"use strict";
@@ -38541,7 +37409,7 @@
 	
 
 /***/ },
-/* 566 */
+/* 614 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -38602,7 +37470,7 @@
 	
 
 /***/ },
-/* 567 */
+/* 615 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -38624,9 +37492,9 @@
 	    return function (target, key) { decorator(target, key, paramIndex); }
 	};
 	var core_1 = __webpack_require__(4);
-	var location_strategy_1 = __webpack_require__(566);
-	var location_1 = __webpack_require__(568);
-	var platform_location_1 = __webpack_require__(565);
+	var location_strategy_1 = __webpack_require__(614);
+	var location_1 = __webpack_require__(616);
+	var platform_location_1 = __webpack_require__(613);
 	var lang_1 = __webpack_require__(7);
 	/**
 	 * `HashLocationStrategy` is a {@link LocationStrategy} used to configure the
@@ -38726,7 +37594,7 @@
 	
 
 /***/ },
-/* 568 */
+/* 616 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -38741,7 +37609,7 @@
 	};
 	var async_1 = __webpack_require__(42);
 	var core_1 = __webpack_require__(4);
-	var location_strategy_1 = __webpack_require__(566);
+	var location_strategy_1 = __webpack_require__(614);
 	/**
 	 * `Location` is a service that applications can use to interact with a browser's URL.
 	 * Depending on which {@link LocationStrategy} is used, `Location` will either persist
@@ -38914,7 +37782,7 @@
 	
 
 /***/ },
-/* 569 */
+/* 617 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -38938,9 +37806,9 @@
 	var core_1 = __webpack_require__(4);
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
-	var platform_location_1 = __webpack_require__(565);
-	var location_strategy_1 = __webpack_require__(566);
-	var location_1 = __webpack_require__(568);
+	var platform_location_1 = __webpack_require__(613);
+	var location_strategy_1 = __webpack_require__(614);
+	var location_1 = __webpack_require__(616);
 	/**
 	 * `PathLocationStrategy` is a {@link LocationStrategy} used to configure the
 	 * {@link Location} service to represent its state in the
@@ -39036,7 +37904,7 @@
 	
 
 /***/ },
-/* 570 */
+/* 618 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -39058,12 +37926,12 @@
 	var exceptions_1 = __webpack_require__(14);
 	var reflection_1 = __webpack_require__(20);
 	var core_1 = __webpack_require__(4);
-	var route_config_impl_1 = __webpack_require__(571);
-	var rules_1 = __webpack_require__(572);
-	var rule_set_1 = __webpack_require__(575);
-	var instruction_1 = __webpack_require__(574);
-	var route_config_normalizer_1 = __webpack_require__(582);
-	var url_parser_1 = __webpack_require__(573);
+	var route_config_impl_1 = __webpack_require__(619);
+	var rules_1 = __webpack_require__(620);
+	var rule_set_1 = __webpack_require__(623);
+	var instruction_1 = __webpack_require__(622);
+	var route_config_normalizer_1 = __webpack_require__(630);
+	var url_parser_1 = __webpack_require__(621);
 	var _resolveToNull = async_1.PromiseWrapper.resolve(null);
 	// A LinkItemArray is an array, which describes a set of routes
 	// The items in the array are found in groups:
@@ -39507,7 +38375,7 @@
 	
 
 /***/ },
-/* 571 */
+/* 619 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -39736,7 +38604,7 @@
 	
 
 /***/ },
-/* 572 */
+/* 620 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -39749,8 +38617,8 @@
 	var exceptions_1 = __webpack_require__(14);
 	var promise_1 = __webpack_require__(43);
 	var collection_1 = __webpack_require__(17);
-	var url_parser_1 = __webpack_require__(573);
-	var instruction_1 = __webpack_require__(574);
+	var url_parser_1 = __webpack_require__(621);
+	var instruction_1 = __webpack_require__(622);
 	// RouteMatch objects hold information about a match between a rule and a URL
 	var RouteMatch = (function () {
 	    function RouteMatch() {
@@ -39863,7 +38731,7 @@
 	
 
 /***/ },
-/* 573 */
+/* 621 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -40103,7 +38971,7 @@
 	
 
 /***/ },
-/* 574 */
+/* 622 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -40451,7 +39319,7 @@
 	
 
 /***/ },
-/* 575 */
+/* 623 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -40459,12 +39327,12 @@
 	var exceptions_1 = __webpack_require__(14);
 	var collection_1 = __webpack_require__(17);
 	var async_1 = __webpack_require__(42);
-	var rules_1 = __webpack_require__(572);
-	var route_config_impl_1 = __webpack_require__(571);
-	var async_route_handler_1 = __webpack_require__(576);
-	var sync_route_handler_1 = __webpack_require__(577);
-	var param_route_path_1 = __webpack_require__(578);
-	var regex_route_path_1 = __webpack_require__(581);
+	var rules_1 = __webpack_require__(620);
+	var route_config_impl_1 = __webpack_require__(619);
+	var async_route_handler_1 = __webpack_require__(624);
+	var sync_route_handler_1 = __webpack_require__(625);
+	var param_route_path_1 = __webpack_require__(626);
+	var regex_route_path_1 = __webpack_require__(629);
 	/**
 	 * A `RuleSet` is responsible for recognizing routes for a particular component.
 	 * It is consumed by `RouteRegistry`, which knows how to recognize an entire hierarchy of
@@ -40609,12 +39477,12 @@
 	
 
 /***/ },
-/* 576 */
+/* 624 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
-	var instruction_1 = __webpack_require__(574);
+	var instruction_1 = __webpack_require__(622);
 	var AsyncRouteHandler = (function () {
 	    function AsyncRouteHandler(_loader, data) {
 	        if (data === void 0) { data = null; }
@@ -40639,13 +39507,13 @@
 	
 
 /***/ },
-/* 577 */
+/* 625 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var async_1 = __webpack_require__(42);
 	var lang_1 = __webpack_require__(7);
-	var instruction_1 = __webpack_require__(574);
+	var instruction_1 = __webpack_require__(622);
 	var SyncRouteHandler = (function () {
 	    function SyncRouteHandler(componentType, data) {
 	        this.componentType = componentType;
@@ -40661,16 +39529,16 @@
 	
 
 /***/ },
-/* 578 */
+/* 626 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
 	var collection_1 = __webpack_require__(17);
-	var utils_1 = __webpack_require__(579);
-	var url_parser_1 = __webpack_require__(573);
-	var route_path_1 = __webpack_require__(580);
+	var utils_1 = __webpack_require__(627);
+	var url_parser_1 = __webpack_require__(621);
+	var route_path_1 = __webpack_require__(628);
 	/**
 	 * Identified by a `...` URL segment. This indicates that the
 	 * Route will continue to be matched by child `Router`s.
@@ -40933,7 +39801,7 @@
 	
 
 /***/ },
-/* 579 */
+/* 627 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -40977,7 +39845,7 @@
 	
 
 /***/ },
-/* 580 */
+/* 628 */
 /***/ function(module, exports) {
 
 	'use strict';"use strict";
@@ -41003,12 +39871,12 @@
 	
 
 /***/ },
-/* 581 */
+/* 629 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
-	var route_path_1 = __webpack_require__(580);
+	var route_path_1 = __webpack_require__(628);
 	var RegexRoutePath = (function () {
 	    function RegexRoutePath(_reString, _serializer) {
 	        this._reString = _reString;
@@ -41039,11 +39907,11 @@
 	
 
 /***/ },
-/* 582 */
+/* 630 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
-	var route_config_decorator_1 = __webpack_require__(583);
+	var route_config_decorator_1 = __webpack_require__(631);
 	var lang_1 = __webpack_require__(7);
 	var exceptions_1 = __webpack_require__(14);
 	/**
@@ -41139,13 +40007,13 @@
 	
 
 /***/ },
-/* 583 */
+/* 631 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
-	var route_config_impl_1 = __webpack_require__(571);
+	var route_config_impl_1 = __webpack_require__(619);
 	var decorators_1 = __webpack_require__(11);
-	var route_config_impl_2 = __webpack_require__(571);
+	var route_config_impl_2 = __webpack_require__(619);
 	exports.Route = route_config_impl_2.Route;
 	exports.Redirect = route_config_impl_2.Redirect;
 	exports.AuxRoute = route_config_impl_2.AuxRoute;
@@ -41160,12 +40028,12 @@
 	
 
 /***/ },
-/* 584 */
+/* 632 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
 	var lang_1 = __webpack_require__(7);
-	var lifecycle_annotations_impl_1 = __webpack_require__(585);
+	var lifecycle_annotations_impl_1 = __webpack_require__(633);
 	var reflection_1 = __webpack_require__(20);
 	function hasLifecycleHook(e, type) {
 	    if (!(type instanceof lang_1.Type))
@@ -41187,7 +40055,7 @@
 	
 
 /***/ },
-/* 585 */
+/* 633 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -41231,7 +40099,7 @@
 	
 
 /***/ },
-/* 586 */
+/* 634 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -41251,10 +40119,10 @@
 	var collection_1 = __webpack_require__(17);
 	var lang_1 = __webpack_require__(7);
 	var core_1 = __webpack_require__(4);
-	var routerMod = __webpack_require__(562);
-	var instruction_1 = __webpack_require__(574);
-	var hookMod = __webpack_require__(587);
-	var route_lifecycle_reflector_1 = __webpack_require__(584);
+	var routerMod = __webpack_require__(610);
+	var instruction_1 = __webpack_require__(622);
+	var hookMod = __webpack_require__(635);
+	var route_lifecycle_reflector_1 = __webpack_require__(632);
 	var _resolveToTrue = async_1.PromiseWrapper.resolve(true);
 	/**
 	 * A router outlet is a placeholder that Angular dynamically fills based on the application's route.
@@ -41423,7 +40291,7 @@
 	
 
 /***/ },
-/* 587 */
+/* 635 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';/**
@@ -41432,8 +40300,8 @@
 	 */
 	"use strict";
 	var decorators_1 = __webpack_require__(11);
-	var lifecycle_annotations_impl_1 = __webpack_require__(585);
-	var lifecycle_annotations_impl_2 = __webpack_require__(585);
+	var lifecycle_annotations_impl_1 = __webpack_require__(633);
+	var lifecycle_annotations_impl_2 = __webpack_require__(633);
 	exports.routerCanReuse = lifecycle_annotations_impl_2.routerCanReuse;
 	exports.routerCanDeactivate = lifecycle_annotations_impl_2.routerCanDeactivate;
 	exports.routerOnActivate = lifecycle_annotations_impl_2.routerOnActivate;
@@ -41469,7 +40337,7 @@
 	
 
 /***/ },
-/* 588 */
+/* 636 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -41483,9 +40351,9 @@
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
 	var core_1 = __webpack_require__(4);
-	var common_1 = __webpack_require__(563);
+	var common_1 = __webpack_require__(611);
 	var lang_1 = __webpack_require__(7);
-	var router_1 = __webpack_require__(562);
+	var router_1 = __webpack_require__(610);
 	/**
 	 * The RouterLink directive lets you link to specific parts of your app.
 	 *
@@ -41569,13 +40437,13 @@
 	
 
 /***/ },
-/* 589 */
+/* 637 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
-	var common_1 = __webpack_require__(563);
-	var router_1 = __webpack_require__(562);
-	var route_registry_1 = __webpack_require__(570);
+	var common_1 = __webpack_require__(611);
+	var router_1 = __webpack_require__(610);
+	var route_registry_1 = __webpack_require__(618);
 	var lang_1 = __webpack_require__(7);
 	var core_1 = __webpack_require__(4);
 	var exceptions_1 = __webpack_require__(14);
@@ -41606,14 +40474,14 @@
 	
 
 /***/ },
-/* 590 */
+/* 638 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
-	var router_providers_common_1 = __webpack_require__(589);
+	var router_providers_common_1 = __webpack_require__(637);
 	var core_1 = __webpack_require__(4);
-	var browser_platform_location_1 = __webpack_require__(591);
-	var common_1 = __webpack_require__(563);
+	var browser_platform_location_1 = __webpack_require__(639);
+	var common_1 = __webpack_require__(611);
 	var lang_1 = __webpack_require__(7);
 	/**
 	 * A list of {@link Provider}s. To use the router, you must add this to your application.
@@ -41652,7 +40520,7 @@
 	
 
 /***/ },
-/* 591 */
+/* 639 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -41671,7 +40539,7 @@
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
 	var decorators_1 = __webpack_require__(10);
-	var platform_location_1 = __webpack_require__(565);
+	var platform_location_1 = __webpack_require__(613);
 	var dom_adapter_1 = __webpack_require__(146);
 	/**
 	 * `PlatformLocation` encapsulates all of the direct calls to platform APIs.
@@ -41737,17 +40605,17 @@
 	
 
 /***/ },
-/* 592 */
+/* 640 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Observable_1 = __webpack_require__(45);
-	var map_1 = __webpack_require__(593);
+	var map_1 = __webpack_require__(641);
 	Observable_1.Observable.prototype.map = map_1.map;
 	//# sourceMappingURL=map.js.map
 
 /***/ },
-/* 593 */
+/* 641 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -41838,18 +40706,18 @@
 	//# sourceMappingURL=map.js.map
 
 /***/ },
-/* 594 */
+/* 642 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Observable_1 = __webpack_require__(45);
-	var mergeMap_1 = __webpack_require__(595);
+	var mergeMap_1 = __webpack_require__(643);
 	Observable_1.Observable.prototype.mergeMap = mergeMap_1.mergeMap;
 	Observable_1.Observable.prototype.flatMap = mergeMap_1.mergeMap;
 	//# sourceMappingURL=mergeMap.js.map
 
 /***/ },
-/* 595 */
+/* 643 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -41858,8 +40726,8 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var subscribeToResult_1 = __webpack_require__(596);
-	var OuterSubscriber_1 = __webpack_require__(600);
+	var subscribeToResult_1 = __webpack_require__(644);
+	var OuterSubscriber_1 = __webpack_require__(648);
 	/**
 	 * Projects each source value to an Observable which is merged in the output
 	 * Observable.
@@ -42015,17 +40883,17 @@
 	//# sourceMappingURL=mergeMap.js.map
 
 /***/ },
-/* 596 */
+/* 644 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var root_1 = __webpack_require__(46);
 	var isArray_1 = __webpack_require__(53);
-	var isPromise_1 = __webpack_require__(597);
+	var isPromise_1 = __webpack_require__(645);
 	var Observable_1 = __webpack_require__(45);
-	var iterator_1 = __webpack_require__(598);
+	var iterator_1 = __webpack_require__(646);
 	var observable_1 = __webpack_require__(48);
-	var InnerSubscriber_1 = __webpack_require__(599);
+	var InnerSubscriber_1 = __webpack_require__(647);
 	function subscribeToResult(outerSubscriber, result, outerValue, outerIndex) {
 	    var destination = new InnerSubscriber_1.InnerSubscriber(outerSubscriber, outerValue, outerIndex);
 	    if (destination.isUnsubscribed) {
@@ -42091,7 +40959,7 @@
 	//# sourceMappingURL=subscribeToResult.js.map
 
 /***/ },
-/* 597 */
+/* 645 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -42102,7 +40970,7 @@
 	//# sourceMappingURL=isPromise.js.map
 
 /***/ },
-/* 598 */
+/* 646 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -42139,7 +41007,7 @@
 	//# sourceMappingURL=iterator.js.map
 
 /***/ },
-/* 599 */
+/* 647 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -42180,7 +41048,7 @@
 	//# sourceMappingURL=InnerSubscriber.js.map
 
 /***/ },
-/* 600 */
+/* 648 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -42213,2565 +41081,6 @@
 	}(Subscriber_1.Subscriber));
 	exports.OuterSubscriber = OuterSubscriber;
 	//# sourceMappingURL=OuterSubscriber.js.map
-
-/***/ },
-/* 601 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	/* global angular */
-	var blackbaud_skyux2_1 = __webpack_require__(602);
-	var upgrade_adapter_1 = __webpack_require__(1);
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = angular.module('barkbaud')
-	    .directive('skyAlert', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyAlertComponent));
-	
-
-/***/ },
-/* 602 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	function __export(m) {
-	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-	}
-	__export(__webpack_require__(603));
-	__export(__webpack_require__(610));
-	__export(__webpack_require__(617));
-	__export(__webpack_require__(618));
-	
-
-/***/ },
-/* 603 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var alert_component_1 = __webpack_require__(604);
-	exports.SkyAlertComponent = alert_component_1.SkyAlertComponent;
-	
-
-/***/ },
-/* 604 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var resources_pipe_1 = __webpack_require__(605);
-	var SkyAlertComponent = (function () {
-	    function SkyAlertComponent() {
-	        this.closedChange = new core_1.EventEmitter();
-	    }
-	    SkyAlertComponent.prototype.close = function () {
-	        this.closed = true;
-	        this.closedChange.emit(true);
-	    };
-	    SkyAlertComponent.prototype.getCls = function () {
-	        var cls = 'sky-alert-' + this.alertType;
-	        if (this.closeable) {
-	            cls += ' sky-alert-closeable';
-	        }
-	        return cls;
-	    };
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', String)
-	    ], SkyAlertComponent.prototype, "alertType", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Boolean)
-	    ], SkyAlertComponent.prototype, "closeable", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Boolean)
-	    ], SkyAlertComponent.prototype, "closed", void 0);
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyAlertComponent.prototype, "closedChange", void 0);
-	    SkyAlertComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-alert',
-	            pipes: [resources_pipe_1.SkyResourcesPipe],
-	            styles: [__webpack_require__(608)],
-	            template: __webpack_require__(609)
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyAlertComponent);
-	    return SkyAlertComponent;
-	}());
-	exports.SkyAlertComponent = SkyAlertComponent;
-	
-
-/***/ },
-/* 605 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var resources_1 = __webpack_require__(606);
-	var SkyResourcesPipe = (function () {
-	    function SkyResourcesPipe() {
-	    }
-	    SkyResourcesPipe.prototype.transform = function (name) {
-	        return resources_1.SkyResources.getString(name);
-	    };
-	    SkyResourcesPipe = __decorate([
-	        core_1.Pipe({
-	            name: 'skyResources'
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyResourcesPipe);
-	    return SkyResourcesPipe;
-	}());
-	exports.SkyResourcesPipe = SkyResourcesPipe;
-	
-
-/***/ },
-/* 606 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var SkyResources = (function () {
-	    /*istanbul ignore next */
-	    function SkyResources() {
-	    }
-	    SkyResources.getString = function (name) {
-	        var stringObj = this.resources[name];
-	        if (stringObj) {
-	            return stringObj.message;
-	        }
-	        return name;
-	    };
-	    SkyResources.resources = __webpack_require__(607);
-	    return SkyResources;
-	}());
-	exports.SkyResources = SkyResources;
-	
-
-/***/ },
-/* 607 */
-/***/ function(module, exports) {
-
-	module.exports = {
-		"action_bar_actions": {
-			"_description": "The label for the actions dropdown on the action button bar",
-			"message": "Actions"
-		},
-		"alert_close": {
-			"_description": "Screen reader text for the close button on alerts",
-			"message": "Close"
-		},
-		"autonumeric_abbr_billions": {
-			"_description": "The suffix to show after an abbreviated value in the billions (e.g. $1.2b)",
-			"message": "b"
-		},
-		"autonumeric_abbr_millions": {
-			"_description": "The suffix to show after an abbreviated value in the millions (e.g. $1.2m)",
-			"message": "m"
-		},
-		"autonumeric_abbr_thousands": {
-			"_description": "The suffix to show after an abbreviated value in the thousands (e.g. $1.2k)",
-			"message": "k"
-		},
-		"avatar_error_not_image_description": {
-			"_description": "Message description displayed when the user attempts to upload an avatar file that is not a valid image",
-			"message": "Please choose a file that is a valid image."
-		},
-		"avatar_error_not_image_title": {
-			"_description": "Message title displayed when the user attempts to upload an avatar file that is not a valid image",
-			"message": "File is not an image."
-		},
-		"avatar_error_too_large_description": {
-			"_description": "Message description displayed when the user attempts to upload an avatar image with a file size that is too large",
-			"message": "Please choose an image that is less than {0}."
-		},
-		"avatar_error_too_large_title": {
-			"_description": "Message title displayed when the user attempts to upload an avatar image with a file size that is too large",
-			"message": "File is too large."
-		},
-		"checklist_select_all": {
-			"_description": "Text for the link in a checklist to select all items.",
-			"message": "Select all"
-		},
-		"checklist_clear_all": {
-			"_description": "Text for the link in a checklist to clear selections.",
-			"message": "Clear all"
-		},
-		"checklist_no_items": {
-			"_description": "Text in a checklist when no items are shown based on the current filter.",
-			"message": "No items found"
-		},
-		"chevron_collapse": {
-			"_description": "Screen reader text for when clicking the chevron would collapse the corresponding section",
-			"message": "Collapse"
-		},
-		"chevron_expand": {
-			"_description": "Screen reader text for when clicking the chevron would expand the corresponding section",
-			"message": "Expand"
-		},
-		"context_menu_default_label": {
-			"_description": "The label on the context menu button used for screen readers when the consumer has not specified a label",
-			"message": "Context menu"
-		},
-		"grid_back_to_top": {
-			"_description": "Text for link in grid to scroll back to the top.",
-			"message": "Back to top"
-		},
-		"grid_column_picker_all_categories": {
-			"_description": "Button text for category filters used to indicate that all columns should be shown in the column picker",
-			"message": "All"
-		},
-		"grid_column_picker_description_header": {
-			"_description": "In the column picker, the header for the column showing the description of the columns to include in the grid.",
-			"message": "Description"
-		},
-		"grid_column_picker_header": {
-			"_description": "Header text for the grid column picker screen",
-			"message": "Choose columns to show in the list"
-		},
-		"grid_column_picker_name_header": {
-			"_description": "In the column picker, the header for the column showing the names of the columns to include in the grid.",
-			"message": "Column"
-		},
-		"grid_column_picker_search_placeholder": {
-			"_description": "Search text placeholder for the search box on the grid column picker",
-			"message": "Search by name"
-		},
-		"grid_column_picker_submit": {
-			"_description": "Button text for applying changes made in the grid column picker",
-			"message": "Apply changes"
-		},
-		"grid_columns_button": {
-			"_description": "Label for button to select columns to display in a grid.",
-			"message": " Choose columns"
-		},
-		"grid_filters_apply": {
-			"_description": "Text for button on filters flyout to apply the selected filters to the grid",
-			"message": "Apply filters"
-		},
-		"grid_filters_button": {
-			"_description": "Label for button to select filters to be applied to a grid.",
-			"message": "Filters"
-		},
-		"grid_filters_clear": {
-			"_description": "Text for button on filters flyout to clear the selected filters for the grid",
-			"message": "Clear"
-		},
-		"grid_filters_header": {
-			"_description": "Header text for grid filters flyout",
-			"message": "Filter"
-		},
-		"grid_filters_hide": {
-			"_description": "Hide link text for grid filters flyout",
-			"message": "Hide"
-		},
-		"grid_filters_summary_header": {
-			"_description": "Header text for filter summary on top of grid",
-			"message": "Filter:"
-		},
-		"grid_load_more": {
-			"_description": "The text for the button to load additional rows into the grid if more rows are available.",
-			"message": "Load more"
-		},
-		"grid_search_placeholder": {
-			"_description": "Placeholder text in grid search box",
-			"message": "Find in this list"
-		},
-		"grid_column_picker_search_no_columns": {
-			"_description": "Displays when no columns are found for the specified search text.",
-			"message": "No columns found"
-		},
-		"modal_footer_cancel_button": {
-			"_description": "Default lable text for modal cancel button",
-			"message": "Cancel"
-		},
-		"modal_footer_primary_button": {
-			"_description": "Default lable text for modal primary button",
-			"message": "Save"
-		},
-		"month_short_april": {
-			"_description": "",
-			"message": "Apr"
-		},
-		"month_short_august": {
-			"_description": "",
-			"message": "Aug"
-		},
-		"month_short_december": {
-			"_description": "",
-			"message": "Dec"
-		},
-		"month_short_february": {
-			"_description": "",
-			"message": "Feb"
-		},
-		"month_short_january": {
-			"_description": "",
-			"message": "Jan"
-		},
-		"month_short_july": {
-			"_description": "",
-			"message": "Jul"
-		},
-		"month_short_june": {
-			"_description": "",
-			"message": "Jun"
-		},
-		"month_short_march": {
-			"_description": "",
-			"message": "Mar"
-		},
-		"month_short_may": {
-			"_description": "",
-			"message": "May"
-		},
-		"month_short_november": {
-			"_description": "",
-			"message": "Nov"
-		},
-		"month_short_october": {
-			"_description": "",
-			"message": "Oct"
-		},
-		"month_short_september": {
-			"_description": "",
-			"message": "Sep"
-		},
-		"page_noaccess_button": {
-			"_description": "",
-			"message": "Return to a non-classified page"
-		},
-		"page_noaccess_description": {
-			"_description": "",
-			"message": "Sorry, you don't have rights to this page.\nIf you feel you should, please contact your system administrator."
-		},
-		"page_noaccess_header": {
-			"_description": "",
-			"message": "Move along, there's nothing to see here"
-		},
-		"text_expand_see_less": {
-			"_description": "Display less text content",
-			"message": "See less"
-		},
-		"text_expand_see_more": {
-			"_description": "",
-			"message": "See more"
-		},
-		"text_expand_modal_title": {
-			"_description": "",
-			"message": "Expanded view"
-		},
-		"text_expand_close_text": {
-			"_description": "Text for the close button on the text expand modal",
-			"message": "Close"
-		},
-		"grid_action_bar_clear_selection": {
-			"_description": "Clear the selections in the grid.",
-			"message": "Clear selection"
-		},
-		"grid_action_bar_cancel_mobile_actions": {
-			"_description": "Close the menu where you choose an action in mobile multiselect.",
-			"message": "Cancel"
-		},
-		"grid_action_bar_choose_action": {
-			"_description": "Open a menu to choose an action in mobile  multiselect.",
-			"message": "Choose an action"
-		},
-		"date_field_invalid_date_message": {
-			"_description": "error message shown when an invalid date is entered.",
-			"message": "Please enter a valid date"
-		},
-		"date_range_picker_this_week": {
-			"_description": "text for date range picker",
-			"message": "This week"
-		},
-		"date_range_picker_last_week": {
-			"_description": "text for date range picker",
-			"message": "Last week"
-		},
-		"date_range_picker_next_week": {
-			"_description": "text for date range picker",
-			"message": "Next week"
-		},
-		"date_range_picker_this_month": {
-			"_description": "text for date range picker",
-			"message": "This month"
-		},
-		"date_range_picker_last_month": {
-			"_description": "text for date range picker",
-			"message": "Last month"
-		},
-		"date_range_picker_next_month": {
-			"_description": "text for date range picker",
-			"message": "Next month"
-		},
-		"date_range_picker_this_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "This calendar year"
-		},
-		"date_range_picker_last_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "Last calendar year"
-		},
-		"date_range_picker_next_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "Next calendar year"
-		},
-		"date_range_picker_this_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "This fiscal year"
-		},
-		"date_range_picker_last_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "Last fiscal year"
-		},
-		"date_range_picker_next_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "Next fiscal year"
-		},
-		"date_range_picker_this_quarter": {
-			"_description": "text for date range picker",
-			"message": "This quarter"
-		},
-		"date_range_picker_last_quarter": {
-			"_description": "text for date range picker",
-			"message": "Last quarter"
-		},
-		"date_range_picker_next_quarter": {
-			"_description": "text for date range picker",
-			"message": "Next quarter"
-		},
-		"date_range_picker_at_any_time": {
-			"_description": "text for date range picker",
-			"message": "At any time"
-		},
-		"date_range_picker_today": {
-			"_description": "text for date range picker",
-			"message": "Today"
-		},
-		"date_range_picker_tomorrow": {
-			"_description": "text for date range picker",
-			"message": "Tomorrow"
-		},
-		"date_range_picker_yesterday": {
-			"_description": "text for date range picker",
-			"message": "Yesterday"
-		},
-		"date_range_picker_specific_range": {
-			"_description": "text for date range picker",
-			"message": "Specific range"
-		},
-		"date_range_picker_filter_description_this_week": {
-			"_description": "text for date range picker",
-			"message": "{0} for this week"
-		},
-		"date_range_picker_filter_description_last_week": {
-			"_description": "text for date range picker",
-			"message": "{0} from last week"
-		},
-		"date_range_picker_filter_description_next_week": {
-			"_description": "text for date range picker",
-			"message": "{0} for next week"
-		},
-		"date_range_picker_filter_description_this_month": {
-			"_description": "text for date range picker",
-			"message": "{0} for this month"
-		},
-		"date_range_picker_filter_description_last_month": {
-			"_description": "text for date range picker",
-			"message": "{0} from last month"
-		},
-		"date_range_picker_filter_description_next_month": {
-			"_description": "text for date range picker",
-			"message": "{0} for next month"
-		},
-		"date_range_picker_filter_description_this_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "{0} for this calendar year"
-		},
-		"date_range_picker_filter_description_last_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "{0} from last calendar year"
-		},
-		"date_range_picker_filter_description_next_calendar_year": {
-			"_description": "text for date range picker",
-			"message": "{0} for next calendar year"
-		},
-		"date_range_picker_filter_description_this_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "{0} for this fiscal year"
-		},
-		"date_range_picker_filter_description_last_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "{0} from last fiscal year"
-		},
-		"date_range_picker_filter_description_next_fiscal_year": {
-			"_description": "text for date range picker",
-			"message": "{0} for next fiscal year"
-		},
-		"date_range_picker_filter_description_this_quarter": {
-			"_description": "text for date range picker",
-			"message": "{0} for this quarter"
-		},
-		"date_range_picker_filter_description_last_quarter": {
-			"_description": "text for date range picker",
-			"message": "{0} from last quarter"
-		},
-		"date_range_picker_filter_description_next_quarter": {
-			"_description": "text for date range picker",
-			"message": "{0} for next quarter"
-		},
-		"date_range_picker_filter_description_at_any_time": {
-			"_description": "text for date range picker",
-			"message": "{0} at any time"
-		},
-		"date_range_picker_filter_description_today": {
-			"_description": "text for date range picker",
-			"message": "{0} for today"
-		},
-		"date_range_picker_filter_description_yesterday": {
-			"_description": "text for date range picker",
-			"message": "{0} from yesterday"
-		},
-		"date_range_picker_filter_description_tomorrow": {
-			"_description": "text for date range picker",
-			"message": "{0} for tomorrow"
-		},
-		"date_range_picker_filter_description_specific_range": {
-			"_description": "text for date range picker",
-			"message": "{0} from {1} to {2}"
-		},
-		"date_range_picker_from_date": {
-			"_description": "label for date range picker",
-			"message": "From date"
-		},
-		"date_range_picker_to_date": {
-			"_description": "label for date range picker",
-			"message": "To date"
-		},
-		"date_range_picker_min_date_error": {
-			"_description": "error message for date range picker",
-			"message": "End date must be after start date"
-		},
-		"date_range_picker_max_date_error": {
-			"_description": "error message for date range picker",
-			"message": "Start date must be before end date"
-		},
-		"errormodal_ok": {
-			"_description": "Text used on the primary button to dismiss the error modal.",
-			"message": "OK"
-		},
-		"error_description_broken": {
-			"_description": "Text used for the error description to when page is broken.",
-			"message": "Try to refresh this page or come back later."
-		},
-		"error_description_construction": {
-			"_description": "Text used for the error description when page is under construction.",
-			"message": "Thanks for your patience while improvements are made!\nPlease check back in a little while."
-		},
-		"error_title_broken": {
-			"_description": "Text used for the error title when something is broken",
-			"message": "Sorry, something went wrong."
-		},
-		"error_title_construction": {
-			"_description": "Text used for the error title when page is under construction.",
-			"message": "This page will return soon."
-		},
-		"error_title_notfound": {
-			"_description": "Text used for the error title when page is not found.",
-			"message": "Sorry, we can't reach that page."
-		},
-		"file_size_b_plural": {
-			"_description": "",
-			"message": "{0} bytes"
-		},
-		"file_size_b_singular": {
-			"_description": "",
-			"message": "{0} byte"
-		},
-		"file_size_kb": {
-			"_description": "",
-			"message": "{0} KB"
-		},
-		"file_size_mb": {
-			"_description": "",
-			"message": "{0} MB"
-		},
-		"file_size_gb": {
-			"_description": "",
-			"message": "{0} GB"
-		},
-		"file_upload_drag_file_here": {
-			"_description": "",
-			"message": "Drag a file here"
-		},
-		"file_upload_drop_files_here": {
-			"_description": "",
-			"message": "Drop files here"
-		},
-		"file_upload_invalid_file": {
-			"_description": "",
-			"message": "This file type is invalid"
-		},
-		"file_upload_link_placeholder": {
-			"_description": "",
-			"message": "http://www.something.com/file"
-		},
-		"file_upload_or_click_to_browse": {
-			"_description": "",
-			"message": "or click to browse"
-		},
-		"file_upload_paste_link": {
-			"_description": "",
-			"message": "Paste a link to a file"
-		},
-		"file_upload_paste_link_done": {
-			"_description": "",
-			"message": "Done"
-		},
-		"searchfield_searching": {
-			"_description": "text for ui-select search control while performing a remote search",
-			"message": "Searching..."
-		},
-		"searchfield_no_records": {
-			"_description": "text for ui-select search control when no records are found.",
-			"message": "Sorry, no matching records found"
-		},
-		"selectfield_summary_text": {
-			"_description": "Text displayed when the user has more than 5 items selected",
-			"message": "{0} items selected"
-		},
-		"selectfield_remove": {
-			"_description": "Text for screen readers to convey the meaning of the remove icon button on select field values",
-			"message": "Remove"
-		},
-		"selectfieldpicker_select": {
-			"_description": "Text displayed on the primary dialog button to confirm selection of multiple items",
-			"message": "Select"
-		},
-		"selectfieldpicker_select_value": {
-			"_description": "The default header text for the select field picker directive when the user is allowed to select one value (singular)",
-			"message": "Select value"
-		},
-		"selectfieldpicker_select_values": {
-			"_description": "The default header text for the select field picker directive when the user is allowed to select more than one value (plural)",
-			"message": "Select values"
-		},
-		"selectfieldpicker_clear": {
-			"_description": "Text displayed on the button in single select mode to clear selection and close form",
-			"message": "Clear selection"
-		},
-		"wizard_navigator_finish": {
-			"_description": "Text displayed on the next button when a wizard is ready for completion.",
-			"message": "Finish"
-		},
-		"wizard_navigator_next": {
-			"_description": "Text displayed on a wizard's next button.",
-			"message": "Next"
-		},
-		"wizard_navigator_previous": {
-			"_description": "Text displayed on a wizard's previous button.",
-			"message": "Previous"
-		},
-		"datepicker_today": {
-			"_description": "Text displayed in the Today button of the datepicker",
-			"message": "Today"
-		},
-		"datepicker_clear": {
-			"_description": "Text displayed in the Clear button of the datepicker",
-			"message": "Clear"
-		},
-		"datepicker_close": {
-			"_description": "Text displayed in the Close button of the datepicker",
-			"message": "Done"
-		},
-		"reorder_top": {
-			"_description": "Text displayed to indicate that a row can be pushed to the top of the list",
-			"message": "Top"
-		}
-	};
-
-/***/ },
-/* 608 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-alert {\n  padding: 10px;\n  margin-bottom: 20px;\n  border: solid 1px transparent;\n  border-radius: 4px; }\n\n.sky-alert-info {\n  background-color: #d9edf7;\n  border-color: #bce8f1;\n  color: #31708f; }\n\n.sky-alert-success {\n  background-color: #dff0d8;\n  border-color: #d6e9c6;\n  color: #3c763d; }\n\n.sky-alert-warning {\n  background-color: #fcf8e3;\n  border-color: #faebcc;\n  color: #8a6d3b; }\n\n.sky-alert-danger {\n  background-color: #f2dede;\n  border-color: #ebccd1;\n  color: #ca2a2a; }\n\n.sky-alert-close {\n  cursor: pointer;\n  float: right;\n  font-size: 19.5px;\n  font-weight: bold;\n  line-height: 1;\n  margin: 0;\n  padding: 0;\n  color: #000;\n  opacity: 0.2;\n  border: none;\n  background-color: transparent;\n  display: none; }\n  .sky-alert-close:hover {\n    opacity: 0.5; }\n\n.sky-alert-closeable .sky-alert-close {\n  display: block; }\n"
-
-/***/ },
-/* 609 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"sky-alert\" [ngClass]=\"getCls()\" [hidden]=\"closed\">\n  <ng-content></ng-content>\n  <button type=\"button\" class=\"sky-alert-close\" (click)=\"close()\" [attr.aria-label]=\"'alert_close' | skyResources\" [hidden]=\"!closeable\">\n    <span aria-hidden=\"true\">&times;</span>\n  </button>\n</div>\n"
-
-/***/ },
-/* 610 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var card_component_1 = __webpack_require__(611);
-	exports.SkyCardComponent = card_component_1.SkyCardComponent;
-	
-
-/***/ },
-/* 611 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var checkbox_component_1 = __webpack_require__(612);
-	var SkyCardComponent = (function () {
-	    function SkyCardComponent() {
-	        this.selectedChange = new core_1.EventEmitter();
-	    }
-	    SkyCardComponent.prototype.contentClick = function () {
-	        var vm = this;
-	        if (vm.selectable) {
-	            vm.selected = !vm.selected;
-	            vm.selectedChange.emit(vm.selected);
-	        }
-	    };
-	    ;
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', String)
-	    ], SkyCardComponent.prototype, "size", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Boolean)
-	    ], SkyCardComponent.prototype, "selectable", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Boolean)
-	    ], SkyCardComponent.prototype, "selected", void 0);
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyCardComponent.prototype, "selectedChange", void 0);
-	    SkyCardComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-card',
-	            styles: [__webpack_require__(615)],
-	            template: __webpack_require__(616),
-	            directives: [checkbox_component_1.SkyCheckboxComponent]
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyCardComponent);
-	    return SkyCardComponent;
-	}());
-	exports.SkyCardComponent = SkyCardComponent;
-	
-
-/***/ },
-/* 612 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var SkyCheckboxComponent = (function () {
-	    function SkyCheckboxComponent() {
-	        this.selected = false;
-	        this.selectedChange = new core_1.EventEmitter();
-	    }
-	    SkyCheckboxComponent.prototype.updateSelected = function ($event) {
-	        this.selected = $event;
-	        this.selectedChange.emit($event);
-	    };
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Object)
-	    ], SkyCheckboxComponent.prototype, "selected", void 0);
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyCheckboxComponent.prototype, "selectedChange", void 0);
-	    SkyCheckboxComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-checkbox',
-	            styles: [__webpack_require__(613)],
-	            template: __webpack_require__(614)
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyCheckboxComponent);
-	    return SkyCheckboxComponent;
-	}());
-	exports.SkyCheckboxComponent = SkyCheckboxComponent;
-	
-
-/***/ },
-/* 613 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-checkbox-wrapper input {\n  opacity: 0;\n  position: absolute;\n  height: 22px;\n  width: 22px;\n  margin: 0;\n  padding: 0; }\n\n.sky-checkbox {\n  border: 1px solid #cccccc;\n  cursor: pointer;\n  display: inline-block;\n  height: 22px;\n  margin: 0;\n  padding: 0;\n  vertical-align: middle;\n  width: 22px;\n  text-align: center;\n  font-size: 14px; }\n\n.sky-checkbox-wrapper input:checked + .sky-checkbox {\n  background-color: #1c84c6;\n  border-color: #1c84c6; }\n  .sky-checkbox-wrapper input:checked + .sky-checkbox:before {\n    color: #fff;\n    content: \"\\f00c\";\n    font-family: FontAwesome;\n    font-size: 12px; }\n\n.sky-checkbox-wrapper input:disabled + .sky-checkbox {\n  background-color: #cccccc;\n  border: 1px solid #cccccc;\n  cursor: default; }\n\n.sky-checkbox-wrapper input:focus + .sky-checkbox {\n  outline: thin dotted;\n  outline: -webkit-focus-ring-color auto 5px;\n  outline-offset: -2px; }\n"
-
-/***/ },
-/* 614 */
-/***/ function(module, exports) {
-
-	module.exports = "<label class=\"sky-checkbox-wrapper\">\n  <input type=\"checkbox\" [ngModel]=\"selected\" (ngModelChange)=\"updateSelected($event)\" />\n  <span role=\"checkbox\" class=\"sky-checkbox\" tabindex=\"-1\"></span>\n  <ng-content select=\"sky-checkbox-label\"></ng-content>\n</label>\n"
-
-/***/ },
-/* 615 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-card {\n  background-color: #fff;\n  border: solid 1px #ccc;\n  display: inline-flex;\n  flex-direction: column;\n  height: 350px;\n  margin: 0 10px 10px 0;\n  transition: background-color 150ms;\n  vertical-align: top;\n  width: 300px;\n  box-shadow: 0px 0px 5px 0 #ddd; }\n\n.sky-card-small {\n  height: 250px;\n  width: 200px; }\n\n.sky-card-selectable .sky-card-header,\n.sky-card-selectable .sky-card-content {\n  cursor: pointer; }\n\n.sky-card-selected {\n  background-color: #eeeffb;\n  transition: background-color 150ms; }\n\n.sky-card-header {\n  align-items: center;\n  display: flex;\n  flex-shrink: 0;\n  margin: 0;\n  padding: 10px 0 0 0; }\n\n.sky-card-heading-left,\n.sky-card-heading-right {\n  font-weight: normal;\n  max-width: 34px; }\n\n.sky-card-heading-left {\n  padding-left: 10px; }\n\n.sky-card-heading-right {\n  padding-right: 10px; }\n\n.sky-card-heading-middle {\n  flex-grow: 1;\n  padding: 0 10px; }\n\n.sky-card-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 24px;\n  margin: 0; }\n\n.sky-card-check {\n  flex-shrink: 0;\n  padding-right: 10px; }\n  .sky-card-check .sky-check-wrapper {\n    margin-bottom: 2px; }\n\n.sky-card-content {\n  flex-grow: 1;\n  font-weight: normal;\n  margin: 0;\n  padding: 10px;\n  overflow: hidden; }\n\n.sky-card-actions {\n  border-top: solid 1px #ccc;\n  bottom: 0;\n  flex-shrink: 0;\n  padding: 7px 0;\n  text-align: center; }\n  .sky-card-actions .sky-context-menu-btn {\n    height: 32px;\n    width: 32px; }\n"
-
-/***/ },
-/* 616 */
-/***/ function(module, exports) {
-
-	module.exports = "<section class=\"sky-card\"\n    [ngClass]=\"\n      {\n        'sky-card-small': size === 'small',\n        'sky-card-selectable': selectable,\n        'sky-card-selected': selectable &amp;&amp; selected\n      }\n\">\n  <header>\n    <label class=\"sky-card-header\" [hidden]=\"!selectable &amp;&amp; titleEl.children.length === 0\">\n      <div class=\"sky-card-heading-middle\">\n        <h1 class=\"sky-card-title\" #titleEl>\n          <ng-content select=\"sky-card-title\"></ng-content>\n        </h1>\n      </div>\n      <div class=\"sky-card-check\" *ngIf=\"selectable\">\n        <sky-checkbox [(selected)]=\"selected\"></sky-checkbox>\n      </div>\n    </label>\n  </header>\n  <div class=\"sky-card-content\" (click)=\"contentClick()\">\n    <ng-content select=\"sky-card-content\"></ng-content>\n    <div class=\"sky-card-actions\" [hidden]=\"actionsEl.children.length === 0\" #actionsEl>\n      <ng-content select=\"sky-card-actions\"></ng-content>\n    </div>\n  </div>\n</section>\n"
-
-/***/ },
-/* 617 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var checkbox_component_1 = __webpack_require__(612);
-	exports.SkyCheckboxComponent = checkbox_component_1.SkyCheckboxComponent;
-	
-
-/***/ },
-/* 618 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var tile_dashboard_service_1 = __webpack_require__(619);
-	exports.SkyTileDashboardService = tile_dashboard_service_1.SkyTileDashboardService;
-	var tile_component_1 = __webpack_require__(620);
-	exports.SkyTileComponent = tile_component_1.SkyTileComponent;
-	var tile_content_section_component_1 = __webpack_require__(628);
-	exports.SkyTileContentSectionComponent = tile_content_section_component_1.SkyTileContentSectionComponent;
-	var tile_dashboard_column_component_1 = __webpack_require__(631);
-	exports.SkyTileDashboardColumnComponent = tile_dashboard_column_component_1.SkyTileDashboardColumnComponent;
-	var tile_dashboard_component_1 = __webpack_require__(647);
-	exports.SkyTileDashboardComponent = tile_dashboard_component_1.SkyTileDashboardComponent;
-	
-
-/***/ },
-/* 619 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var ATTR_TILE_ID = '_sky-tile-dashboard-tile-id';
-	var bagIdIndex = 0;
-	function getTileId(tile) {
-	    var el = tile.elementRef.nativeElement;
-	    var tileId;
-	    while (el) {
-	        tileId = el.getAttribute(ATTR_TILE_ID);
-	        if (tileId) {
-	            return tileId;
-	        }
-	        el = el.parentElement;
-	    }
-	    return undefined;
-	}
-	var SkyTileDashboardService = (function () {
-	    function SkyTileDashboardService() {
-	        this.ready = new core_1.EventEmitter();
-	        this.configChange = new core_1.EventEmitter();
-	    }
-	    SkyTileDashboardService.prototype.findTile = function (tileId) {
-	        if (this.config && this.config.columns) {
-	            for (var _i = 0, _a = this.config.columns; _i < _a.length; _i++) {
-	                var column = _a[_i];
-	                if (column.tiles) {
-	                    for (var _b = 0, _c = column.tiles; _b < _c.length; _b++) {
-	                        var tile = _c[_b];
-	                        if (tile.id === tileId) {
-	                            return tile;
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        return undefined;
-	    };
-	    SkyTileDashboardService.prototype.setConfig = function (config) {
-	        this.config = config;
-	        this.checkReady();
-	    };
-	    SkyTileDashboardService.prototype.addTileComponent = function (tile, component) {
-	        this.tileComponents = this.tileComponents || [];
-	        this.tileComponents.push(component);
-	        component.location.nativeElement.setAttribute(ATTR_TILE_ID, tile.id);
-	    };
-	    SkyTileDashboardService.prototype.setDragulaService = function (dragulaService) {
-	        var _this = this;
-	        bagIdIndex++;
-	        this.dragulaService = dragulaService;
-	        this.bagId = 'sky-tile-dashboard-bag-' + bagIdIndex;
-	        dragulaService.setOptions(this.bagId, {
-	            moves: function (el, container, handle) {
-	                return handle.matches('.sky-tile-grab-handle');
-	            }
-	        });
-	        dragulaService.drop.subscribe(function (value) {
-	            var bag = dragulaService.find(_this.bagId);
-	            if (bag) {
-	                var containers = bag.drake.containers;
-	                var columns = [];
-	                for (var _i = 0, containers_1 = containers; _i < containers_1.length; _i++) {
-	                    var container = containers_1[_i];
-	                    var column = { tiles: [] }, tiles = container.querySelectorAll('[' + ATTR_TILE_ID + ']');
-	                    if (tiles) {
-	                        for (var _a = 0, tiles_1 = tiles; _a < tiles_1.length; _a++) {
-	                            var tileEl = tiles_1[_a];
-	                            var tileId = tileEl.getAttribute(ATTR_TILE_ID);
-	                            var tile = _this.findTile(tileId);
-	                            if (tile) {
-	                                column.tiles.push(tile);
-	                            }
-	                        }
-	                    }
-	                    columns.push(column);
-	                }
-	                var config = {
-	                    columns: columns
-	                };
-	                _this.configChange.emit(config);
-	            }
-	        });
-	        this.checkReady();
-	    };
-	    SkyTileDashboardService.prototype.tileIsCollapsed = function (tile) {
-	        var tileConfig = this.findTile(getTileId(tile));
-	        if (tileConfig) {
-	            return tileConfig.isCollapsed;
-	        }
-	        return undefined;
-	    };
-	    SkyTileDashboardService.prototype.setTileCollapsed = function (tile, isCollapsed) {
-	        var tileConfig = this.findTile(getTileId(tile));
-	        if (tileConfig) {
-	            tileConfig.isCollapsed = isCollapsed;
-	            this.configChange.emit(this.config);
-	        }
-	    };
-	    SkyTileDashboardService.prototype.checkReady = function () {
-	        if (this.config && this.dragulaService) {
-	            this.ready.emit(this.config);
-	        }
-	    };
-	    SkyTileDashboardService = __decorate([
-	        core_1.Injectable(), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyTileDashboardService);
-	    return SkyTileDashboardService;
-	}());
-	exports.SkyTileDashboardService = SkyTileDashboardService;
-	
-
-/***/ },
-/* 620 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var slide_service_1 = __webpack_require__(621);
-	var chevron_component_1 = __webpack_require__(623);
-	var resources_pipe_1 = __webpack_require__(605);
-	var tile_dashboard_service_1 = __webpack_require__(619);
-	var SkyTileComponent = (function () {
-	    function SkyTileComponent(dashboardService, slideService, elementRef) {
-	        this.dashboardService = dashboardService;
-	        this.slideService = slideService;
-	        this.elementRef = elementRef;
-	        this.isInDashboardColumn = false;
-	        this.settingsClick = new core_1.EventEmitter();
-	        this.collapsedStateChange = new core_1.EventEmitter();
-	        this._isCollapsed = false;
-	        this.isInDashboardColumn = !!dashboardService;
-	    }
-	    Object.defineProperty(SkyTileComponent.prototype, "isCollapsed", {
-	        get: function () {
-	            if (this.dashboardService) {
-	                return this.dashboardService.tileIsCollapsed(this);
-	            }
-	            return this._isCollapsed;
-	        },
-	        set: function (value) {
-	            if (this.dashboardService) {
-	                this.dashboardService.setTileCollapsed(this, value);
-	            }
-	            else {
-	                this._isCollapsed = value;
-	            }
-	            this.slideForCollapsed();
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    SkyTileComponent.prototype.settingsButtonClicked = function () {
-	        this.settingsClick.emit(undefined);
-	    };
-	    Object.defineProperty(SkyTileComponent.prototype, "hasSettings", {
-	        get: function () {
-	            return this.settingsClick.observers.length > 0;
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    SkyTileComponent.prototype.titleClick = function () {
-	        this.isCollapsed = !this.isCollapsed;
-	    };
-	    SkyTileComponent.prototype.chevronDirectionChange = function (direction) {
-	        this.isCollapsed = direction === 'down';
-	    };
-	    SkyTileComponent.prototype.ngAfterViewInit = function () {
-	        if (this.isCollapsed) {
-	            this.slideForCollapsed(false);
-	        }
-	    };
-	    SkyTileComponent.prototype.slideForCollapsed = function (animate) {
-	        if (animate === void 0) { animate = true; }
-	        var direction = this.isCollapsed ? 'up' : 'down';
-	        this.slideService.slide(this.elementRef, '.sky-tile-content', direction, animate);
-	    };
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyTileComponent.prototype, "settingsClick", void 0);
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyTileComponent.prototype, "collapsedStateChange", void 0);
-	    SkyTileComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-tile',
-	            styles: [__webpack_require__(626)],
-	            template: __webpack_require__(627),
-	            directives: [chevron_component_1.SkyChevronComponent],
-	            pipes: [resources_pipe_1.SkyResourcesPipe],
-	            viewProviders: [slide_service_1.SkySlideService]
-	        }),
-	        __param(0, core_1.Optional()), 
-	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, slide_service_1.SkySlideService, core_1.ElementRef])
-	    ], SkyTileComponent);
-	    return SkyTileComponent;
-	}());
-	exports.SkyTileComponent = SkyTileComponent;
-	
-
-/***/ },
-/* 621 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var animate_1 = __webpack_require__(622);
-	var SkySlideService = (function () {
-	    function SkySlideService(animationBuilder) {
-	        this.animationBuilder = animationBuilder;
-	    }
-	    SkySlideService.prototype.slide = function (el, selector, direction, animate) {
-	        if (animate === void 0) { animate = false; }
-	        clearTimeout(this.autoHeightTimeoutId);
-	        var animateEl = el.nativeElement.querySelector(selector);
-	        var animation = this.animationBuilder.css();
-	        var duration = animate ? 250 : 0;
-	        animation.setDuration(duration);
-	        animateEl.removeAttribute('hidden');
-	        animateEl.style.height = 'auto';
-	        animateEl.style.display = 'block';
-	        var height = animateEl.offsetHeight;
-	        if (direction === 'up') {
-	            animation
-	                .setFromStyles({
-	                height: height + 'px',
-	                overflow: 'hidden'
-	            })
-	                .setToStyles({
-	                height: '0px'
-	            });
-	        }
-	        else {
-	            animation
-	                .setFromStyles({
-	                height: '0px'
-	            })
-	                .setToStyles({
-	                height: height + 'px'
-	            });
-	        }
-	        animation.start(animateEl);
-	        if (direction === 'down') {
-	            this.autoHeightTimeoutId = setTimeout(function () {
-	                animateEl.style.height = 'auto';
-	            }, duration + 50);
-	        }
-	    };
-	    SkySlideService = __decorate([
-	        core_1.Injectable(), 
-	        __metadata('design:paramtypes', [animate_1.AnimationBuilder])
-	    ], SkySlideService);
-	    return SkySlideService;
-	}());
-	exports.SkySlideService = SkySlideService;
-	
-
-/***/ },
-/* 622 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';"use strict";
-	var animation_1 = __webpack_require__(155);
-	exports.Animation = animation_1.Animation;
-	var animation_builder_1 = __webpack_require__(152);
-	exports.AnimationBuilder = animation_builder_1.AnimationBuilder;
-	var browser_details_1 = __webpack_require__(158);
-	exports.BrowserDetails = browser_details_1.BrowserDetails;
-	var css_animation_builder_1 = __webpack_require__(153);
-	exports.CssAnimationBuilder = css_animation_builder_1.CssAnimationBuilder;
-	var css_animation_options_1 = __webpack_require__(154);
-	exports.CssAnimationOptions = css_animation_options_1.CssAnimationOptions;
-	
-
-/***/ },
-/* 623 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var resources_pipe_1 = __webpack_require__(605);
-	var SkyChevronComponent = (function () {
-	    function SkyChevronComponent() {
-	        this.directionChange = new core_1.EventEmitter();
-	        this.direction = 'up';
-	    }
-	    SkyChevronComponent.prototype.chevronClick = function ($event) {
-	        $event.stopPropagation();
-	        this.direction = this.direction === 'up' ? 'down' : 'up';
-	        this.directionChange.emit(this.direction);
-	    };
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyChevronComponent.prototype, "directionChange", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Object)
-	    ], SkyChevronComponent.prototype, "direction", void 0);
-	    SkyChevronComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-chevron',
-	            styles: [__webpack_require__(624)],
-	            template: __webpack_require__(625),
-	            pipes: [resources_pipe_1.SkyResourcesPipe]
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyChevronComponent);
-	    return SkyChevronComponent;
-	}());
-	exports.SkyChevronComponent = SkyChevronComponent;
-	
-
-/***/ },
-/* 624 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-chevron {\n  border: none;\n  background-color: transparent;\n  flex-shrink: 0;\n  height: 24px;\n  margin: 0;\n  overflow: hidden;\n  padding: 0;\n  width: 24px; }\n\n.sky-chevron-part {\n  border-color: #d1dade;\n  border-style: solid;\n  border-width: 3px 0 0 0;\n  display: inline-block;\n  height: 10px;\n  position: relative;\n  top: 6px;\n  transition: transform 250ms, left 250ms;\n  vertical-align: top;\n  width: 10px; }\n\n.sky-chevron-up .sky-chevron-left {\n  left: 7px;\n  transform: rotate(-45deg); }\n\n.sky-chevron-up .sky-chevron-right {\n  left: -8px;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-left {\n  left: 0;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-right {\n  left: -1px;\n  transform: rotate(-45deg); }\n"
-
-/***/ },
-/* 625 */
-/***/ function(module, exports) {
-
-	module.exports = "<button\n    type=\"button\"\n    class=\"sky-chevron\"\n    [ngClass]=\"['sky-chevron-' + direction]\"\n    (click)=\"chevronClick($event)\"\n    [attr.aria-label]=\"(isCollapsed ? 'chevron_expand' : 'chevron_collapse') | skyResources\"\n>\n  <i class=\"sky-chevron-part sky-chevron-left\"></i>\n  <i class=\"sky-chevron-part sky-chevron-right\"></i>\n</button>\n"
-
-/***/ },
-/* 626 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-tile {\n  background-color: #fff;\n  margin-bottom: 20px; }\n\n.sky-tile-header {\n  border-color: #e7eaec;\n  border-style: solid solid none;\n  border-width: 4px 0 0;\n  display: flex; }\n\n.sky-tile-header-content {\n  display: flex;\n  flex: 1;\n  align-items: baseline;\n  cursor: pointer; }\n\n.sky-tile-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 22px;\n  font-weight: 100;\n  margin: 0;\n  padding: 10px 15px; }\n\n.sky-tile-summary {\n  color: #1ab394;\n  font-family: \"Oswald\", sans-serif;\n  font-size: 18px;\n  font-weight: 400;\n  opacity: 0;\n  padding-right: 15px;\n  transition: opacity 250ms;\n  max-height: 30px;\n  overflow: hidden; }\n\n.sky-tile-collapsed .sky-tile-summary {\n  opacity: 1; }\n\n.sky-tile-header-column-tools {\n  flex-shrink: 0; }\n\n.sky-tile-content {\n  border-color: #e7eaec;\n  border-image: none;\n  border-style: solid solid none;\n  border-width: 1px 0; }\n\n:host /deep/ .sky-tile-tools .sky-chevron {\n  margin: 12px 9px 12px 0; }\n\n.sky-tile-settings {\n  color: #D1DADE;\n  height: 24px;\n  margin: 12px 9px 12px 0;\n  padding: 0;\n  background-color: transparent;\n  border: none;\n  width: 24px; }\n\n.sky-tile-grab-handle {\n  color: #E7EAEC;\n  cursor: move;\n  cursor: -webkit-grab;\n  cursor: -moz-grab;\n  font-size: 15px;\n  padding: 15px 15px 15px 0; }\n"
-
-/***/ },
-/* 627 */
-/***/ function(module, exports) {
-
-	module.exports = "<section\n    class=\"sky-tile\"\n    [attr.sky-tile-id]=\"tileId\"\n    [ngClass]=\"{\n      'sky-tile-collapsed': isCollapsed\n    }\"\n>\n  <header class=\"sky-tile-header\">\n    <div class=\"sky-tile-header-content\" (click)=\"titleClick()\">\n      <h1 class=\"sky-tile-title\">\n        <ng-content select=\"sky-tile-title\"></ng-content>\n      </h1>\n      <div class=\"sky-tile-summary\">\n        <ng-content select=\"sky-tile-summary\"></ng-content>\n      </div>\n    </div>\n    <div class=\"sky-tile-header-column-tools\">\n      <div class=\"sky-tile-tools\">\n        <sky-chevron\n            [direction]=\"isCollapsed ? 'down' : 'up'\"\n            (directionChange)=\"chevronDirectionChange($event)\"\n        >\n        </sky-chevron>\n        <button\n            type=\"button\"\n            *ngIf=\"hasSettings\"\n            class=\"sky-tile-settings fa fa-cog\"\n            (click)=\"settingsButtonClicked();\"\n        >\n        </button>\n        <i\n            class=\"sky-tile-grab-handle fa fa-th\"\n            *ngIf=\"isInDashboardColumn\"\n        >\n        </i>\n      </div>\n    </div>\n  </header>\n  <div class=\"sky-tile-content\">\n  <!-- <div class=\"sky-tile-content\" [hidden]=\"isCollapsed\"> -->\n    <ng-content select=\"sky-tile-content\"></ng-content>\n    {{isCollapsed}}\n  </div>\n</section>\n"
-
-/***/ },
-/* 628 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var SkyTileContentSectionComponent = (function () {
-	    function SkyTileContentSectionComponent() {
-	    }
-	    SkyTileContentSectionComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-tile-content-section',
-	            styles: [__webpack_require__(629)],
-	            template: __webpack_require__(630)
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyTileContentSectionComponent);
-	    return SkyTileContentSectionComponent;
-	}());
-	exports.SkyTileContentSectionComponent = SkyTileContentSectionComponent;
-	
-
-/***/ },
-/* 629 */
-/***/ function(module, exports) {
-
-	module.exports = ".sky-tile-content-section {\n  padding: 15px; }\n"
-
-/***/ },
-/* 630 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"sky-tile-content-section\">\n  <ng-content></ng-content>\n</div>\n"
-
-/***/ },
-/* 631 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var ng2_dragula_1 = __webpack_require__(632);
-	var tile_dashboard_column_content_component_1 = __webpack_require__(644);
-	var tile_dashboard_service_1 = __webpack_require__(619);
-	var columnIdIndex = 0;
-	var SkyTileDashboardColumnComponent = (function () {
-	    function SkyTileDashboardColumnComponent(dashboardService, cmpResolver) {
-	        this.dashboardService = dashboardService;
-	        this.cmpResolver = cmpResolver;
-	        this.viewInitialized = false;
-	        columnIdIndex++;
-	        this.columnId = 'tile-dashboard-column-' + columnIdIndex;
-	        this.bagId = dashboardService.bagId;
-	    }
-	    Object.defineProperty(SkyTileDashboardColumnComponent.prototype, "tiles", {
-	        set: function (value) {
-	            this._tiles = value;
-	            this.updateTiles();
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    SkyTileDashboardColumnComponent.prototype.updateTiles = function () {
-	        var _this = this;
-	        if (this.viewInitialized && this._tiles) {
-	            var _loop_1 = function(tile) {
-	                this_1.cmpResolver.resolveComponent(tile.component)
-	                    .then(function (factory) {
-	                    var componentRef = _this.content.viewContainer.createComponent(factory);
-	                    _this.dashboardService.addTileComponent(tile, componentRef);
-	                });
-	            };
-	            var this_1 = this;
-	            for (var _i = 0, _a = this._tiles; _i < _a.length; _i++) {
-	                var tile = _a[_i];
-	                _loop_1(tile);
-	            }
-	        }
-	    };
-	    SkyTileDashboardColumnComponent.prototype.ngAfterViewInit = function () {
-	        this.viewInitialized = true;
-	        this.updateTiles();
-	    };
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Array), 
-	        __metadata('design:paramtypes', [Array])
-	    ], SkyTileDashboardColumnComponent.prototype, "tiles", null);
-	    __decorate([
-	        core_1.ViewChild('content'), 
-	        __metadata('design:type', tile_dashboard_column_content_component_1.SkyTileDashboardColumnContentComponent)
-	    ], SkyTileDashboardColumnComponent.prototype, "content", void 0);
-	    SkyTileDashboardColumnComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-tile-dashboard-column',
-	            styles: [__webpack_require__(645)],
-	            template: __webpack_require__(646),
-	            directives: [ng2_dragula_1.Dragula, tile_dashboard_column_content_component_1.SkyTileDashboardColumnContentComponent]
-	        }), 
-	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, core_1.ComponentResolver])
-	    ], SkyTileDashboardColumnComponent);
-	    return SkyTileDashboardColumnComponent;
-	}());
-	exports.SkyTileDashboardColumnComponent = SkyTileDashboardColumnComponent;
-	
-
-/***/ },
-/* 632 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	function __export(m) {
-	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-	}
-	var dragula_directive_1 = __webpack_require__(633);
-	var dragula_provider_1 = __webpack_require__(634);
-	__export(__webpack_require__(633));
-	__export(__webpack_require__(634));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = {
-	    directives: [dragula_directive_1.Dragula],
-	    providers: [dragula_provider_1.DragulaService]
-	};
-	
-
-/***/ },
-/* 633 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-	    return c > 3 && r && Object.defineProperty(target, key, r), r;
-	};
-	var __metadata = (this && this.__metadata) || function (k, v) {
-	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-	};
-	var core_1 = __webpack_require__(4);
-	var dragula_provider_1 = __webpack_require__(634);
-	var dragula = __webpack_require__(635);
-	var Dragula = (function () {
-	    function Dragula(el, dragulaService) {
-	        this.el = el;
-	        this.dragulaService = dragulaService;
-	        this.container = el.nativeElement;
-	    }
-	    Dragula.prototype.ngOnInit = function () {
-	        var _this = this;
-	        // console.log(this.bag);
-	        var bag = this.dragulaService.find(this.bag);
-	        var checkModel = function () {
-	            if (_this.dragulaModel) {
-	                if (_this.drake.models) {
-	                    _this.drake.models.push(_this.dragulaModel);
-	                }
-	                else {
-	                    _this.drake.models = [_this.dragulaModel];
-	                }
-	            }
-	        };
-	        if (bag) {
-	            this.drake = bag.drake;
-	            checkModel();
-	            this.drake.containers.push(this.container);
-	        }
-	        else {
-	            this.drake = dragula({
-	                containers: [this.container]
-	            });
-	            checkModel();
-	            this.dragulaService.add(this.bag, this.drake);
-	        }
-	    };
-	    Dragula.prototype.ngOnChanges = function (changes) {
-	        // console.log('dragula.directive: ngOnChanges');
-	        // console.log(changes);
-	        if (changes && changes['dragulaModel']) {
-	            if (this.drake) {
-	                if (this.drake.models) {
-	                    var modelIndex = this.drake.models.indexOf(changes['dragulaModel'].previousValue);
-	                    this.drake.models.splice(modelIndex, 1, changes['dragulaModel'].currentValue);
-	                }
-	                else {
-	                    this.drake.models = [changes['dragulaModel'].currentValue];
-	                }
-	            }
-	        }
-	    };
-	    __decorate([
-	        core_1.Input('dragula'), 
-	        __metadata('design:type', String)
-	    ], Dragula.prototype, "bag", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Object)
-	    ], Dragula.prototype, "dragulaModel", void 0);
-	    Dragula = __decorate([
-	        core_1.Directive({
-	            selector: '[dragula]'
-	        }), 
-	        __metadata('design:paramtypes', [core_1.ElementRef, dragula_provider_1.DragulaService])
-	    ], Dragula);
-	    return Dragula;
-	}());
-	exports.Dragula = Dragula;
-	
-
-/***/ },
-/* 634 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-	    return c > 3 && r && Object.defineProperty(target, key, r), r;
-	};
-	var __metadata = (this && this.__metadata) || function (k, v) {
-	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-	};
-	var dragula = __webpack_require__(635);
-	var core_1 = __webpack_require__(4);
-	var DragulaService = (function () {
-	    function DragulaService() {
-	        this.cancel = new core_1.EventEmitter();
-	        this.cloned = new core_1.EventEmitter();
-	        this.drag = new core_1.EventEmitter();
-	        this.dragend = new core_1.EventEmitter();
-	        this.drop = new core_1.EventEmitter();
-	        this.out = new core_1.EventEmitter();
-	        this.over = new core_1.EventEmitter();
-	        this.remove = new core_1.EventEmitter();
-	        this.shadow = new core_1.EventEmitter();
-	        this.dropModel = new core_1.EventEmitter();
-	        this.removeModel = new core_1.EventEmitter();
-	        this.events = [
-	            'cancel',
-	            'cloned',
-	            'drag',
-	            'dragend',
-	            'drop',
-	            'out',
-	            'over',
-	            'remove',
-	            'shadow',
-	            'dropModel',
-	            'removeModel'
-	        ];
-	        this.bags = [];
-	    }
-	    DragulaService.prototype.add = function (name, drake) {
-	        var bag = this.find(name);
-	        if (bag) {
-	            throw new Error('Bag named: "' + name + '" already exists.');
-	        }
-	        bag = {
-	            name: name,
-	            drake: drake
-	        };
-	        this.bags.push(bag);
-	        if (drake.models) {
-	            this.handleModels(name, drake);
-	        }
-	        if (!bag.initEvents) {
-	            this.setupEvents(bag);
-	        }
-	        return bag;
-	    };
-	    DragulaService.prototype.find = function (name) {
-	        for (var i = 0; i < this.bags.length; i++) {
-	            if (this.bags[i].name === name) {
-	                return this.bags[i];
-	            }
-	        }
-	    };
-	    DragulaService.prototype.destroy = function (name) {
-	        var bag = this.find(name);
-	        var i = this.bags.indexOf(bag);
-	        this.bags.splice(i, 1);
-	        bag.drake.destroy();
-	    };
-	    DragulaService.prototype.setOptions = function (name, options) {
-	        var bag = this.add(name, dragula(options));
-	        this.handleModels(name, bag.drake);
-	    };
-	    DragulaService.prototype.handleModels = function (name, drake) {
-	        var _this = this;
-	        var dragElm;
-	        var dragIndex;
-	        var dropIndex;
-	        var sourceModel;
-	        drake.on('remove', function (el, source) {
-	            if (!drake.models) {
-	                return;
-	            }
-	            sourceModel = drake.models[drake.containers.indexOf(source)];
-	            sourceModel.splice(dragIndex, 1);
-	            // console.log('REMOVE');
-	            // console.log(sourceModel);
-	            _this.removeModel.emit([name, el, source]);
-	        });
-	        drake.on('drag', function (el, source) {
-	            dragElm = el;
-	            dragIndex = _this.domIndexOf(el, source);
-	        });
-	        drake.on('drop', function (dropElm, target, source) {
-	            if (!drake.models || !target) {
-	                return;
-	            }
-	            dropIndex = _this.domIndexOf(dropElm, target);
-	            sourceModel = drake.models[drake.containers.indexOf(source)];
-	            // console.log('DROP');
-	            // console.log(sourceModel);
-	            if (target === source) {
-	                sourceModel.splice(dropIndex, 0, sourceModel.splice(dragIndex, 1)[0]);
-	            }
-	            else {
-	                var notCopy = dragElm === dropElm;
-	                var targetModel = drake.models[drake.containers.indexOf(target)];
-	                var dropElmModel = notCopy ? sourceModel[dragIndex] : JSON.parse(JSON.stringify(sourceModel[dragIndex]));
-	                if (notCopy) {
-	                    sourceModel.splice(dragIndex, 1);
-	                }
-	                targetModel.splice(dropIndex, 0, dropElmModel);
-	                target.removeChild(dropElm); // element must be removed for ngFor to apply correctly
-	            }
-	            _this.dropModel.emit([name, dropElm, target, source]);
-	        });
-	    };
-	    DragulaService.prototype.setupEvents = function (bag) {
-	        bag.initEvents = true;
-	        var that = this;
-	        var emitter = function (type) {
-	            function replicate() {
-	                var args = Array.prototype.slice.call(arguments);
-	                that[type].emit([bag.name].concat(args));
-	            }
-	            bag.drake.on(type, replicate);
-	        };
-	        this.events.forEach(emitter);
-	    };
-	    DragulaService.prototype.domIndexOf = function (child, parent) {
-	        return Array.prototype.indexOf.call(parent.children, child);
-	    };
-	    DragulaService = __decorate([
-	        core_1.Injectable(), 
-	        __metadata('design:paramtypes', [])
-	    ], DragulaService);
-	    return DragulaService;
-	}());
-	exports.DragulaService = DragulaService;
-	
-
-/***/ },
-/* 635 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
-
-	var emitter = __webpack_require__(636);
-	var crossvent = __webpack_require__(640);
-	var classes = __webpack_require__(643);
-	var doc = document;
-	var documentElement = doc.documentElement;
-
-	function dragula (initialContainers, options) {
-	  var len = arguments.length;
-	  if (len === 1 && Array.isArray(initialContainers) === false) {
-	    options = initialContainers;
-	    initialContainers = [];
-	  }
-	  var _mirror; // mirror image
-	  var _source; // source container
-	  var _item; // item being dragged
-	  var _offsetX; // reference x
-	  var _offsetY; // reference y
-	  var _moveX; // reference move x
-	  var _moveY; // reference move y
-	  var _initialSibling; // reference sibling when grabbed
-	  var _currentSibling; // reference sibling now
-	  var _copy; // item used for copying
-	  var _renderTimer; // timer for setTimeout renderMirrorImage
-	  var _lastDropTarget = null; // last container item was over
-	  var _grabbed; // holds mousedown context until first mousemove
-
-	  var o = options || {};
-	  if (o.moves === void 0) { o.moves = always; }
-	  if (o.accepts === void 0) { o.accepts = always; }
-	  if (o.invalid === void 0) { o.invalid = invalidTarget; }
-	  if (o.containers === void 0) { o.containers = initialContainers || []; }
-	  if (o.isContainer === void 0) { o.isContainer = never; }
-	  if (o.copy === void 0) { o.copy = false; }
-	  if (o.copySortSource === void 0) { o.copySortSource = false; }
-	  if (o.revertOnSpill === void 0) { o.revertOnSpill = false; }
-	  if (o.removeOnSpill === void 0) { o.removeOnSpill = false; }
-	  if (o.direction === void 0) { o.direction = 'vertical'; }
-	  if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
-	  if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
-
-	  var drake = emitter({
-	    containers: o.containers,
-	    start: manualStart,
-	    end: end,
-	    cancel: cancel,
-	    remove: remove,
-	    destroy: destroy,
-	    dragging: false
-	  });
-
-	  if (o.removeOnSpill === true) {
-	    drake.on('over', spillOver).on('out', spillOut);
-	  }
-
-	  events();
-
-	  return drake;
-
-	  function isContainer (el) {
-	    return drake.containers.indexOf(el) !== -1 || o.isContainer(el);
-	  }
-
-	  function events (remove) {
-	    var op = remove ? 'remove' : 'add';
-	    touchy(documentElement, op, 'mousedown', grab);
-	    touchy(documentElement, op, 'mouseup', release);
-	  }
-
-	  function eventualMovements (remove) {
-	    var op = remove ? 'remove' : 'add';
-	    touchy(documentElement, op, 'mousemove', startBecauseMouseMoved);
-	  }
-
-	  function movements (remove) {
-	    var op = remove ? 'remove' : 'add';
-	    crossvent[op](documentElement, 'selectstart', preventGrabbed); // IE8
-	    crossvent[op](documentElement, 'click', preventGrabbed);
-	  }
-
-	  function destroy () {
-	    events(true);
-	    release({});
-	  }
-
-	  function preventGrabbed (e) {
-	    if (_grabbed) {
-	      e.preventDefault();
-	    }
-	  }
-
-	  function grab (e) {
-	    _moveX = e.clientX;
-	    _moveY = e.clientY;
-
-	    var ignore = whichMouseButton(e) !== 1 || e.metaKey || e.ctrlKey;
-	    if (ignore) {
-	      return; // we only care about honest-to-god left clicks and touch events
-	    }
-	    var item = e.target;
-	    var context = canStart(item);
-	    if (!context) {
-	      return;
-	    }
-	    _grabbed = context;
-	    eventualMovements();
-	    if (e.type === 'mousedown') {
-	      if (isInput(item)) { // see also: https://github.com/bevacqua/dragula/issues/208
-	        item.focus(); // fixes https://github.com/bevacqua/dragula/issues/176
-	      } else {
-	        e.preventDefault(); // fixes https://github.com/bevacqua/dragula/issues/155
-	      }
-	    }
-	  }
-
-	  function startBecauseMouseMoved (e) {
-	    if (!_grabbed) {
-	      return;
-	    }
-	    if (whichMouseButton(e) === 0) {
-	      release({});
-	      return; // when text is selected on an input and then dragged, mouseup doesn't fire. this is our only hope
-	    }
-	    // truthy check fixes #239, equality fixes #207
-	    if (e.clientX !== void 0 && e.clientX === _moveX && e.clientY !== void 0 && e.clientY === _moveY) {
-	      return;
-	    }
-	    if (o.ignoreInputTextSelection) {
-	      var clientX = getCoord('clientX', e);
-	      var clientY = getCoord('clientY', e);
-	      var elementBehindCursor = doc.elementFromPoint(clientX, clientY);
-	      if (isInput(elementBehindCursor)) {
-	        return;
-	      }
-	    }
-
-	    var grabbed = _grabbed; // call to end() unsets _grabbed
-	    eventualMovements(true);
-	    movements();
-	    end();
-	    start(grabbed);
-
-	    var offset = getOffset(_item);
-	    _offsetX = getCoord('pageX', e) - offset.left;
-	    _offsetY = getCoord('pageY', e) - offset.top;
-
-	    classes.add(_copy || _item, 'gu-transit');
-	    renderMirrorImage();
-	    drag(e);
-	  }
-
-	  function canStart (item) {
-	    if (drake.dragging && _mirror) {
-	      return;
-	    }
-	    if (isContainer(item)) {
-	      return; // don't drag container itself
-	    }
-	    var handle = item;
-	    while (getParent(item) && isContainer(getParent(item)) === false) {
-	      if (o.invalid(item, handle)) {
-	        return;
-	      }
-	      item = getParent(item); // drag target should be a top element
-	      if (!item) {
-	        return;
-	      }
-	    }
-	    var source = getParent(item);
-	    if (!source) {
-	      return;
-	    }
-	    if (o.invalid(item, handle)) {
-	      return;
-	    }
-
-	    var movable = o.moves(item, source, handle, nextEl(item));
-	    if (!movable) {
-	      return;
-	    }
-
-	    return {
-	      item: item,
-	      source: source
-	    };
-	  }
-
-	  function manualStart (item) {
-	    var context = canStart(item);
-	    if (context) {
-	      start(context);
-	    }
-	  }
-
-	  function start (context) {
-	    if (isCopy(context.item, context.source)) {
-	      _copy = context.item.cloneNode(true);
-	      drake.emit('cloned', _copy, context.item, 'copy');
-	    }
-
-	    _source = context.source;
-	    _item = context.item;
-	    _initialSibling = _currentSibling = nextEl(context.item);
-
-	    drake.dragging = true;
-	    drake.emit('drag', _item, _source);
-	  }
-
-	  function invalidTarget () {
-	    return false;
-	  }
-
-	  function end () {
-	    if (!drake.dragging) {
-	      return;
-	    }
-	    var item = _copy || _item;
-	    drop(item, getParent(item));
-	  }
-
-	  function ungrab () {
-	    _grabbed = false;
-	    eventualMovements(true);
-	    movements(true);
-	  }
-
-	  function release (e) {
-	    ungrab();
-
-	    if (!drake.dragging) {
-	      return;
-	    }
-	    var item = _copy || _item;
-	    var clientX = getCoord('clientX', e);
-	    var clientY = getCoord('clientY', e);
-	    var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
-	    var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
-	    if (dropTarget && ((_copy && o.copySortSource) || (!_copy || dropTarget !== _source))) {
-	      drop(item, dropTarget);
-	    } else if (o.removeOnSpill) {
-	      remove();
-	    } else {
-	      cancel();
-	    }
-	  }
-
-	  function drop (item, target) {
-	    var parent = getParent(item);
-	    if (_copy && o.copySortSource && target === _source) {
-	      parent.removeChild(_item);
-	    }
-	    if (isInitialPlacement(target)) {
-	      drake.emit('cancel', item, _source, _source);
-	    } else {
-	      drake.emit('drop', item, target, _source, _currentSibling);
-	    }
-	    cleanup();
-	  }
-
-	  function remove () {
-	    if (!drake.dragging) {
-	      return;
-	    }
-	    var item = _copy || _item;
-	    var parent = getParent(item);
-	    if (parent) {
-	      parent.removeChild(item);
-	    }
-	    drake.emit(_copy ? 'cancel' : 'remove', item, parent, _source);
-	    cleanup();
-	  }
-
-	  function cancel (revert) {
-	    if (!drake.dragging) {
-	      return;
-	    }
-	    var reverts = arguments.length > 0 ? revert : o.revertOnSpill;
-	    var item = _copy || _item;
-	    var parent = getParent(item);
-	    var initial = isInitialPlacement(parent);
-	    if (initial === false && reverts) {
-	      if (_copy) {
-	        parent.removeChild(_copy);
-	      } else {
-	        _source.insertBefore(item, _initialSibling);
-	      }
-	    }
-	    if (initial || reverts) {
-	      drake.emit('cancel', item, _source, _source);
-	    } else {
-	      drake.emit('drop', item, parent, _source, _currentSibling);
-	    }
-	    cleanup();
-	  }
-
-	  function cleanup () {
-	    var item = _copy || _item;
-	    ungrab();
-	    removeMirrorImage();
-	    if (item) {
-	      classes.rm(item, 'gu-transit');
-	    }
-	    if (_renderTimer) {
-	      clearTimeout(_renderTimer);
-	    }
-	    drake.dragging = false;
-	    if (_lastDropTarget) {
-	      drake.emit('out', item, _lastDropTarget, _source);
-	    }
-	    drake.emit('dragend', item);
-	    _source = _item = _copy = _initialSibling = _currentSibling = _renderTimer = _lastDropTarget = null;
-	  }
-
-	  function isInitialPlacement (target, s) {
-	    var sibling;
-	    if (s !== void 0) {
-	      sibling = s;
-	    } else if (_mirror) {
-	      sibling = _currentSibling;
-	    } else {
-	      sibling = nextEl(_copy || _item);
-	    }
-	    return target === _source && sibling === _initialSibling;
-	  }
-
-	  function findDropTarget (elementBehindCursor, clientX, clientY) {
-	    var target = elementBehindCursor;
-	    while (target && !accepted()) {
-	      target = getParent(target);
-	    }
-	    return target;
-
-	    function accepted () {
-	      var droppable = isContainer(target);
-	      if (droppable === false) {
-	        return false;
-	      }
-
-	      var immediate = getImmediateChild(target, elementBehindCursor);
-	      var reference = getReference(target, immediate, clientX, clientY);
-	      var initial = isInitialPlacement(target, reference);
-	      if (initial) {
-	        return true; // should always be able to drop it right back where it was
-	      }
-	      return o.accepts(_item, target, _source, reference);
-	    }
-	  }
-
-	  function drag (e) {
-	    if (!_mirror) {
-	      return;
-	    }
-	    e.preventDefault();
-
-	    var clientX = getCoord('clientX', e);
-	    var clientY = getCoord('clientY', e);
-	    var x = clientX - _offsetX;
-	    var y = clientY - _offsetY;
-
-	    _mirror.style.left = x + 'px';
-	    _mirror.style.top = y + 'px';
-
-	    var item = _copy || _item;
-	    var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
-	    var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
-	    var changed = dropTarget !== null && dropTarget !== _lastDropTarget;
-	    if (changed || dropTarget === null) {
-	      out();
-	      _lastDropTarget = dropTarget;
-	      over();
-	    }
-	    var parent = getParent(item);
-	    if (dropTarget === _source && _copy && !o.copySortSource) {
-	      if (parent) {
-	        parent.removeChild(item);
-	      }
-	      return;
-	    }
-	    var reference;
-	    var immediate = getImmediateChild(dropTarget, elementBehindCursor);
-	    if (immediate !== null) {
-	      reference = getReference(dropTarget, immediate, clientX, clientY);
-	    } else if (o.revertOnSpill === true && !_copy) {
-	      reference = _initialSibling;
-	      dropTarget = _source;
-	    } else {
-	      if (_copy && parent) {
-	        parent.removeChild(item);
-	      }
-	      return;
-	    }
-	    if (
-	      (reference === null && changed) ||
-	      reference !== item &&
-	      reference !== nextEl(item)
-	    ) {
-	      _currentSibling = reference;
-	      dropTarget.insertBefore(item, reference);
-	      drake.emit('shadow', item, dropTarget, _source);
-	    }
-	    function moved (type) { drake.emit(type, item, _lastDropTarget, _source); }
-	    function over () { if (changed) { moved('over'); } }
-	    function out () { if (_lastDropTarget) { moved('out'); } }
-	  }
-
-	  function spillOver (el) {
-	    classes.rm(el, 'gu-hide');
-	  }
-
-	  function spillOut (el) {
-	    if (drake.dragging) { classes.add(el, 'gu-hide'); }
-	  }
-
-	  function renderMirrorImage () {
-	    if (_mirror) {
-	      return;
-	    }
-	    var rect = _item.getBoundingClientRect();
-	    _mirror = _item.cloneNode(true);
-	    _mirror.style.width = getRectWidth(rect) + 'px';
-	    _mirror.style.height = getRectHeight(rect) + 'px';
-	    classes.rm(_mirror, 'gu-transit');
-	    classes.add(_mirror, 'gu-mirror');
-	    o.mirrorContainer.appendChild(_mirror);
-	    touchy(documentElement, 'add', 'mousemove', drag);
-	    classes.add(o.mirrorContainer, 'gu-unselectable');
-	    drake.emit('cloned', _mirror, _item, 'mirror');
-	  }
-
-	  function removeMirrorImage () {
-	    if (_mirror) {
-	      classes.rm(o.mirrorContainer, 'gu-unselectable');
-	      touchy(documentElement, 'remove', 'mousemove', drag);
-	      getParent(_mirror).removeChild(_mirror);
-	      _mirror = null;
-	    }
-	  }
-
-	  function getImmediateChild (dropTarget, target) {
-	    var immediate = target;
-	    while (immediate !== dropTarget && getParent(immediate) !== dropTarget) {
-	      immediate = getParent(immediate);
-	    }
-	    if (immediate === documentElement) {
-	      return null;
-	    }
-	    return immediate;
-	  }
-
-	  function getReference (dropTarget, target, x, y) {
-	    var horizontal = o.direction === 'horizontal';
-	    var reference = target !== dropTarget ? inside() : outside();
-	    return reference;
-
-	    function outside () { // slower, but able to figure out any position
-	      var len = dropTarget.children.length;
-	      var i;
-	      var el;
-	      var rect;
-	      for (i = 0; i < len; i++) {
-	        el = dropTarget.children[i];
-	        rect = el.getBoundingClientRect();
-	        if (horizontal && (rect.left + rect.width / 2) > x) { return el; }
-	        if (!horizontal && (rect.top + rect.height / 2) > y) { return el; }
-	      }
-	      return null;
-	    }
-
-	    function inside () { // faster, but only available if dropped inside a child element
-	      var rect = target.getBoundingClientRect();
-	      if (horizontal) {
-	        return resolve(x > rect.left + getRectWidth(rect) / 2);
-	      }
-	      return resolve(y > rect.top + getRectHeight(rect) / 2);
-	    }
-
-	    function resolve (after) {
-	      return after ? nextEl(target) : target;
-	    }
-	  }
-
-	  function isCopy (item, container) {
-	    return typeof o.copy === 'boolean' ? o.copy : o.copy(item, container);
-	  }
-	}
-
-	function touchy (el, op, type, fn) {
-	  var touch = {
-	    mouseup: 'touchend',
-	    mousedown: 'touchstart',
-	    mousemove: 'touchmove'
-	  };
-	  var pointers = {
-	    mouseup: 'pointerup',
-	    mousedown: 'pointerdown',
-	    mousemove: 'pointermove'
-	  };
-	  var microsoft = {
-	    mouseup: 'MSPointerUp',
-	    mousedown: 'MSPointerDown',
-	    mousemove: 'MSPointerMove'
-	  };
-	  if (global.navigator.pointerEnabled) {
-	    crossvent[op](el, pointers[type], fn);
-	  } else if (global.navigator.msPointerEnabled) {
-	    crossvent[op](el, microsoft[type], fn);
-	  } else {
-	    crossvent[op](el, touch[type], fn);
-	    crossvent[op](el, type, fn);
-	  }
-	}
-
-	function whichMouseButton (e) {
-	  if (e.touches !== void 0) { return e.touches.length; }
-	  if (e.which !== void 0 && e.which !== 0) { return e.which; } // see https://github.com/bevacqua/dragula/issues/261
-	  if (e.buttons !== void 0) { return e.buttons; }
-	  var button = e.button;
-	  if (button !== void 0) { // see https://github.com/jquery/jquery/blob/99e8ff1baa7ae341e94bb89c3e84570c7c3ad9ea/src/event.js#L573-L575
-	    return button & 1 ? 1 : button & 2 ? 3 : (button & 4 ? 2 : 0);
-	  }
-	}
-
-	function getOffset (el) {
-	  var rect = el.getBoundingClientRect();
-	  return {
-	    left: rect.left + getScroll('scrollLeft', 'pageXOffset'),
-	    top: rect.top + getScroll('scrollTop', 'pageYOffset')
-	  };
-	}
-
-	function getScroll (scrollProp, offsetProp) {
-	  if (typeof global[offsetProp] !== 'undefined') {
-	    return global[offsetProp];
-	  }
-	  if (documentElement.clientHeight) {
-	    return documentElement[scrollProp];
-	  }
-	  return doc.body[scrollProp];
-	}
-
-	function getElementBehindPoint (point, x, y) {
-	  var p = point || {};
-	  var state = p.className;
-	  var el;
-	  p.className += ' gu-hide';
-	  el = doc.elementFromPoint(x, y);
-	  p.className = state;
-	  return el;
-	}
-
-	function never () { return false; }
-	function always () { return true; }
-	function getRectWidth (rect) { return rect.width || (rect.right - rect.left); }
-	function getRectHeight (rect) { return rect.height || (rect.bottom - rect.top); }
-	function getParent (el) { return el.parentNode === doc ? null : el.parentNode; }
-	function isInput (el) { return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || isEditable(el); }
-	function isEditable (el) {
-	  if (!el) { return false; } // no parents were editable
-	  if (el.contentEditable === 'false') { return false; } // stop the lookup
-	  if (el.contentEditable === 'true') { return true; } // found a contentEditable element in the chain
-	  return isEditable(getParent(el)); // contentEditable is set to 'inherit'
-	}
-
-	function nextEl (el) {
-	  return el.nextElementSibling || manually();
-	  function manually () {
-	    var sibling = el;
-	    do {
-	      sibling = sibling.nextSibling;
-	    } while (sibling && sibling.nodeType !== 1);
-	    return sibling;
-	  }
-	}
-
-	function getEventHost (e) {
-	  // on touchend event, we have to use `e.changedTouches`
-	  // see http://stackoverflow.com/questions/7192563/touchend-event-properties
-	  // see https://github.com/bevacqua/dragula/issues/34
-	  if (e.targetTouches && e.targetTouches.length) {
-	    return e.targetTouches[0];
-	  }
-	  if (e.changedTouches && e.changedTouches.length) {
-	    return e.changedTouches[0];
-	  }
-	  return e;
-	}
-
-	function getCoord (coord, e) {
-	  var host = getEventHost(e);
-	  var missMap = {
-	    pageX: 'clientX', // IE8
-	    pageY: 'clientY' // IE8
-	  };
-	  if (coord in missMap && !(coord in host) && missMap[coord] in host) {
-	    coord = missMap[coord];
-	  }
-	  return host[coord];
-	}
-
-	module.exports = dragula;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 636 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var atoa = __webpack_require__(637);
-	var debounce = __webpack_require__(638);
-
-	module.exports = function emitter (thing, options) {
-	  var opts = options || {};
-	  var evt = {};
-	  if (thing === undefined) { thing = {}; }
-	  thing.on = function (type, fn) {
-	    if (!evt[type]) {
-	      evt[type] = [fn];
-	    } else {
-	      evt[type].push(fn);
-	    }
-	    return thing;
-	  };
-	  thing.once = function (type, fn) {
-	    fn._once = true; // thing.off(fn) still works!
-	    thing.on(type, fn);
-	    return thing;
-	  };
-	  thing.off = function (type, fn) {
-	    var c = arguments.length;
-	    if (c === 1) {
-	      delete evt[type];
-	    } else if (c === 0) {
-	      evt = {};
-	    } else {
-	      var et = evt[type];
-	      if (!et) { return thing; }
-	      et.splice(et.indexOf(fn), 1);
-	    }
-	    return thing;
-	  };
-	  thing.emit = function () {
-	    var args = atoa(arguments);
-	    return thing.emitterSnapshot(args.shift()).apply(this, args);
-	  };
-	  thing.emitterSnapshot = function (type) {
-	    var et = (evt[type] || []).slice(0);
-	    return function () {
-	      var args = atoa(arguments);
-	      var ctx = this || thing;
-	      if (type === 'error' && opts.throws !== false && !et.length) { throw args.length === 1 ? args[0] : args; }
-	      et.forEach(function emitter (listen) {
-	        if (opts.async) { debounce(listen, args, ctx); } else { listen.apply(ctx, args); }
-	        if (listen._once) { thing.off(type, listen); }
-	      });
-	      return thing;
-	    };
-	  };
-	  return thing;
-	};
-
-
-/***/ },
-/* 637 */
-/***/ function(module, exports) {
-
-	module.exports = function atoa (a, n) { return Array.prototype.slice.call(a, n); }
-
-
-/***/ },
-/* 638 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var ticky = __webpack_require__(639);
-
-	module.exports = function debounce (fn, args, ctx) {
-	  if (!fn) { return; }
-	  ticky(function run () {
-	    fn.apply(ctx || null, args || []);
-	  });
-	};
-
-
-/***/ },
-/* 639 */
-/***/ function(module, exports) {
-
-	var si = typeof setImmediate === 'function', tick;
-	if (si) {
-	  tick = function (fn) { setImmediate(fn); };
-	} else {
-	  tick = function (fn) { setTimeout(fn, 0); };
-	}
-
-	module.exports = tick;
-
-/***/ },
-/* 640 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
-
-	var customEvent = __webpack_require__(641);
-	var eventmap = __webpack_require__(642);
-	var doc = global.document;
-	var addEvent = addEventEasy;
-	var removeEvent = removeEventEasy;
-	var hardCache = [];
-
-	if (!global.addEventListener) {
-	  addEvent = addEventHard;
-	  removeEvent = removeEventHard;
-	}
-
-	module.exports = {
-	  add: addEvent,
-	  remove: removeEvent,
-	  fabricate: fabricateEvent
-	};
-
-	function addEventEasy (el, type, fn, capturing) {
-	  return el.addEventListener(type, fn, capturing);
-	}
-
-	function addEventHard (el, type, fn) {
-	  return el.attachEvent('on' + type, wrap(el, type, fn));
-	}
-
-	function removeEventEasy (el, type, fn, capturing) {
-	  return el.removeEventListener(type, fn, capturing);
-	}
-
-	function removeEventHard (el, type, fn) {
-	  var listener = unwrap(el, type, fn);
-	  if (listener) {
-	    return el.detachEvent('on' + type, listener);
-	  }
-	}
-
-	function fabricateEvent (el, type, model) {
-	  var e = eventmap.indexOf(type) === -1 ? makeCustomEvent() : makeClassicEvent();
-	  if (el.dispatchEvent) {
-	    el.dispatchEvent(e);
-	  } else {
-	    el.fireEvent('on' + type, e);
-	  }
-	  function makeClassicEvent () {
-	    var e;
-	    if (doc.createEvent) {
-	      e = doc.createEvent('Event');
-	      e.initEvent(type, true, true);
-	    } else if (doc.createEventObject) {
-	      e = doc.createEventObject();
-	    }
-	    return e;
-	  }
-	  function makeCustomEvent () {
-	    return new customEvent(type, { detail: model });
-	  }
-	}
-
-	function wrapperFactory (el, type, fn) {
-	  return function wrapper (originalEvent) {
-	    var e = originalEvent || global.event;
-	    e.target = e.target || e.srcElement;
-	    e.preventDefault = e.preventDefault || function preventDefault () { e.returnValue = false; };
-	    e.stopPropagation = e.stopPropagation || function stopPropagation () { e.cancelBubble = true; };
-	    e.which = e.which || e.keyCode;
-	    fn.call(el, e);
-	  };
-	}
-
-	function wrap (el, type, fn) {
-	  var wrapper = unwrap(el, type, fn) || wrapperFactory(el, type, fn);
-	  hardCache.push({
-	    wrapper: wrapper,
-	    element: el,
-	    type: type,
-	    fn: fn
-	  });
-	  return wrapper;
-	}
-
-	function unwrap (el, type, fn) {
-	  var i = find(el, type, fn);
-	  if (i) {
-	    var wrapper = hardCache[i].wrapper;
-	    hardCache.splice(i, 1); // free up a tad of memory
-	    return wrapper;
-	  }
-	}
-
-	function find (el, type, fn) {
-	  var i, item;
-	  for (i = 0; i < hardCache.length; i++) {
-	    item = hardCache[i];
-	    if (item.element === el && item.type === type && item.fn === fn) {
-	      return i;
-	    }
-	  }
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 641 */
-/***/ function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {
-	var NativeCustomEvent = global.CustomEvent;
-
-	function useNative () {
-	  try {
-	    var p = new NativeCustomEvent('cat', { detail: { foo: 'bar' } });
-	    return  'cat' === p.type && 'bar' === p.detail.foo;
-	  } catch (e) {
-	  }
-	  return false;
-	}
-
-	/**
-	 * Cross-browser `CustomEvent` constructor.
-	 *
-	 * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent.CustomEvent
-	 *
-	 * @public
-	 */
-
-	module.exports = useNative() ? NativeCustomEvent :
-
-	// IE >= 9
-	'function' === typeof document.createEvent ? function CustomEvent (type, params) {
-	  var e = document.createEvent('CustomEvent');
-	  if (params) {
-	    e.initCustomEvent(type, params.bubbles, params.cancelable, params.detail);
-	  } else {
-	    e.initCustomEvent(type, false, false, void 0);
-	  }
-	  return e;
-	} :
-
-	// IE <= 8
-	function CustomEvent (type, params) {
-	  var e = document.createEventObject();
-	  e.type = type;
-	  if (params) {
-	    e.bubbles = Boolean(params.bubbles);
-	    e.cancelable = Boolean(params.cancelable);
-	    e.detail = params.detail;
-	  } else {
-	    e.bubbles = false;
-	    e.cancelable = false;
-	    e.detail = void 0;
-	  }
-	  return e;
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 642 */
-/***/ function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
-
-	var eventmap = [];
-	var eventname = '';
-	var ron = /^on/;
-
-	for (eventname in global) {
-	  if (ron.test(eventname)) {
-	    eventmap.push(eventname.slice(2));
-	  }
-	}
-
-	module.exports = eventmap;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 643 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var cache = {};
-	var start = '(?:^|\\s)';
-	var end = '(?:\\s|$)';
-
-	function lookupClass (className) {
-	  var cached = cache[className];
-	  if (cached) {
-	    cached.lastIndex = 0;
-	  } else {
-	    cache[className] = cached = new RegExp(start + className + end, 'g');
-	  }
-	  return cached;
-	}
-
-	function addClass (el, className) {
-	  var current = el.className;
-	  if (!current.length) {
-	    el.className = className;
-	  } else if (!lookupClass(className).test(current)) {
-	    el.className += ' ' + className;
-	  }
-	}
-
-	function rmClass (el, className) {
-	  el.className = el.className.replace(lookupClass(className), ' ').trim();
-	}
-
-	module.exports = {
-	  add: addClass,
-	  rm: rmClass
-	};
-
-
-/***/ },
-/* 644 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var SkyTileDashboardColumnContentComponent = (function () {
-	    function SkyTileDashboardColumnContentComponent(viewContainer) {
-	        this.viewContainer = viewContainer;
-	    }
-	    SkyTileDashboardColumnContentComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-tile-dashboard-column-content',
-	            template: "<div></div>"
-	        }), 
-	        __metadata('design:paramtypes', [core_1.ViewContainerRef])
-	    ], SkyTileDashboardColumnContentComponent);
-	    return SkyTileDashboardColumnContentComponent;
-	}());
-	exports.SkyTileDashboardColumnContentComponent = SkyTileDashboardColumnContentComponent;
-	
-
-/***/ },
-/* 645 */
-/***/ function(module, exports) {
-
-	module.exports = ":host {\n  flex: 1;\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 767px) {\n  :host {\n    padding: 0; }\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n\n.sky-tile-dashboard-column {\n  min-height: 100px;\n  width: 100%; }\n"
-
-/***/ },
-/* 646 */
-/***/ function(module, exports) {
-
-	module.exports = "<div class=\"sky-tile-dashboard-column\" [dragula]=\"bagId\">\n  <sky-tile-dashboard-column-content #content></sky-tile-dashboard-column-content>\n</div>\n"
-
-/***/ },
-/* 647 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var core_1 = __webpack_require__(4);
-	var ng2_dragula_1 = __webpack_require__(632);
-	var tile_dashboard_column_component_1 = __webpack_require__(631);
-	var tile_dashboard_service_1 = __webpack_require__(619);
-	var SkyTileDashboardComponent = (function () {
-	    function SkyTileDashboardComponent(dashboardService, dragulaService) {
-	        var _this = this;
-	        this.dashboardService = dashboardService;
-	        this.configChange = new core_1.EventEmitter();
-	        this.configSet = false;
-	        dashboardService.configChange.subscribe(function (config) {
-	            _this.configChange.emit(config);
-	        });
-	        dashboardService.setDragulaService(dragulaService);
-	    }
-	    Object.defineProperty(SkyTileDashboardComponent.prototype, "config", {
-	        set: function (config) {
-	            if (config && !this.configSet) {
-	                this.dashboardConfigForBinding = config;
-	                this.dashboardService.setConfig(config);
-	                this.configSet = true;
-	            }
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    __decorate([
-	        core_1.Output(), 
-	        __metadata('design:type', Object)
-	    ], SkyTileDashboardComponent.prototype, "configChange", void 0);
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', Object), 
-	        __metadata('design:paramtypes', [Object])
-	    ], SkyTileDashboardComponent.prototype, "config", null);
-	    SkyTileDashboardComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-tile-dashboard',
-	            styles: [__webpack_require__(648)],
-	            template: __webpack_require__(649),
-	            directives: [tile_dashboard_column_component_1.SkyTileDashboardColumnComponent],
-	            providers: [ng2_dragula_1.DragulaService, tile_dashboard_service_1.SkyTileDashboardService]
-	        }), 
-	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, ng2_dragula_1.DragulaService])
-	    ], SkyTileDashboardComponent);
-	    return SkyTileDashboardComponent;
-	}());
-	exports.SkyTileDashboardComponent = SkyTileDashboardComponent;
-	
-
-/***/ },
-/* 648 */
-/***/ function(module, exports) {
-
-	module.exports = ":host {\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 991px) {\n  :host {\n    display: block;\n    padding: 0; }\n  :host /deep/ .sky-tile-dashboard-column {\n    padding: 0; } }\n\n@media (max-width: 767px) {\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n"
-
-/***/ },
-/* 649 */
-/***/ function(module, exports) {
-
-	module.exports = "<sky-tile-dashboard-column *ngFor=\"let column of dashboardConfigForBinding?.columns\" [tiles]=\"column.tiles\"></sky-tile-dashboard-column>\n<ng-content></ng-content>\n"
 
 /***/ }
 /******/ ]);
