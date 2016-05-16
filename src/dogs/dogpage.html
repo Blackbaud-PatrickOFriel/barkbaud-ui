@@ -1,6 +1,13 @@
 <div class="bb-page-header">
     <div class="container-fluid">
         <div class="row">
+          <div class="col-md-12">
+            <sky-alert [alert-type]="'success'" [closeable]="mainController.isClosable">
+              This dog is a good dog.
+            </sky-alert>
+          </div>
+        </div>
+        <div class="row">
             <div class="col-md-3 col-lg-2">
                 <bark-photo bark-photo-base64="dogPage.dog.image.data"></bark-photo>
             </div>

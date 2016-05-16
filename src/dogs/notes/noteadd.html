@@ -11,10 +11,10 @@
           <textarea class="form-control" ng-model="noteAdd.note.description"></textarea>
         </div>
         <div class="form-group">
-          <label class="control-label">
-            <input type="checkbox" bb-check ng-model="noteAdd.note.addConstituentNote" />
-            Add as note on current owner's Raisers Edge NXT record.
-          </label>
+          <sky-checkbox [(selected)]="noteAdd.note.addConstituentNote">
+            <sky-checkbox-label>Add as note on current owner's Raisers Edge NXT record.
+            </sky-checkbox-label>
+          </sky-checkbox>
         </div>
       </div>
       <bb-modal-footer>

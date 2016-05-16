@@ -46,11 +46,8 @@
 
 	"use strict";
 	var upgrade_adapter_1 = __webpack_require__(1);
-	var blackbaud_skyux2_1 = __webpack_require__(244);
-	angular.module('barkbaud.skyux2', [])
-	    .directive('skyAlert', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyAlertComponent));
-	console.log('wuuuuuut');
-	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud'], { strictDi: true });
+	var core_ts_1 = __webpack_require__(244);
+	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', core_ts_1.default.name], { strictDi: true });
 	
 
 /***/ },
@@ -35782,13 +35779,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	function __export(m) {
-	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-	}
-	__export(__webpack_require__(245));
-	__export(__webpack_require__(252));
-	__export(__webpack_require__(259));
-	__export(__webpack_require__(260));
+	var alert_module_ts_1 = __webpack_require__(245);
+	var check_module_ts_1 = __webpack_require__(294);
+	var skyUx2Adapter = angular.module('barkbaud.skyux2', [
+	    alert_module_ts_1.default.name,
+	    check_module_ts_1.default.name
+	]);
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = skyUx2Adapter;
 	
 
 /***/ },
@@ -35796,8 +35794,13 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var alert_component_1 = __webpack_require__(246);
-	exports.SkyAlertComponent = alert_component_1.SkyAlertComponent;
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(246);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var alertModule = angular.module('barkbaud.skyux2.alert', [])
+	    .directive('skyAlert', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyAlertComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = alertModule;
 	
 
 /***/ },
@@ -35805,8 +35808,31 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	function __export(m) {
+	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+	}
+	__export(__webpack_require__(247));
+	__export(__webpack_require__(254));
+	__export(__webpack_require__(261));
+	__export(__webpack_require__(262));
+	
+
+/***/ },
+/* 247 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var alert_component_1 = __webpack_require__(248);
+	exports.SkyAlertComponent = alert_component_1.SkyAlertComponent;
+	
+
+/***/ },
+/* 248 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
 	var core_1 = __webpack_require__(4);
-	var resources_pipe_1 = __webpack_require__(247);
+	var resources_pipe_1 = __webpack_require__(249);
 	var SkyAlertComponent = (function () {
 	    function SkyAlertComponent() {
 	        this.closedChange = new core_1.EventEmitter();
@@ -35842,8 +35868,8 @@
 	        core_1.Component({
 	            selector: 'sky-alert',
 	            pipes: [resources_pipe_1.SkyResourcesPipe],
-	            styles: [__webpack_require__(250)],
-	            template: __webpack_require__(251)
+	            styles: [__webpack_require__(252)],
+	            template: __webpack_require__(253)
 	        }), 
 	        __metadata('design:paramtypes', [])
 	    ], SkyAlertComponent);
@@ -35853,12 +35879,12 @@
 	
 
 /***/ },
-/* 247 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var resources_1 = __webpack_require__(248);
+	var resources_1 = __webpack_require__(250);
 	var SkyResourcesPipe = (function () {
 	    function SkyResourcesPipe() {
 	    }
@@ -35877,7 +35903,7 @@
 	
 
 /***/ },
-/* 248 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -35892,14 +35918,14 @@
 	        }
 	        return name;
 	    };
-	    SkyResources.resources = __webpack_require__(249);
+	    SkyResources.resources = __webpack_require__(251);
 	    return SkyResources;
 	}());
 	exports.SkyResources = SkyResources;
 	
 
 /***/ },
-/* 249 */
+/* 251 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -36442,33 +36468,33 @@
 	};
 
 /***/ },
-/* 250 */
+/* 252 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-alert {\n  padding: 10px;\n  margin-bottom: 20px;\n  border: solid 1px transparent;\n  border-radius: 4px; }\n\n.sky-alert-info {\n  background-color: #d9edf7;\n  border-color: #bce8f1;\n  color: #31708f; }\n\n.sky-alert-success {\n  background-color: #dff0d8;\n  border-color: #d6e9c6;\n  color: #3c763d; }\n\n.sky-alert-warning {\n  background-color: #fcf8e3;\n  border-color: #faebcc;\n  color: #8a6d3b; }\n\n.sky-alert-danger {\n  background-color: #f2dede;\n  border-color: #ebccd1;\n  color: #ca2a2a; }\n\n.sky-alert-close {\n  cursor: pointer;\n  float: right;\n  font-size: 19.5px;\n  font-weight: bold;\n  line-height: 1;\n  margin: 0;\n  padding: 0;\n  color: #000;\n  opacity: 0.2;\n  border: none;\n  background-color: transparent;\n  display: none; }\n  .sky-alert-close:hover {\n    opacity: 0.5; }\n\n.sky-alert-closeable .sky-alert-close {\n  display: block; }\n"
 
 /***/ },
-/* 251 */
+/* 253 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"sky-alert\" [ngClass]=\"getCls()\" [hidden]=\"closed\">\n  <ng-content></ng-content>\n  <button type=\"button\" class=\"sky-alert-close\" (click)=\"close()\" [attr.aria-label]=\"'alert_close' | skyResources\" [hidden]=\"!closeable\">\n    <span aria-hidden=\"true\">&times;</span>\n  </button>\n</div>\n"
 
 /***/ },
-/* 252 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var card_component_1 = __webpack_require__(253);
+	var card_component_1 = __webpack_require__(255);
 	exports.SkyCardComponent = card_component_1.SkyCardComponent;
 	
 
 /***/ },
-/* 253 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var checkbox_component_1 = __webpack_require__(254);
+	var checkbox_component_1 = __webpack_require__(256);
 	var SkyCardComponent = (function () {
 	    function SkyCardComponent() {
 	        this.selectedChange = new core_1.EventEmitter();
@@ -36500,8 +36526,8 @@
 	    SkyCardComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-card',
-	            styles: [__webpack_require__(257)],
-	            template: __webpack_require__(258),
+	            styles: [__webpack_require__(259)],
+	            template: __webpack_require__(260),
 	            directives: [checkbox_component_1.SkyCheckboxComponent]
 	        }), 
 	        __metadata('design:paramtypes', [])
@@ -36512,7 +36538,7 @@
 	
 
 /***/ },
-/* 254 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36537,8 +36563,8 @@
 	    SkyCheckboxComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-checkbox',
-	            styles: [__webpack_require__(255)],
-	            template: __webpack_require__(256)
+	            styles: [__webpack_require__(257)],
+	            template: __webpack_require__(258)
 	        }), 
 	        __metadata('design:paramtypes', [])
 	    ], SkyCheckboxComponent);
@@ -36548,57 +36574,57 @@
 	
 
 /***/ },
-/* 255 */
+/* 257 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-checkbox-wrapper input {\n  opacity: 0;\n  position: absolute;\n  height: 22px;\n  width: 22px;\n  margin: 0;\n  padding: 0; }\n\n.sky-checkbox {\n  border: 1px solid #cccccc;\n  cursor: pointer;\n  display: inline-block;\n  height: 22px;\n  margin: 0;\n  padding: 0;\n  vertical-align: middle;\n  width: 22px;\n  text-align: center;\n  font-size: 14px; }\n\n.sky-checkbox-wrapper input:checked + .sky-checkbox {\n  background-color: #1c84c6;\n  border-color: #1c84c6; }\n  .sky-checkbox-wrapper input:checked + .sky-checkbox:before {\n    color: #fff;\n    content: \"\\f00c\";\n    font-family: FontAwesome;\n    font-size: 12px; }\n\n.sky-checkbox-wrapper input:disabled + .sky-checkbox {\n  background-color: #cccccc;\n  border: 1px solid #cccccc;\n  cursor: default; }\n\n.sky-checkbox-wrapper input:focus + .sky-checkbox {\n  outline: thin dotted;\n  outline: -webkit-focus-ring-color auto 5px;\n  outline-offset: -2px; }\n"
 
 /***/ },
-/* 256 */
+/* 258 */
 /***/ function(module, exports) {
 
 	module.exports = "<label class=\"sky-checkbox-wrapper\">\n  <input type=\"checkbox\" [ngModel]=\"selected\" (ngModelChange)=\"updateSelected($event)\" />\n  <span role=\"checkbox\" class=\"sky-checkbox\" tabindex=\"-1\"></span>\n  <ng-content select=\"sky-checkbox-label\"></ng-content>\n</label>\n"
 
 /***/ },
-/* 257 */
+/* 259 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-card {\n  background-color: #fff;\n  border: solid 1px #ccc;\n  display: inline-flex;\n  flex-direction: column;\n  height: 350px;\n  margin: 0 10px 10px 0;\n  transition: background-color 150ms;\n  vertical-align: top;\n  width: 300px;\n  box-shadow: 0px 0px 5px 0 #ddd; }\n\n.sky-card-small {\n  height: 250px;\n  width: 200px; }\n\n.sky-card-selectable .sky-card-header,\n.sky-card-selectable .sky-card-content {\n  cursor: pointer; }\n\n.sky-card-selected {\n  background-color: #eeeffb;\n  transition: background-color 150ms; }\n\n.sky-card-header {\n  align-items: center;\n  display: flex;\n  flex-shrink: 0;\n  margin: 0;\n  padding: 10px 0 0 0; }\n\n.sky-card-heading-left,\n.sky-card-heading-right {\n  font-weight: normal;\n  max-width: 34px; }\n\n.sky-card-heading-left {\n  padding-left: 10px; }\n\n.sky-card-heading-right {\n  padding-right: 10px; }\n\n.sky-card-heading-middle {\n  flex-grow: 1;\n  padding: 0 10px; }\n\n.sky-card-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 24px;\n  margin: 0; }\n\n.sky-card-check {\n  flex-shrink: 0;\n  padding-right: 10px; }\n  .sky-card-check .sky-check-wrapper {\n    margin-bottom: 2px; }\n\n.sky-card-content {\n  flex-grow: 1;\n  font-weight: normal;\n  margin: 0;\n  padding: 10px;\n  overflow: hidden; }\n\n.sky-card-actions {\n  border-top: solid 1px #ccc;\n  bottom: 0;\n  flex-shrink: 0;\n  padding: 7px 0;\n  text-align: center; }\n  .sky-card-actions .sky-context-menu-btn {\n    height: 32px;\n    width: 32px; }\n"
 
 /***/ },
-/* 258 */
+/* 260 */
 /***/ function(module, exports) {
 
 	module.exports = "<section class=\"sky-card\"\n    [ngClass]=\"\n      {\n        'sky-card-small': size === 'small',\n        'sky-card-selectable': selectable,\n        'sky-card-selected': selectable &amp;&amp; selected\n      }\n\">\n  <header>\n    <label class=\"sky-card-header\" [hidden]=\"!selectable &amp;&amp; titleEl.children.length === 0\">\n      <div class=\"sky-card-heading-middle\">\n        <h1 class=\"sky-card-title\" #titleEl>\n          <ng-content select=\"sky-card-title\"></ng-content>\n        </h1>\n      </div>\n      <div class=\"sky-card-check\" *ngIf=\"selectable\">\n        <sky-checkbox [(selected)]=\"selected\"></sky-checkbox>\n      </div>\n    </label>\n  </header>\n  <div class=\"sky-card-content\" (click)=\"contentClick()\">\n    <ng-content select=\"sky-card-content\"></ng-content>\n    <div class=\"sky-card-actions\" [hidden]=\"actionsEl.children.length === 0\" #actionsEl>\n      <ng-content select=\"sky-card-actions\"></ng-content>\n    </div>\n  </div>\n</section>\n"
 
 /***/ },
-/* 259 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var checkbox_component_1 = __webpack_require__(254);
+	var checkbox_component_1 = __webpack_require__(256);
 	exports.SkyCheckboxComponent = checkbox_component_1.SkyCheckboxComponent;
 	
 
 /***/ },
-/* 260 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var tile_dashboard_service_1 = __webpack_require__(261);
+	var tile_dashboard_service_1 = __webpack_require__(263);
 	exports.SkyTileDashboardService = tile_dashboard_service_1.SkyTileDashboardService;
-	var tile_component_1 = __webpack_require__(262);
+	var tile_component_1 = __webpack_require__(264);
 	exports.SkyTileComponent = tile_component_1.SkyTileComponent;
-	var tile_content_section_component_1 = __webpack_require__(270);
+	var tile_content_section_component_1 = __webpack_require__(272);
 	exports.SkyTileContentSectionComponent = tile_content_section_component_1.SkyTileContentSectionComponent;
-	var tile_dashboard_column_component_1 = __webpack_require__(273);
+	var tile_dashboard_column_component_1 = __webpack_require__(275);
 	exports.SkyTileDashboardColumnComponent = tile_dashboard_column_component_1.SkyTileDashboardColumnComponent;
-	var tile_dashboard_component_1 = __webpack_require__(289);
+	var tile_dashboard_component_1 = __webpack_require__(291);
 	exports.SkyTileDashboardComponent = tile_dashboard_component_1.SkyTileDashboardComponent;
 	
 
 /***/ },
-/* 261 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36714,15 +36740,15 @@
 	
 
 /***/ },
-/* 262 */
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var slide_service_1 = __webpack_require__(263);
-	var chevron_component_1 = __webpack_require__(265);
-	var resources_pipe_1 = __webpack_require__(247);
-	var tile_dashboard_service_1 = __webpack_require__(261);
+	var slide_service_1 = __webpack_require__(265);
+	var chevron_component_1 = __webpack_require__(267);
+	var resources_pipe_1 = __webpack_require__(249);
+	var tile_dashboard_service_1 = __webpack_require__(263);
 	var SkyTileComponent = (function () {
 	    function SkyTileComponent(dashboardService, slideService, elementRef) {
 	        this.dashboardService = dashboardService;
@@ -36790,8 +36816,8 @@
 	    SkyTileComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-tile',
-	            styles: [__webpack_require__(268)],
-	            template: __webpack_require__(269),
+	            styles: [__webpack_require__(270)],
+	            template: __webpack_require__(271),
 	            directives: [chevron_component_1.SkyChevronComponent],
 	            pipes: [resources_pipe_1.SkyResourcesPipe],
 	            viewProviders: [slide_service_1.SkySlideService]
@@ -36805,12 +36831,12 @@
 	
 
 /***/ },
-/* 263 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var animate_1 = __webpack_require__(264);
+	var animate_1 = __webpack_require__(266);
 	var SkySlideService = (function () {
 	    function SkySlideService(animationBuilder) {
 	        this.animationBuilder = animationBuilder;
@@ -36862,7 +36888,7 @@
 	
 
 /***/ },
-/* 264 */
+/* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';"use strict";
@@ -36879,12 +36905,12 @@
 	
 
 /***/ },
-/* 265 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var resources_pipe_1 = __webpack_require__(247);
+	var resources_pipe_1 = __webpack_require__(249);
 	var SkyChevronComponent = (function () {
 	    function SkyChevronComponent() {
 	        this.directionChange = new core_1.EventEmitter();
@@ -36906,8 +36932,8 @@
 	    SkyChevronComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-chevron',
-	            styles: [__webpack_require__(266)],
-	            template: __webpack_require__(267),
+	            styles: [__webpack_require__(268)],
+	            template: __webpack_require__(269),
 	            pipes: [resources_pipe_1.SkyResourcesPipe]
 	        }), 
 	        __metadata('design:paramtypes', [])
@@ -36918,31 +36944,31 @@
 	
 
 /***/ },
-/* 266 */
+/* 268 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-chevron {\n  border: none;\n  background-color: transparent;\n  flex-shrink: 0;\n  height: 24px;\n  margin: 0;\n  overflow: hidden;\n  padding: 0;\n  width: 24px; }\n\n.sky-chevron-part {\n  border-color: #d1dade;\n  border-style: solid;\n  border-width: 3px 0 0 0;\n  display: inline-block;\n  height: 10px;\n  position: relative;\n  top: 6px;\n  transition: transform 250ms, left 250ms;\n  vertical-align: top;\n  width: 10px; }\n\n.sky-chevron-up .sky-chevron-left {\n  left: 7px;\n  transform: rotate(-45deg); }\n\n.sky-chevron-up .sky-chevron-right {\n  left: -8px;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-left {\n  left: 0;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-right {\n  left: -1px;\n  transform: rotate(-45deg); }\n"
 
 /***/ },
-/* 267 */
+/* 269 */
 /***/ function(module, exports) {
 
 	module.exports = "<button\n    type=\"button\"\n    class=\"sky-chevron\"\n    [ngClass]=\"['sky-chevron-' + direction]\"\n    (click)=\"chevronClick($event)\"\n    [attr.aria-label]=\"(isCollapsed ? 'chevron_expand' : 'chevron_collapse') | skyResources\"\n>\n  <i class=\"sky-chevron-part sky-chevron-left\"></i>\n  <i class=\"sky-chevron-part sky-chevron-right\"></i>\n</button>\n"
 
 /***/ },
-/* 268 */
+/* 270 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-tile {\n  background-color: #fff;\n  margin-bottom: 20px; }\n\n.sky-tile-header {\n  border-color: #e7eaec;\n  border-style: solid solid none;\n  border-width: 4px 0 0;\n  display: flex; }\n\n.sky-tile-header-content {\n  display: flex;\n  flex: 1;\n  align-items: baseline;\n  cursor: pointer; }\n\n.sky-tile-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 22px;\n  font-weight: 100;\n  margin: 0;\n  padding: 10px 15px; }\n\n.sky-tile-summary {\n  color: #1ab394;\n  font-family: \"Oswald\", sans-serif;\n  font-size: 18px;\n  font-weight: 400;\n  opacity: 0;\n  padding-right: 15px;\n  transition: opacity 250ms;\n  max-height: 30px;\n  overflow: hidden; }\n\n.sky-tile-collapsed .sky-tile-summary {\n  opacity: 1; }\n\n.sky-tile-header-column-tools {\n  flex-shrink: 0; }\n\n.sky-tile-content {\n  border-color: #e7eaec;\n  border-image: none;\n  border-style: solid solid none;\n  border-width: 1px 0; }\n\n:host /deep/ .sky-tile-tools .sky-chevron {\n  margin: 12px 9px 12px 0; }\n\n.sky-tile-settings {\n  color: #D1DADE;\n  height: 24px;\n  margin: 12px 9px 12px 0;\n  padding: 0;\n  background-color: transparent;\n  border: none;\n  width: 24px; }\n\n.sky-tile-grab-handle {\n  color: #E7EAEC;\n  cursor: move;\n  cursor: -webkit-grab;\n  cursor: -moz-grab;\n  font-size: 15px;\n  padding: 15px 15px 15px 0; }\n"
 
 /***/ },
-/* 269 */
+/* 271 */
 /***/ function(module, exports) {
 
 	module.exports = "<section\n    class=\"sky-tile\"\n    [attr.sky-tile-id]=\"tileId\"\n    [ngClass]=\"{\n      'sky-tile-collapsed': isCollapsed\n    }\"\n>\n  <header class=\"sky-tile-header\">\n    <div class=\"sky-tile-header-content\" (click)=\"titleClick()\">\n      <h1 class=\"sky-tile-title\">\n        <ng-content select=\"sky-tile-title\"></ng-content>\n      </h1>\n      <div class=\"sky-tile-summary\">\n        <ng-content select=\"sky-tile-summary\"></ng-content>\n      </div>\n    </div>\n    <div class=\"sky-tile-header-column-tools\">\n      <div class=\"sky-tile-tools\">\n        <sky-chevron\n            [direction]=\"isCollapsed ? 'down' : 'up'\"\n            (directionChange)=\"chevronDirectionChange($event)\"\n        >\n        </sky-chevron>\n        <button\n            type=\"button\"\n            *ngIf=\"hasSettings\"\n            class=\"sky-tile-settings fa fa-cog\"\n            (click)=\"settingsButtonClicked();\"\n        >\n        </button>\n        <i\n            class=\"sky-tile-grab-handle fa fa-th\"\n            *ngIf=\"isInDashboardColumn\"\n        >\n        </i>\n      </div>\n    </div>\n  </header>\n  <div class=\"sky-tile-content\">\n  <!-- <div class=\"sky-tile-content\" [hidden]=\"isCollapsed\"> -->\n    <ng-content select=\"sky-tile-content\"></ng-content>\n    {{isCollapsed}}\n  </div>\n</section>\n"
 
 /***/ },
-/* 270 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -36953,8 +36979,8 @@
 	    SkyTileContentSectionComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-tile-content-section',
-	            styles: [__webpack_require__(271)],
-	            template: __webpack_require__(272)
+	            styles: [__webpack_require__(273)],
+	            template: __webpack_require__(274)
 	        }), 
 	        __metadata('design:paramtypes', [])
 	    ], SkyTileContentSectionComponent);
@@ -36964,26 +36990,26 @@
 	
 
 /***/ },
-/* 271 */
+/* 273 */
 /***/ function(module, exports) {
 
 	module.exports = ".sky-tile-content-section {\n  padding: 15px; }\n"
 
 /***/ },
-/* 272 */
+/* 274 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"sky-tile-content-section\">\n  <ng-content></ng-content>\n</div>\n"
 
 /***/ },
-/* 273 */
+/* 275 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var ng2_dragula_1 = __webpack_require__(274);
-	var tile_dashboard_column_content_component_1 = __webpack_require__(286);
-	var tile_dashboard_service_1 = __webpack_require__(261);
+	var ng2_dragula_1 = __webpack_require__(276);
+	var tile_dashboard_column_content_component_1 = __webpack_require__(288);
+	var tile_dashboard_service_1 = __webpack_require__(263);
 	var columnIdIndex = 0;
 	var SkyTileDashboardColumnComponent = (function () {
 	    function SkyTileDashboardColumnComponent(dashboardService, cmpResolver) {
@@ -37035,8 +37061,8 @@
 	    SkyTileDashboardColumnComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-tile-dashboard-column',
-	            styles: [__webpack_require__(287)],
-	            template: __webpack_require__(288),
+	            styles: [__webpack_require__(289)],
+	            template: __webpack_require__(290),
 	            directives: [ng2_dragula_1.Dragula, tile_dashboard_column_content_component_1.SkyTileDashboardColumnContentComponent]
 	        }), 
 	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, core_1.ComponentResolver])
@@ -37047,17 +37073,17 @@
 	
 
 /***/ },
-/* 274 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	function __export(m) {
 	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	}
-	var dragula_directive_1 = __webpack_require__(275);
-	var dragula_provider_1 = __webpack_require__(276);
-	__export(__webpack_require__(275));
-	__export(__webpack_require__(276));
+	var dragula_directive_1 = __webpack_require__(277);
+	var dragula_provider_1 = __webpack_require__(278);
+	__export(__webpack_require__(277));
+	__export(__webpack_require__(278));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = {
 	    directives: [dragula_directive_1.Dragula],
@@ -37066,7 +37092,7 @@
 	
 
 /***/ },
-/* 275 */
+/* 277 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37080,8 +37106,8 @@
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
 	var core_1 = __webpack_require__(4);
-	var dragula_provider_1 = __webpack_require__(276);
-	var dragula = __webpack_require__(277);
+	var dragula_provider_1 = __webpack_require__(278);
+	var dragula = __webpack_require__(279);
 	var Dragula = (function () {
 	    function Dragula(el, dragulaService) {
 	        this.el = el;
@@ -37150,7 +37176,7 @@
 	
 
 /***/ },
-/* 276 */
+/* 278 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -37163,7 +37189,7 @@
 	var __metadata = (this && this.__metadata) || function (k, v) {
 	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 	};
-	var dragula = __webpack_require__(277);
+	var dragula = __webpack_require__(279);
 	var core_1 = __webpack_require__(4);
 	var DragulaService = (function () {
 	    function DragulaService() {
@@ -37297,14 +37323,14 @@
 	
 
 /***/ },
-/* 277 */
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	var emitter = __webpack_require__(278);
-	var crossvent = __webpack_require__(282);
-	var classes = __webpack_require__(285);
+	var emitter = __webpack_require__(280);
+	var crossvent = __webpack_require__(284);
+	var classes = __webpack_require__(287);
 	var doc = document;
 	var documentElement = doc.documentElement;
 
@@ -37905,13 +37931,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 278 */
+/* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var atoa = __webpack_require__(279);
-	var debounce = __webpack_require__(280);
+	var atoa = __webpack_require__(281);
+	var debounce = __webpack_require__(282);
 
 	module.exports = function emitter (thing, options) {
 	  var opts = options || {};
@@ -37965,19 +37991,19 @@
 
 
 /***/ },
-/* 279 */
+/* 281 */
 /***/ function(module, exports) {
 
 	module.exports = function atoa (a, n) { return Array.prototype.slice.call(a, n); }
 
 
 /***/ },
-/* 280 */
+/* 282 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var ticky = __webpack_require__(281);
+	var ticky = __webpack_require__(283);
 
 	module.exports = function debounce (fn, args, ctx) {
 	  if (!fn) { return; }
@@ -37988,7 +38014,7 @@
 
 
 /***/ },
-/* 281 */
+/* 283 */
 /***/ function(module, exports) {
 
 	var si = typeof setImmediate === 'function', tick;
@@ -38001,13 +38027,13 @@
 	module.exports = tick;
 
 /***/ },
-/* 282 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	var customEvent = __webpack_require__(283);
-	var eventmap = __webpack_require__(284);
+	var customEvent = __webpack_require__(285);
+	var eventmap = __webpack_require__(286);
 	var doc = global.document;
 	var addEvent = addEventEasy;
 	var removeEvent = removeEventEasy;
@@ -38109,7 +38135,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 283 */
+/* 285 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -38164,7 +38190,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 284 */
+/* 286 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -38184,7 +38210,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 285 */
+/* 287 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -38223,7 +38249,7 @@
 
 
 /***/ },
-/* 286 */
+/* 288 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -38245,26 +38271,26 @@
 	
 
 /***/ },
-/* 287 */
+/* 289 */
 /***/ function(module, exports) {
 
 	module.exports = ":host {\n  flex: 1;\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 767px) {\n  :host {\n    padding: 0; }\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n\n.sky-tile-dashboard-column {\n  min-height: 100px;\n  width: 100%; }\n"
 
 /***/ },
-/* 288 */
+/* 290 */
 /***/ function(module, exports) {
 
 	module.exports = "<div class=\"sky-tile-dashboard-column\" [dragula]=\"bagId\">\n  <sky-tile-dashboard-column-content #content></sky-tile-dashboard-column-content>\n</div>\n"
 
 /***/ },
-/* 289 */
+/* 291 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var ng2_dragula_1 = __webpack_require__(274);
-	var tile_dashboard_column_component_1 = __webpack_require__(273);
-	var tile_dashboard_service_1 = __webpack_require__(261);
+	var ng2_dragula_1 = __webpack_require__(276);
+	var tile_dashboard_column_component_1 = __webpack_require__(275);
+	var tile_dashboard_service_1 = __webpack_require__(263);
 	var SkyTileDashboardComponent = (function () {
 	    function SkyTileDashboardComponent(dashboardService, dragulaService) {
 	        var _this = this;
@@ -38299,8 +38325,8 @@
 	    SkyTileDashboardComponent = __decorate([
 	        core_1.Component({
 	            selector: 'sky-tile-dashboard',
-	            styles: [__webpack_require__(290)],
-	            template: __webpack_require__(291),
+	            styles: [__webpack_require__(292)],
+	            template: __webpack_require__(293),
 	            directives: [tile_dashboard_column_component_1.SkyTileDashboardColumnComponent],
 	            providers: [ng2_dragula_1.DragulaService, tile_dashboard_service_1.SkyTileDashboardService]
 	        }), 
@@ -38312,16 +38338,30 @@
 	
 
 /***/ },
-/* 290 */
+/* 292 */
 /***/ function(module, exports) {
 
 	module.exports = ":host {\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 991px) {\n  :host {\n    display: block;\n    padding: 0; }\n  :host /deep/ .sky-tile-dashboard-column {\n    padding: 0; } }\n\n@media (max-width: 767px) {\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n"
 
 /***/ },
-/* 291 */
+/* 293 */
 /***/ function(module, exports) {
 
 	module.exports = "<sky-tile-dashboard-column *ngFor=\"let column of dashboardConfigForBinding?.columns\" [tiles]=\"column.tiles\"></sky-tile-dashboard-column>\n<ng-content></ng-content>\n"
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(246);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var checkModule = angular.module('barkbaud.skyux2.check', [])
+	    .directive('skyCheckbox', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyCheckboxComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = checkModule;
+	
 
 /***/ }
 /******/ ]);

@@ -1248,9 +1248,6 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '          </div>\n' +
         '      </div>\n' +
         '    </div>\n' +
-        '    <sky-alert [alert-type]="\'info\'">\n' +
-        '      Info alert\n' +
-        '    </sky-alert>\n' +
         '  </section>\n' +
         '  <div bb-tile-section class="text-danger" ng-show="dashboardPage.error">\n' +
         '    Error loading dogs.\n' +
@@ -1340,6 +1337,13 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '<div class="bb-page-header">\n' +
         '    <div class="container-fluid">\n' +
         '        <div class="row">\n' +
+        '          <div class="col-md-12">\n' +
+        '            <sky-alert [alert-type]="\'success\'" [closeable]="mainController.isClosable">\n' +
+        '              This dog is a good dog.\n' +
+        '            </sky-alert>\n' +
+        '          </div>\n' +
+        '        </div>\n' +
+        '        <div class="row">\n' +
         '            <div class="col-md-3 col-lg-2">\n' +
         '                <bark-photo bark-photo-base64="dogPage.dog.image.data"></bark-photo>\n' +
         '            </div>\n' +
@@ -1372,6 +1376,10 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '          <textarea class="form-control" ng-model="noteAdd.note.description"></textarea>\n' +
         '        </div>\n' +
         '        <div class="form-group">\n' +
+        '          <sky-checkbox [(selected)]="noteAdd.note.addConstituentNote">\n' +
+        '            <sky-checkbox-label>Add as note on current owner\'s Raisers Edge NXT record.\n' +
+        '            </sky-checkbox-label>\n' +
+        '          </sky-checkbox>\n' +
         '          <label class="control-label">\n' +
         '            <input type="checkbox" bb-check ng-model="noteAdd.note.addConstituentNote" />\n' +
         '            Add as note on current owner\'s Raisers Edge NXT record.\n' +
@@ -1481,12 +1489,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '        </ul>\n' +
         '      </div>\n' +
         '    </bb-navbar>\n' +
-        '    <sky-alert [alert-type]="\'info\'">\n' +
-        '      Info alert\n' +
-        '    </sky-alert>\n' +
-        '    <sky-alert [alert-type]="\'success\'" [closeable]="mainController.isClosable">\n' +
-        '      Success alert\n' +
-        '    </sky-alert>\n' +
+        '\n' +
         '    <div ui-view></div>\n' +
         '  </div>\n' +
         '\n' +
