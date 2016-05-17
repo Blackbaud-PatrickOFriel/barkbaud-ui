@@ -71,20 +71,8 @@ defaultConfig = {
     },
 
     module: {
-        preLoaders: [
-            {
-                test: /\.js$/,
-                loader: 'source-map-loader',
-                exclude: [
-                    path.join(__dirname, 'node_modules', 'rxjs'),
-                    path.join(__dirname, 'node_modules', '@angular2-material'),
-                    path.join(__dirname, 'node_modules', '@angular')
-                ]
-            }
-        ],
         noParse: [
-            path.join(__dirname, 'node_modules', 'zone.js', 'dist'),
-            path.join(__dirname, 'node_modules', 'angular2', 'bundles')
+            path.join(__dirname, 'node_modules', 'zone.js', 'dist')
         ]
     },
 

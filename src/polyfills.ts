@@ -5,8 +5,10 @@
 // import 'reflect-metadata';
 
 // CoreJS has all the polyfills you need
-
-import 'core-js';
+import 'core-js/es6';
+import 'core-js/es7/reflect';
+//import 'es6-shim';
+//import 'reflect-metadata';
 require('zone.js/dist/zone');
 
 // Typescript emit helpers polyfill

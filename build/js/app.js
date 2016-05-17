@@ -484,7 +484,7 @@ angular.module('md5', []).constant('md5', (function() {
 }).call(this);
 
 /*jshint browser: true */
-/*globals angular, ng */
+/*globals angular */
 
 (function () {
     'use strict';
@@ -557,7 +557,7 @@ angular.module('md5', []).constant('md5', (function() {
 
     MainController.$inject = ['barkbaudAuthService'];
 
-    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar', 'barkbaud.skyux2'])
+    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
         .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
         .run(run)
@@ -1380,10 +1380,6 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '            <sky-checkbox-label>Add as note on current owner\'s Raisers Edge NXT record.\n' +
         '            </sky-checkbox-label>\n' +
         '          </sky-checkbox>\n' +
-        '          <label class="control-label">\n' +
-        '            <input type="checkbox" bb-check ng-model="noteAdd.note.addConstituentNote" />\n' +
-        '            Add as note on current owner\'s Raisers Edge NXT record.\n' +
-        '          </label>\n' +
         '        </div>\n' +
         '      </div>\n' +
         '      <bb-modal-footer>\n' +

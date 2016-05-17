@@ -155,10 +155,6 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '            <sky-checkbox-label>Add as note on current owner\'s Raisers Edge NXT record.\n' +
         '            </sky-checkbox-label>\n' +
         '          </sky-checkbox>\n' +
-        '          <label class="control-label">\n' +
-        '            <input type="checkbox" bb-check ng-model="noteAdd.note.addConstituentNote" />\n' +
-        '            Add as note on current owner\'s Raisers Edge NXT record.\n' +
-        '          </label>\n' +
         '        </div>\n' +
         '      </div>\n' +
         '      <bb-modal-footer>\n' +

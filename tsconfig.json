@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES5",
     "module": "commonjs",
+    "moduleResolution": "node",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -15,6 +16,10 @@
     "typings/main.d.ts",
     "typings/main"
   ],
+  "awesomeTypescriptLoaderOptions": {
+    "resolveGlobs": true,
+    "forkChecker": true
+  },
   "compileOnSave": false,
   "buildOnSave": false,
   "atom": { "rewriteTsconfig": false }

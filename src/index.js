@@ -1,5 +1,5 @@
 /*jshint browser: true */
-/*globals angular, ng */
+/*globals angular */
 
 (function () {
     'use strict';
@@ -72,7 +72,7 @@
 
     MainController.$inject = ['barkbaudAuthService'];
 
-    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar', 'barkbaud.skyux2'])
+    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
         .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
         .run(run)
