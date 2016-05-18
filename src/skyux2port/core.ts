@@ -1,10 +1,10 @@
-import Alert from './alert.module.ts';
-import Check from './check.module.ts';
+import alertModule from './alert.module.ts';
+import checkModule from './check.module.ts';
 
 
 let skyUx2Adapter = angular.module('barkbaud.skyux2', [
-  Alert.name,
-  Check.name
+  alertModule.name,
+  checkModule.name
 ]);
 
 export default skyUx2Adapter;

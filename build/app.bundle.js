@@ -46,7 +46,8 @@
 
 	"use strict";
 	var upgrade_adapter_1 = __webpack_require__(1);
-	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', 'barkbaud.skyux2' /*, SkyUx2Adapter.name*/], { strictDi: true });
+	var core_ts_1 = __webpack_require__(289);
+	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', core_ts_1.default.name], { strictDi: true });
 	
 
 /***/ },
@@ -40498,6 +40499,2787 @@
 	exports.resumeBootstrap = angular.resumeBootstrap;
 	exports.getTestability = angular.getTestability;
 	//# sourceMappingURL=angular_js.js.map
+
+/***/ },
+/* 289 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var alert_module_ts_1 = __webpack_require__(290);
+	var check_module_ts_1 = __webpack_require__(345);
+	var skyUx2Adapter = angular.module('barkbaud.skyux2', [
+	    alert_module_ts_1.default.name,
+	    check_module_ts_1.default.name
+	]);
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = skyUx2Adapter;
+	
+
+/***/ },
+/* 290 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var alertModule = angular.module('barkbaud.skyux2.alert', [])
+	    .directive('skyAlert', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyAlertComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = alertModule;
+	
+
+/***/ },
+/* 291 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	function __export(m) {
+	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+	}
+	__export(__webpack_require__(292));
+	__export(__webpack_require__(299));
+	__export(__webpack_require__(306));
+	__export(__webpack_require__(307));
+	__export(__webpack_require__(319));
+	
+
+/***/ },
+/* 292 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var alert_component_1 = __webpack_require__(293);
+	exports.SkyAlertComponent = alert_component_1.SkyAlertComponent;
+	
+
+/***/ },
+/* 293 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var resources_pipe_1 = __webpack_require__(294);
+	var SkyAlertComponent = (function () {
+	    function SkyAlertComponent() {
+	        this.closedChange = new core_1.EventEmitter();
+	    }
+	    SkyAlertComponent.prototype.close = function () {
+	        this.closed = true;
+	        this.closedChange.emit(true);
+	    };
+	    SkyAlertComponent.prototype.getCls = function () {
+	        var cls = 'sky-alert-' + this.alertType;
+	        if (this.closeable) {
+	            cls += ' sky-alert-closeable';
+	        }
+	        return cls;
+	    };
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', String)
+	    ], SkyAlertComponent.prototype, "alertType", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Boolean)
+	    ], SkyAlertComponent.prototype, "closeable", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Boolean)
+	    ], SkyAlertComponent.prototype, "closed", void 0);
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyAlertComponent.prototype, "closedChange", void 0);
+	    SkyAlertComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-alert',
+	            pipes: [resources_pipe_1.SkyResourcesPipe],
+	            styles: [__webpack_require__(297)],
+	            template: __webpack_require__(298)
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyAlertComponent);
+	    return SkyAlertComponent;
+	}());
+	exports.SkyAlertComponent = SkyAlertComponent;
+	
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var resources_1 = __webpack_require__(295);
+	var SkyResourcesPipe = (function () {
+	    function SkyResourcesPipe() {
+	    }
+	    SkyResourcesPipe.prototype.transform = function (name) {
+	        return resources_1.SkyResources.getString(name);
+	    };
+	    SkyResourcesPipe = __decorate([
+	        core_1.Pipe({
+	            name: 'skyResources'
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyResourcesPipe);
+	    return SkyResourcesPipe;
+	}());
+	exports.SkyResourcesPipe = SkyResourcesPipe;
+	
+
+/***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var SkyResources = (function () {
+	    /*istanbul ignore next */
+	    function SkyResources() {
+	    }
+	    SkyResources.getString = function (name) {
+	        var stringObj = this.resources[name];
+	        if (stringObj) {
+	            return stringObj.message;
+	        }
+	        return name;
+	    };
+	    SkyResources.resources = __webpack_require__(296);
+	    return SkyResources;
+	}());
+	exports.SkyResources = SkyResources;
+	
+
+/***/ },
+/* 296 */
+/***/ function(module, exports) {
+
+	module.exports = {
+		"action_bar_actions": {
+			"_description": "The label for the actions dropdown on the action button bar",
+			"message": "Actions"
+		},
+		"alert_close": {
+			"_description": "Screen reader text for the close button on alerts",
+			"message": "Close"
+		},
+		"autonumeric_abbr_billions": {
+			"_description": "The suffix to show after an abbreviated value in the billions (e.g. $1.2b)",
+			"message": "b"
+		},
+		"autonumeric_abbr_millions": {
+			"_description": "The suffix to show after an abbreviated value in the millions (e.g. $1.2m)",
+			"message": "m"
+		},
+		"autonumeric_abbr_thousands": {
+			"_description": "The suffix to show after an abbreviated value in the thousands (e.g. $1.2k)",
+			"message": "k"
+		},
+		"avatar_error_not_image_description": {
+			"_description": "Message description displayed when the user attempts to upload an avatar file that is not a valid image",
+			"message": "Please choose a file that is a valid image."
+		},
+		"avatar_error_not_image_title": {
+			"_description": "Message title displayed when the user attempts to upload an avatar file that is not a valid image",
+			"message": "File is not an image."
+		},
+		"avatar_error_too_large_description": {
+			"_description": "Message description displayed when the user attempts to upload an avatar image with a file size that is too large",
+			"message": "Please choose an image that is less than {0}."
+		},
+		"avatar_error_too_large_title": {
+			"_description": "Message title displayed when the user attempts to upload an avatar image with a file size that is too large",
+			"message": "File is too large."
+		},
+		"checklist_select_all": {
+			"_description": "Text for the link in a checklist to select all items.",
+			"message": "Select all"
+		},
+		"checklist_clear_all": {
+			"_description": "Text for the link in a checklist to clear selections.",
+			"message": "Clear all"
+		},
+		"checklist_no_items": {
+			"_description": "Text in a checklist when no items are shown based on the current filter.",
+			"message": "No items found"
+		},
+		"chevron_collapse": {
+			"_description": "Screen reader text for when clicking the chevron would collapse the corresponding section",
+			"message": "Collapse"
+		},
+		"chevron_expand": {
+			"_description": "Screen reader text for when clicking the chevron would expand the corresponding section",
+			"message": "Expand"
+		},
+		"context_menu_default_label": {
+			"_description": "The label on the context menu button used for screen readers when the consumer has not specified a label",
+			"message": "Context menu"
+		},
+		"grid_back_to_top": {
+			"_description": "Text for link in grid to scroll back to the top.",
+			"message": "Back to top"
+		},
+		"grid_column_picker_all_categories": {
+			"_description": "Button text for category filters used to indicate that all columns should be shown in the column picker",
+			"message": "All"
+		},
+		"grid_column_picker_description_header": {
+			"_description": "In the column picker, the header for the column showing the description of the columns to include in the grid.",
+			"message": "Description"
+		},
+		"grid_column_picker_header": {
+			"_description": "Header text for the grid column picker screen",
+			"message": "Choose columns to show in the list"
+		},
+		"grid_column_picker_name_header": {
+			"_description": "In the column picker, the header for the column showing the names of the columns to include in the grid.",
+			"message": "Column"
+		},
+		"grid_column_picker_search_placeholder": {
+			"_description": "Search text placeholder for the search box on the grid column picker",
+			"message": "Search by name"
+		},
+		"grid_column_picker_submit": {
+			"_description": "Button text for applying changes made in the grid column picker",
+			"message": "Apply changes"
+		},
+		"grid_columns_button": {
+			"_description": "Label for button to select columns to display in a grid.",
+			"message": " Choose columns"
+		},
+		"grid_filters_apply": {
+			"_description": "Text for button on filters flyout to apply the selected filters to the grid",
+			"message": "Apply filters"
+		},
+		"grid_filters_button": {
+			"_description": "Label for button to select filters to be applied to a grid.",
+			"message": "Filters"
+		},
+		"grid_filters_clear": {
+			"_description": "Text for button on filters flyout to clear the selected filters for the grid",
+			"message": "Clear"
+		},
+		"grid_filters_header": {
+			"_description": "Header text for grid filters flyout",
+			"message": "Filter"
+		},
+		"grid_filters_hide": {
+			"_description": "Hide link text for grid filters flyout",
+			"message": "Hide"
+		},
+		"grid_filters_summary_header": {
+			"_description": "Header text for filter summary on top of grid",
+			"message": "Filter:"
+		},
+		"grid_load_more": {
+			"_description": "The text for the button to load additional rows into the grid if more rows are available.",
+			"message": "Load more"
+		},
+		"grid_search_placeholder": {
+			"_description": "Placeholder text in grid search box",
+			"message": "Find in this list"
+		},
+		"grid_column_picker_search_no_columns": {
+			"_description": "Displays when no columns are found for the specified search text.",
+			"message": "No columns found"
+		},
+		"modal_footer_cancel_button": {
+			"_description": "Default lable text for modal cancel button",
+			"message": "Cancel"
+		},
+		"modal_footer_primary_button": {
+			"_description": "Default lable text for modal primary button",
+			"message": "Save"
+		},
+		"month_short_april": {
+			"_description": "",
+			"message": "Apr"
+		},
+		"month_short_august": {
+			"_description": "",
+			"message": "Aug"
+		},
+		"month_short_december": {
+			"_description": "",
+			"message": "Dec"
+		},
+		"month_short_february": {
+			"_description": "",
+			"message": "Feb"
+		},
+		"month_short_january": {
+			"_description": "",
+			"message": "Jan"
+		},
+		"month_short_july": {
+			"_description": "",
+			"message": "Jul"
+		},
+		"month_short_june": {
+			"_description": "",
+			"message": "Jun"
+		},
+		"month_short_march": {
+			"_description": "",
+			"message": "Mar"
+		},
+		"month_short_may": {
+			"_description": "",
+			"message": "May"
+		},
+		"month_short_november": {
+			"_description": "",
+			"message": "Nov"
+		},
+		"month_short_october": {
+			"_description": "",
+			"message": "Oct"
+		},
+		"month_short_september": {
+			"_description": "",
+			"message": "Sep"
+		},
+		"page_noaccess_button": {
+			"_description": "",
+			"message": "Return to a non-classified page"
+		},
+		"page_noaccess_description": {
+			"_description": "",
+			"message": "Sorry, you don't have rights to this page.\nIf you feel you should, please contact your system administrator."
+		},
+		"page_noaccess_header": {
+			"_description": "",
+			"message": "Move along, there's nothing to see here"
+		},
+		"text_expand_see_less": {
+			"_description": "Display less text content",
+			"message": "See less"
+		},
+		"text_expand_see_more": {
+			"_description": "",
+			"message": "See more"
+		},
+		"text_expand_modal_title": {
+			"_description": "",
+			"message": "Expanded view"
+		},
+		"text_expand_close_text": {
+			"_description": "Text for the close button on the text expand modal",
+			"message": "Close"
+		},
+		"grid_action_bar_clear_selection": {
+			"_description": "Clear the selections in the grid.",
+			"message": "Clear selection"
+		},
+		"grid_action_bar_cancel_mobile_actions": {
+			"_description": "Close the menu where you choose an action in mobile multiselect.",
+			"message": "Cancel"
+		},
+		"grid_action_bar_choose_action": {
+			"_description": "Open a menu to choose an action in mobile  multiselect.",
+			"message": "Choose an action"
+		},
+		"date_field_invalid_date_message": {
+			"_description": "error message shown when an invalid date is entered.",
+			"message": "Please enter a valid date"
+		},
+		"date_range_picker_this_week": {
+			"_description": "text for date range picker",
+			"message": "This week"
+		},
+		"date_range_picker_last_week": {
+			"_description": "text for date range picker",
+			"message": "Last week"
+		},
+		"date_range_picker_next_week": {
+			"_description": "text for date range picker",
+			"message": "Next week"
+		},
+		"date_range_picker_this_month": {
+			"_description": "text for date range picker",
+			"message": "This month"
+		},
+		"date_range_picker_last_month": {
+			"_description": "text for date range picker",
+			"message": "Last month"
+		},
+		"date_range_picker_next_month": {
+			"_description": "text for date range picker",
+			"message": "Next month"
+		},
+		"date_range_picker_this_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "This calendar year"
+		},
+		"date_range_picker_last_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "Last calendar year"
+		},
+		"date_range_picker_next_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "Next calendar year"
+		},
+		"date_range_picker_this_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "This fiscal year"
+		},
+		"date_range_picker_last_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "Last fiscal year"
+		},
+		"date_range_picker_next_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "Next fiscal year"
+		},
+		"date_range_picker_this_quarter": {
+			"_description": "text for date range picker",
+			"message": "This quarter"
+		},
+		"date_range_picker_last_quarter": {
+			"_description": "text for date range picker",
+			"message": "Last quarter"
+		},
+		"date_range_picker_next_quarter": {
+			"_description": "text for date range picker",
+			"message": "Next quarter"
+		},
+		"date_range_picker_at_any_time": {
+			"_description": "text for date range picker",
+			"message": "At any time"
+		},
+		"date_range_picker_today": {
+			"_description": "text for date range picker",
+			"message": "Today"
+		},
+		"date_range_picker_tomorrow": {
+			"_description": "text for date range picker",
+			"message": "Tomorrow"
+		},
+		"date_range_picker_yesterday": {
+			"_description": "text for date range picker",
+			"message": "Yesterday"
+		},
+		"date_range_picker_specific_range": {
+			"_description": "text for date range picker",
+			"message": "Specific range"
+		},
+		"date_range_picker_filter_description_this_week": {
+			"_description": "text for date range picker",
+			"message": "{0} for this week"
+		},
+		"date_range_picker_filter_description_last_week": {
+			"_description": "text for date range picker",
+			"message": "{0} from last week"
+		},
+		"date_range_picker_filter_description_next_week": {
+			"_description": "text for date range picker",
+			"message": "{0} for next week"
+		},
+		"date_range_picker_filter_description_this_month": {
+			"_description": "text for date range picker",
+			"message": "{0} for this month"
+		},
+		"date_range_picker_filter_description_last_month": {
+			"_description": "text for date range picker",
+			"message": "{0} from last month"
+		},
+		"date_range_picker_filter_description_next_month": {
+			"_description": "text for date range picker",
+			"message": "{0} for next month"
+		},
+		"date_range_picker_filter_description_this_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "{0} for this calendar year"
+		},
+		"date_range_picker_filter_description_last_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "{0} from last calendar year"
+		},
+		"date_range_picker_filter_description_next_calendar_year": {
+			"_description": "text for date range picker",
+			"message": "{0} for next calendar year"
+		},
+		"date_range_picker_filter_description_this_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "{0} for this fiscal year"
+		},
+		"date_range_picker_filter_description_last_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "{0} from last fiscal year"
+		},
+		"date_range_picker_filter_description_next_fiscal_year": {
+			"_description": "text for date range picker",
+			"message": "{0} for next fiscal year"
+		},
+		"date_range_picker_filter_description_this_quarter": {
+			"_description": "text for date range picker",
+			"message": "{0} for this quarter"
+		},
+		"date_range_picker_filter_description_last_quarter": {
+			"_description": "text for date range picker",
+			"message": "{0} from last quarter"
+		},
+		"date_range_picker_filter_description_next_quarter": {
+			"_description": "text for date range picker",
+			"message": "{0} for next quarter"
+		},
+		"date_range_picker_filter_description_at_any_time": {
+			"_description": "text for date range picker",
+			"message": "{0} at any time"
+		},
+		"date_range_picker_filter_description_today": {
+			"_description": "text for date range picker",
+			"message": "{0} for today"
+		},
+		"date_range_picker_filter_description_yesterday": {
+			"_description": "text for date range picker",
+			"message": "{0} from yesterday"
+		},
+		"date_range_picker_filter_description_tomorrow": {
+			"_description": "text for date range picker",
+			"message": "{0} for tomorrow"
+		},
+		"date_range_picker_filter_description_specific_range": {
+			"_description": "text for date range picker",
+			"message": "{0} from {1} to {2}"
+		},
+		"date_range_picker_from_date": {
+			"_description": "label for date range picker",
+			"message": "From date"
+		},
+		"date_range_picker_to_date": {
+			"_description": "label for date range picker",
+			"message": "To date"
+		},
+		"date_range_picker_min_date_error": {
+			"_description": "error message for date range picker",
+			"message": "End date must be after start date"
+		},
+		"date_range_picker_max_date_error": {
+			"_description": "error message for date range picker",
+			"message": "Start date must be before end date"
+		},
+		"errormodal_ok": {
+			"_description": "Text used on the primary button to dismiss the error modal.",
+			"message": "OK"
+		},
+		"error_description_broken": {
+			"_description": "Text used for the error description to when page is broken.",
+			"message": "Try to refresh this page or come back later."
+		},
+		"error_description_construction": {
+			"_description": "Text used for the error description when page is under construction.",
+			"message": "Thanks for your patience while improvements are made!\nPlease check back in a little while."
+		},
+		"error_title_broken": {
+			"_description": "Text used for the error title when something is broken",
+			"message": "Sorry, something went wrong."
+		},
+		"error_title_construction": {
+			"_description": "Text used for the error title when page is under construction.",
+			"message": "This page will return soon."
+		},
+		"error_title_notfound": {
+			"_description": "Text used for the error title when page is not found.",
+			"message": "Sorry, we can't reach that page."
+		},
+		"file_size_b_plural": {
+			"_description": "",
+			"message": "{0} bytes"
+		},
+		"file_size_b_singular": {
+			"_description": "",
+			"message": "{0} byte"
+		},
+		"file_size_kb": {
+			"_description": "",
+			"message": "{0} KB"
+		},
+		"file_size_mb": {
+			"_description": "",
+			"message": "{0} MB"
+		},
+		"file_size_gb": {
+			"_description": "",
+			"message": "{0} GB"
+		},
+		"file_upload_drag_file_here": {
+			"_description": "",
+			"message": "Drag a file here"
+		},
+		"file_upload_drop_files_here": {
+			"_description": "",
+			"message": "Drop files here"
+		},
+		"file_upload_invalid_file": {
+			"_description": "",
+			"message": "This file type is invalid"
+		},
+		"file_upload_link_placeholder": {
+			"_description": "",
+			"message": "http://www.something.com/file"
+		},
+		"file_upload_or_click_to_browse": {
+			"_description": "",
+			"message": "or click to browse"
+		},
+		"file_upload_paste_link": {
+			"_description": "",
+			"message": "Paste a link to a file"
+		},
+		"file_upload_paste_link_done": {
+			"_description": "",
+			"message": "Done"
+		},
+		"searchfield_searching": {
+			"_description": "text for ui-select search control while performing a remote search",
+			"message": "Searching..."
+		},
+		"searchfield_no_records": {
+			"_description": "text for ui-select search control when no records are found.",
+			"message": "Sorry, no matching records found"
+		},
+		"selectfield_summary_text": {
+			"_description": "Text displayed when the user has more than 5 items selected",
+			"message": "{0} items selected"
+		},
+		"selectfield_remove": {
+			"_description": "Text for screen readers to convey the meaning of the remove icon button on select field values",
+			"message": "Remove"
+		},
+		"selectfieldpicker_select": {
+			"_description": "Text displayed on the primary dialog button to confirm selection of multiple items",
+			"message": "Select"
+		},
+		"selectfieldpicker_select_value": {
+			"_description": "The default header text for the select field picker directive when the user is allowed to select one value (singular)",
+			"message": "Select value"
+		},
+		"selectfieldpicker_select_values": {
+			"_description": "The default header text for the select field picker directive when the user is allowed to select more than one value (plural)",
+			"message": "Select values"
+		},
+		"selectfieldpicker_clear": {
+			"_description": "Text displayed on the button in single select mode to clear selection and close form",
+			"message": "Clear selection"
+		},
+		"wizard_navigator_finish": {
+			"_description": "Text displayed on the next button when a wizard is ready for completion.",
+			"message": "Finish"
+		},
+		"wizard_navigator_next": {
+			"_description": "Text displayed on a wizard's next button.",
+			"message": "Next"
+		},
+		"wizard_navigator_previous": {
+			"_description": "Text displayed on a wizard's previous button.",
+			"message": "Previous"
+		},
+		"datepicker_today": {
+			"_description": "Text displayed in the Today button of the datepicker",
+			"message": "Today"
+		},
+		"datepicker_clear": {
+			"_description": "Text displayed in the Clear button of the datepicker",
+			"message": "Clear"
+		},
+		"datepicker_close": {
+			"_description": "Text displayed in the Close button of the datepicker",
+			"message": "Done"
+		},
+		"reorder_top": {
+			"_description": "Text displayed to indicate that a row can be pushed to the top of the list",
+			"message": "Top"
+		}
+	};
+
+/***/ },
+/* 297 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-alert {\n  padding: 10px;\n  margin-bottom: 20px;\n  border: solid 1px transparent;\n  border-radius: 4px; }\n\n.sky-alert-info {\n  background-color: #d9edf7;\n  border-color: #bce8f1;\n  color: #31708f; }\n\n.sky-alert-success {\n  background-color: #dff0d8;\n  border-color: #d6e9c6;\n  color: #3c763d; }\n\n.sky-alert-warning {\n  background-color: #fcf8e3;\n  border-color: #faebcc;\n  color: #8a6d3b; }\n\n.sky-alert-danger {\n  background-color: #f2dede;\n  border-color: #ebccd1;\n  color: #ca2a2a; }\n\n.sky-alert-close {\n  cursor: pointer;\n  float: right;\n  font-size: 19.5px;\n  font-weight: bold;\n  line-height: 1;\n  margin: 0;\n  padding: 0;\n  color: #000;\n  opacity: 0.2;\n  border: none;\n  background-color: transparent;\n  display: none; }\n  .sky-alert-close:hover {\n    opacity: 0.5; }\n\n.sky-alert-closeable .sky-alert-close {\n  display: block; }\n"
+
+/***/ },
+/* 298 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"sky-alert\" [ngClass]=\"getCls()\" [hidden]=\"closed\">\n  <ng-content></ng-content>\n  <button type=\"button\" class=\"sky-alert-close\" (click)=\"close()\" [attr.aria-label]=\"'alert_close' | skyResources\" [hidden]=\"!closeable\">\n    <span aria-hidden=\"true\">&times;</span>\n  </button>\n</div>\n"
+
+/***/ },
+/* 299 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var card_component_1 = __webpack_require__(300);
+	exports.SkyCardComponent = card_component_1.SkyCardComponent;
+	
+
+/***/ },
+/* 300 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var checkbox_component_1 = __webpack_require__(301);
+	var SkyCardComponent = (function () {
+	    function SkyCardComponent() {
+	        this.selectedChange = new core_1.EventEmitter();
+	    }
+	    SkyCardComponent.prototype.contentClick = function () {
+	        if (this.selectable) {
+	            this.selected = !this.selected;
+	            this.selectedChange.emit(this.selected);
+	        }
+	    };
+	    ;
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', String)
+	    ], SkyCardComponent.prototype, "size", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Boolean)
+	    ], SkyCardComponent.prototype, "selectable", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Boolean)
+	    ], SkyCardComponent.prototype, "selected", void 0);
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyCardComponent.prototype, "selectedChange", void 0);
+	    SkyCardComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-card',
+	            styles: [__webpack_require__(304)],
+	            template: __webpack_require__(305),
+	            directives: [checkbox_component_1.SkyCheckboxComponent]
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyCardComponent);
+	    return SkyCardComponent;
+	}());
+	exports.SkyCardComponent = SkyCardComponent;
+	
+
+/***/ },
+/* 301 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var SkyCheckboxComponent = (function () {
+	    function SkyCheckboxComponent() {
+	        this.selected = false;
+	        this.selectedChange = new core_1.EventEmitter();
+	    }
+	    SkyCheckboxComponent.prototype.updateSelected = function ($event) {
+	        this.selected = $event;
+	        this.selectedChange.emit($event);
+	    };
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Object)
+	    ], SkyCheckboxComponent.prototype, "selected", void 0);
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyCheckboxComponent.prototype, "selectedChange", void 0);
+	    SkyCheckboxComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-checkbox',
+	            styles: [__webpack_require__(302)],
+	            template: __webpack_require__(303)
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyCheckboxComponent);
+	    return SkyCheckboxComponent;
+	}());
+	exports.SkyCheckboxComponent = SkyCheckboxComponent;
+	
+
+/***/ },
+/* 302 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-checkbox-wrapper input {\n  opacity: 0;\n  position: absolute;\n  height: 22px;\n  width: 22px;\n  margin: 0;\n  padding: 0; }\n\n.sky-checkbox {\n  border: 1px solid #cccccc;\n  cursor: pointer;\n  display: inline-block;\n  height: 22px;\n  margin: 0;\n  padding: 0;\n  vertical-align: middle;\n  width: 22px;\n  text-align: center;\n  font-size: 14px; }\n\n.sky-checkbox-wrapper input:checked + .sky-checkbox {\n  background-color: #1c84c6;\n  border-color: #1c84c6; }\n  .sky-checkbox-wrapper input:checked + .sky-checkbox:before {\n    color: #fff;\n    content: \"\\f00c\";\n    font-family: FontAwesome;\n    font-size: 12px; }\n\n.sky-checkbox-wrapper input:disabled + .sky-checkbox {\n  background-color: #cccccc;\n  border: 1px solid #cccccc;\n  cursor: default; }\n\n.sky-checkbox-wrapper input:focus + .sky-checkbox {\n  outline: thin dotted;\n  outline: -webkit-focus-ring-color auto 5px;\n  outline-offset: -2px; }\n"
+
+/***/ },
+/* 303 */
+/***/ function(module, exports) {
+
+	module.exports = "<label class=\"sky-checkbox-wrapper\">\n  <input type=\"checkbox\" [ngModel]=\"selected\" (ngModelChange)=\"updateSelected($event)\" />\n  <span role=\"checkbox\" class=\"sky-checkbox\" tabindex=\"-1\"></span>\n  <ng-content select=\"sky-checkbox-label\"></ng-content>\n</label>\n"
+
+/***/ },
+/* 304 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-card {\n  background-color: #fff;\n  border: solid 1px #ccc;\n  display: inline-flex;\n  flex-direction: column;\n  height: 350px;\n  margin: 0 10px 10px 0;\n  transition: background-color 150ms;\n  vertical-align: top;\n  width: 300px;\n  box-shadow: 0px 0px 5px 0 #ddd; }\n\n.sky-card-small {\n  height: 250px;\n  width: 200px; }\n\n.sky-card-selectable .sky-card-header,\n.sky-card-selectable .sky-card-content {\n  cursor: pointer; }\n\n.sky-card-selected {\n  background-color: #eeeffb;\n  transition: background-color 150ms; }\n\n.sky-card-header {\n  align-items: center;\n  display: flex;\n  flex-shrink: 0;\n  margin: 0;\n  padding: 10px 0 0 0; }\n\n.sky-card-heading-left,\n.sky-card-heading-right {\n  font-weight: normal;\n  max-width: 34px; }\n\n.sky-card-heading-left {\n  padding-left: 10px; }\n\n.sky-card-heading-right {\n  padding-right: 10px; }\n\n.sky-card-heading-middle {\n  flex-grow: 1;\n  padding: 0 10px; }\n\n.sky-card-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 24px;\n  margin: 0; }\n\n.sky-card-check {\n  flex-shrink: 0;\n  padding-right: 10px; }\n  .sky-card-check .sky-check-wrapper {\n    margin-bottom: 2px; }\n\n.sky-card-content {\n  flex-grow: 1;\n  font-weight: normal;\n  margin: 0;\n  padding: 10px;\n  overflow: hidden; }\n\n.sky-card-actions {\n  border-top: solid 1px #ccc;\n  bottom: 0;\n  flex-shrink: 0;\n  padding: 7px 0;\n  text-align: center; }\n  .sky-card-actions .sky-context-menu-btn {\n    height: 32px;\n    width: 32px; }\n"
+
+/***/ },
+/* 305 */
+/***/ function(module, exports) {
+
+	module.exports = "<section class=\"sky-card\"\n    [ngClass]=\"\n      {\n        'sky-card-small': size === 'small',\n        'sky-card-selectable': selectable,\n        'sky-card-selected': selectable &amp;&amp; selected\n      }\n\">\n  <header>\n    <label class=\"sky-card-header\" [hidden]=\"!selectable &amp;&amp; titleEl.children.length === 0\">\n      <div class=\"sky-card-heading-middle\">\n        <h1 class=\"sky-card-title\" #titleEl>\n          <ng-content select=\"sky-card-title\"></ng-content>\n        </h1>\n      </div>\n      <div class=\"sky-card-check\" *ngIf=\"selectable\">\n        <sky-checkbox [(selected)]=\"selected\"></sky-checkbox>\n      </div>\n    </label>\n  </header>\n  <div class=\"sky-card-content\" (click)=\"contentClick()\">\n    <ng-content select=\"sky-card-content\"></ng-content>\n    <div class=\"sky-card-actions\" [hidden]=\"actionsEl.children.length === 0\" #actionsEl>\n      <ng-content select=\"sky-card-actions\"></ng-content>\n    </div>\n  </div>\n</section>\n"
+
+/***/ },
+/* 306 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var checkbox_component_1 = __webpack_require__(301);
+	exports.SkyCheckboxComponent = checkbox_component_1.SkyCheckboxComponent;
+	
+
+/***/ },
+/* 307 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var repeater_component_1 = __webpack_require__(308);
+	exports.SkyRepeaterComponent = repeater_component_1.SkyRepeaterComponent;
+	var repeater_item_component_1 = __webpack_require__(309);
+	exports.SkyRepeaterItemComponent = repeater_item_component_1.SkyRepeaterItemComponent;
+	
+
+/***/ },
+/* 308 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var repeater_item_component_1 = __webpack_require__(309);
+	var repeater_service_1 = __webpack_require__(313);
+	var SkyRepeaterComponent = (function () {
+	    function SkyRepeaterComponent(repeaterService) {
+	        var _this = this;
+	        this.repeaterService = repeaterService;
+	        this._expandMode = 'none';
+	        repeaterService.itemCollapseStateChange.subscribe(function (item) {
+	            if (_this._expandMode === 'single' && item.isExpanded) {
+	                for (var _i = 0, _a = _this.items.toArray(); _i < _a.length; _i++) {
+	                    var otherItem = _a[_i];
+	                    if (otherItem !== item && otherItem.isExpanded) {
+	                        otherItem.isExpanded = false;
+	                    }
+	                }
+	            }
+	        });
+	    }
+	    Object.defineProperty(SkyRepeaterComponent.prototype, "expandMode", {
+	        set: function (value) {
+	            this._expandMode = value || 'none';
+	            this.updateForExpandMode();
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    SkyRepeaterComponent.prototype.isCollapsible = function () {
+	        return this._expandMode !== 'none';
+	    };
+	    SkyRepeaterComponent.prototype.ngAfterContentInit = function () {
+	        var _this = this;
+	        // HACK: Have to use setTimeout() here to avoid error described in this issue:
+	        // https://github.com/angular/angular/issues/6005
+	        setTimeout(function () {
+	            _this.updateForExpandMode();
+	        }, 0);
+	        this.items.changes.subscribe(function () {
+	            _this.updateForExpandMode();
+	        });
+	    };
+	    SkyRepeaterComponent.prototype.updateForExpandMode = function () {
+	        if (this.items) {
+	            var foundExpanded_1 = false;
+	            var isCollapsible_1 = this.isCollapsible();
+	            var isSingle_1 = this._expandMode === 'single';
+	            this.items.forEach(function (item) {
+	                item.isCollapsible = isCollapsible_1;
+	                if (!isCollapsible_1 && !item.isExpanded) {
+	                    item.isExpanded = true;
+	                }
+	                else if (isSingle_1 && item.isExpanded) {
+	                    if (foundExpanded_1) {
+	                        item.isExpanded = false;
+	                    }
+	                    foundExpanded_1 = true;
+	                }
+	            });
+	        }
+	    };
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', String), 
+	        __metadata('design:paramtypes', [String])
+	    ], SkyRepeaterComponent.prototype, "expandMode", null);
+	    __decorate([
+	        core_1.ContentChildren(repeater_item_component_1.SkyRepeaterItemComponent), 
+	        __metadata('design:type', core_1.QueryList)
+	    ], SkyRepeaterComponent.prototype, "items", void 0);
+	    SkyRepeaterComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-repeater',
+	            styles: [__webpack_require__(317)],
+	            template: __webpack_require__(318),
+	            providers: [repeater_service_1.SkyRepeaterService]
+	        }), 
+	        __metadata('design:paramtypes', [repeater_service_1.SkyRepeaterService])
+	    ], SkyRepeaterComponent);
+	    return SkyRepeaterComponent;
+	}());
+	exports.SkyRepeaterComponent = SkyRepeaterComponent;
+	
+
+/***/ },
+/* 309 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var chevron_component_1 = __webpack_require__(310);
+	var repeater_service_1 = __webpack_require__(313);
+	var slide_service_1 = __webpack_require__(314);
+	var SkyRepeaterItemComponent = (function () {
+	    function SkyRepeaterItemComponent(repeaterService, elementRef, slideService) {
+	        this.repeaterService = repeaterService;
+	        this.elementRef = elementRef;
+	        this.slideService = slideService;
+	        this.isCollapsible = false;
+	        this.viewInitialized = false;
+	        this._isExpanded = true;
+	    }
+	    Object.defineProperty(SkyRepeaterItemComponent.prototype, "isExpanded", {
+	        get: function () {
+	            return this._isExpanded;
+	        },
+	        set: function (value) {
+	            this._isExpanded = value;
+	            this.repeaterService.onItemCollapseStateChange(this);
+	            if (this.viewInitialized) {
+	                this.slideForCollapsed();
+	            }
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    SkyRepeaterItemComponent.prototype.headerClick = function () {
+	        if (this.isCollapsible) {
+	            this.isExpanded = !this.isExpanded;
+	        }
+	    };
+	    SkyRepeaterItemComponent.prototype.chevronDirectionChange = function (direction) {
+	        this.isExpanded = direction === 'up';
+	    };
+	    SkyRepeaterItemComponent.prototype.ngAfterViewInit = function () {
+	        this.viewInitialized = true;
+	        this.slideForCollapsed(false);
+	    };
+	    SkyRepeaterItemComponent.prototype.slideForCollapsed = function (animate) {
+	        if (animate === void 0) { animate = true; }
+	        var direction = this.isExpanded ? 'down' : 'up';
+	        this.slideService.slide(this.elementRef, '.sky-repeater-item-content', direction, animate);
+	    };
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Boolean)
+	    ], SkyRepeaterItemComponent.prototype, "isExpanded", null);
+	    SkyRepeaterItemComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-repeater-item',
+	            styles: [__webpack_require__(315)],
+	            template: __webpack_require__(316),
+	            directives: [chevron_component_1.SkyChevronComponent],
+	            viewProviders: [slide_service_1.SkySlideService]
+	        }), 
+	        __metadata('design:paramtypes', [repeater_service_1.SkyRepeaterService, core_1.ElementRef, slide_service_1.SkySlideService])
+	    ], SkyRepeaterItemComponent);
+	    return SkyRepeaterItemComponent;
+	}());
+	exports.SkyRepeaterItemComponent = SkyRepeaterItemComponent;
+	
+
+/***/ },
+/* 310 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var resources_pipe_1 = __webpack_require__(294);
+	var SkyChevronComponent = (function () {
+	    function SkyChevronComponent() {
+	        this.directionChange = new core_1.EventEmitter();
+	        this.direction = 'up';
+	    }
+	    SkyChevronComponent.prototype.chevronClick = function () {
+	        this.direction = this.direction === 'up' ? 'down' : 'up';
+	        this.directionChange.emit(this.direction);
+	    };
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyChevronComponent.prototype, "directionChange", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Object)
+	    ], SkyChevronComponent.prototype, "direction", void 0);
+	    SkyChevronComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-chevron',
+	            styles: [__webpack_require__(311)],
+	            template: __webpack_require__(312),
+	            pipes: [resources_pipe_1.SkyResourcesPipe]
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyChevronComponent);
+	    return SkyChevronComponent;
+	}());
+	exports.SkyChevronComponent = SkyChevronComponent;
+	
+
+/***/ },
+/* 311 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-chevron {\n  border: none;\n  background-color: transparent;\n  flex-shrink: 0;\n  height: 24px;\n  margin: 0;\n  overflow: hidden;\n  padding: 0;\n  width: 24px; }\n\n.sky-chevron-part {\n  border-color: #d1dade;\n  border-style: solid;\n  border-width: 3px 0 0 0;\n  display: inline-block;\n  height: 10px;\n  position: relative;\n  top: 6px;\n  transition: transform 250ms, left 250ms;\n  vertical-align: top;\n  width: 10px; }\n\n.sky-chevron-up .sky-chevron-left {\n  left: 7px;\n  transform: rotate(-45deg); }\n\n.sky-chevron-up .sky-chevron-right {\n  left: -8px;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-left {\n  left: 0;\n  transform: rotate(45deg); }\n\n.sky-chevron-down .sky-chevron-right {\n  left: -1px;\n  transform: rotate(-45deg); }\n"
+
+/***/ },
+/* 312 */
+/***/ function(module, exports) {
+
+	module.exports = "<button\n    type=\"button\"\n    class=\"sky-chevron\"\n    [ngClass]=\"['sky-chevron-' + direction]\"\n    (click)=\"$event.stopPropagation();chevronClick()\"\n    [attr.aria-label]=\"(isCollapsed ? 'chevron_expand' : 'chevron_collapse') | skyResources\"\n>\n  <i class=\"sky-chevron-part sky-chevron-left\"></i>\n  <i class=\"sky-chevron-part sky-chevron-right\"></i>\n</button>\n"
+
+/***/ },
+/* 313 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var SkyRepeaterService = (function () {
+	    function SkyRepeaterService() {
+	        this.itemCollapseStateChange = new core_1.EventEmitter();
+	    }
+	    SkyRepeaterService.prototype.onItemCollapseStateChange = function (item) {
+	        this.itemCollapseStateChange.emit(item);
+	    };
+	    SkyRepeaterService = __decorate([
+	        core_1.Injectable(), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyRepeaterService);
+	    return SkyRepeaterService;
+	}());
+	exports.SkyRepeaterService = SkyRepeaterService;
+	
+
+/***/ },
+/* 314 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var animation_builder_1 = __webpack_require__(261);
+	var SkySlideService = (function () {
+	    function SkySlideService(animationBuilder) {
+	        this.animationBuilder = animationBuilder;
+	    }
+	    SkySlideService.prototype.slide = function (el, selector, direction, animate) {
+	        var _this = this;
+	        if (animate === void 0) { animate = false; }
+	        var animateEl = el.nativeElement.querySelector(selector);
+	        animateEl.style.overflow = 'hidden';
+	        if (animate) {
+	            var animation = this.animationBuilder.css();
+	            animation.setDuration(250);
+	            animateEl.removeAttribute('hidden');
+	            animateEl.style.height = 'auto';
+	            animateEl.style.display = 'block';
+	            var currentHeight = animateEl.offsetHeight;
+	            var fromHeight = void 0;
+	            var toHeight = void 0;
+	            if (direction === 'up') {
+	                fromHeight = currentHeight;
+	                toHeight = 0;
+	            }
+	            else {
+	                fromHeight = 0;
+	                toHeight = currentHeight;
+	            }
+	            animation
+	                .setFromStyles({
+	                height: fromHeight + 'px'
+	            })
+	                .setToStyles({
+	                height: toHeight + 'px'
+	            });
+	            if (this.currentAnimation) {
+	                this.currentAnimation.handleAnimationCompleted();
+	            }
+	            this.currentAnimation = animation
+	                .start(animateEl)
+	                .onComplete(function () {
+	                _this.currentAnimation = undefined;
+	                if (direction === 'up') {
+	                    animateEl.style.display = 'none';
+	                }
+	                else {
+	                    animateEl.style.height = 'auto';
+	                }
+	            });
+	        }
+	        else {
+	            if (direction === 'up') {
+	                animateEl.style.height = 0;
+	            }
+	            else {
+	                animateEl.style.height = 'auto';
+	            }
+	        }
+	    };
+	    SkySlideService = __decorate([
+	        core_1.Injectable(), 
+	        __metadata('design:paramtypes', [animation_builder_1.AnimationBuilder])
+	    ], SkySlideService);
+	    return SkySlideService;
+	}());
+	exports.SkySlideService = SkySlideService;
+	
+
+/***/ },
+/* 315 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-repeater-item {\n  display: flex;\n  padding: 10px;\n  border-bottom: 1px dotted #cccccc; }\n\n.sky-repeater-item-right {\n  flex-grow: 1; }\n\n.sky-repeater-item-header {\n  align-items: center;\n  display: flex; }\n\n.sky-repeater-item-chevron {\n  margin-left: 10px; }\n\n.sky-repeater-item-context-menu {\n  padding: 5px 10px 0 0; }\n\n.sky-repeater-item-title {\n  font-family: \"open sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  font-size: 15px;\n  font-weight: bold;\n  margin: 10px 0;\n  flex-grow: 1; }\n\n.sky-repeater-item-collapsible .sky-repeater-item-header {\n  cursor: pointer; }\n\n.sky-repeater-item-collapsible .sky-repeater-item-content {\n  padding-right: 34px; }\n\n.sky-repeater-item-collapsed .sky-repeater-item-content {\n  display: none; }\n"
+
+/***/ },
+/* 316 */
+/***/ function(module, exports) {
+
+	module.exports = "<section\n    class=\"sky-repeater-item\"\n    [ngClass]=\"{'sky-repeater-item-collapsible': isCollapsible}\"\n>\n  <div class=\"sky-repeater-item-left\">\n    <div\n        class=\"sky-repeater-item-context-menu\"\n        [hidden]=\"contextMenuEl.children.length === 0\"\n        #contextMenuEl\n    >\n      <ng-content select=\"sky-repeater-item-context-menu\"></ng-content>\n    </div>\n  </div>\n  <div class=\"sky-repeater-item-right\">\n    <header\n        class=\"sky-repeater-item-header\"\n        [hidden]=\"titleEl.children.length === 0\"\n        (click)=\"headerClick()\"\n    >\n      <h1 class=\"sky-repeater-item-title\" #titleEl>\n        <ng-content select=\"sky-repeater-item-title\"></ng-content>\n      </h1>\n      <div class=\"sky-repeater-item-chevron\" [hidden]=\"!isCollapsible\">\n        <sky-chevron\n            [direction]=\"isExpanded ? 'up' : 'down'\"\n            (directionChange)=\"chevronDirectionChange($event)\"\n        >\n        </sky-chevron>\n      </div>\n    </header>\n    <div class=\"sky-repeater-item-content\">\n      <ng-content select=\"sky-repeater-item-content\"></ng-content>\n    </div>\n  </div>\n</section>\n"
+
+/***/ },
+/* 317 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-repeater {\n  padding: 0; }\n"
+
+/***/ },
+/* 318 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"sky-repeater\">\n  <ng-content></ng-content>\n</div>\n"
+
+/***/ },
+/* 319 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tile_dashboard_service_1 = __webpack_require__(320);
+	exports.SkyTileDashboardService = tile_dashboard_service_1.SkyTileDashboardService;
+	var tile_component_1 = __webpack_require__(321);
+	exports.SkyTileComponent = tile_component_1.SkyTileComponent;
+	var tile_content_section_component_1 = __webpack_require__(324);
+	exports.SkyTileContentSectionComponent = tile_content_section_component_1.SkyTileContentSectionComponent;
+	var tile_dashboard_column_component_1 = __webpack_require__(327);
+	exports.SkyTileDashboardColumnComponent = tile_dashboard_column_component_1.SkyTileDashboardColumnComponent;
+	var tile_dashboard_component_1 = __webpack_require__(342);
+	exports.SkyTileDashboardComponent = tile_dashboard_component_1.SkyTileDashboardComponent;
+	
+
+/***/ },
+/* 320 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var ATTR_TILE_ID = '_sky-tile-dashboard-tile-id';
+	var bagIdIndex = 0;
+	function getTileId(tile) {
+	    var el = tile.elementRef.nativeElement;
+	    var tileId;
+	    while (el) {
+	        tileId = el.getAttribute(ATTR_TILE_ID);
+	        if (tileId) {
+	            return tileId;
+	        }
+	        el = el.parentElement;
+	    }
+	    return undefined;
+	}
+	var SkyTileDashboardService = (function () {
+	    function SkyTileDashboardService() {
+	        this.ready = new core_1.EventEmitter();
+	        this.configChange = new core_1.EventEmitter();
+	    }
+	    SkyTileDashboardService.prototype.findTile = function (tileId) {
+	        if (this.config && this.config.columns) {
+	            for (var _i = 0, _a = this.config.columns; _i < _a.length; _i++) {
+	                var column = _a[_i];
+	                if (column.tiles) {
+	                    for (var _b = 0, _c = column.tiles; _b < _c.length; _b++) {
+	                        var tile = _c[_b];
+	                        if (tile.id === tileId) {
+	                            return tile;
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	        return undefined;
+	    };
+	    SkyTileDashboardService.prototype.setConfig = function (config) {
+	        this.config = config;
+	        this.checkReady();
+	    };
+	    SkyTileDashboardService.prototype.addTileComponent = function (tile, component) {
+	        this.tileComponents = this.tileComponents || [];
+	        this.tileComponents.push(component);
+	        component.location.nativeElement.setAttribute(ATTR_TILE_ID, tile.id);
+	    };
+	    SkyTileDashboardService.prototype.setDragulaService = function (dragulaService) {
+	        var _this = this;
+	        bagIdIndex++;
+	        this.dragulaService = dragulaService;
+	        this.bagId = 'sky-tile-dashboard-bag-' + bagIdIndex;
+	        dragulaService.setOptions(this.bagId, {
+	            moves: function (el, container, handle) {
+	                return handle.matches('.sky-tile-grab-handle');
+	            }
+	        });
+	        dragulaService.drop.subscribe(function (value) {
+	            var bag = dragulaService.find(_this.bagId);
+	            if (bag) {
+	                var containers = bag.drake.containers;
+	                var columns = [];
+	                for (var _i = 0, containers_1 = containers; _i < containers_1.length; _i++) {
+	                    var container = containers_1[_i];
+	                    var column = { tiles: [] }, tiles = container.querySelectorAll('[' + ATTR_TILE_ID + ']');
+	                    if (tiles) {
+	                        for (var _a = 0, tiles_1 = tiles; _a < tiles_1.length; _a++) {
+	                            var tileEl = tiles_1[_a];
+	                            var tileId = tileEl.getAttribute(ATTR_TILE_ID);
+	                            var tile = _this.findTile(tileId);
+	                            if (tile) {
+	                                column.tiles.push(tile);
+	                            }
+	                        }
+	                    }
+	                    columns.push(column);
+	                }
+	                var config = {
+	                    columns: columns
+	                };
+	                _this.configChange.emit(config);
+	            }
+	        });
+	        this.checkReady();
+	    };
+	    SkyTileDashboardService.prototype.tileIsCollapsed = function (tile) {
+	        var tileConfig = this.findTile(getTileId(tile));
+	        if (tileConfig) {
+	            return tileConfig.isCollapsed;
+	        }
+	        return undefined;
+	    };
+	    SkyTileDashboardService.prototype.setTileCollapsed = function (tile, isCollapsed) {
+	        var tileConfig = this.findTile(getTileId(tile));
+	        if (tileConfig) {
+	            tileConfig.isCollapsed = isCollapsed;
+	            this.configChange.emit(this.config);
+	        }
+	    };
+	    SkyTileDashboardService.prototype.checkReady = function () {
+	        if (this.config && this.dragulaService) {
+	            this.ready.emit(this.config);
+	        }
+	    };
+	    SkyTileDashboardService = __decorate([
+	        core_1.Injectable(), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyTileDashboardService);
+	    return SkyTileDashboardService;
+	}());
+	exports.SkyTileDashboardService = SkyTileDashboardService;
+	
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var slide_service_1 = __webpack_require__(314);
+	var chevron_component_1 = __webpack_require__(310);
+	var resources_pipe_1 = __webpack_require__(294);
+	var tile_dashboard_service_1 = __webpack_require__(320);
+	var SkyTileComponent = (function () {
+	    function SkyTileComponent(dashboardService, slideService, elementRef) {
+	        this.dashboardService = dashboardService;
+	        this.slideService = slideService;
+	        this.elementRef = elementRef;
+	        this.isInDashboardColumn = false;
+	        this.settingsClick = new core_1.EventEmitter();
+	        this.collapsedStateChange = new core_1.EventEmitter();
+	        this._isCollapsed = false;
+	        this.isInDashboardColumn = !!dashboardService;
+	    }
+	    Object.defineProperty(SkyTileComponent.prototype, "isCollapsed", {
+	        get: function () {
+	            if (this.dashboardService) {
+	                return this.dashboardService.tileIsCollapsed(this);
+	            }
+	            return this._isCollapsed;
+	        },
+	        set: function (value) {
+	            if (this.dashboardService) {
+	                this.dashboardService.setTileCollapsed(this, value);
+	            }
+	            else {
+	                this._isCollapsed = value;
+	            }
+	            this.slideForCollapsed();
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    SkyTileComponent.prototype.settingsButtonClicked = function () {
+	        this.settingsClick.emit(undefined);
+	    };
+	    Object.defineProperty(SkyTileComponent.prototype, "hasSettings", {
+	        get: function () {
+	            return this.settingsClick.observers.length > 0;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    SkyTileComponent.prototype.titleClick = function () {
+	        this.isCollapsed = !this.isCollapsed;
+	    };
+	    SkyTileComponent.prototype.chevronDirectionChange = function (direction) {
+	        this.isCollapsed = direction === 'down';
+	    };
+	    SkyTileComponent.prototype.ngAfterViewInit = function () {
+	        if (this.isCollapsed) {
+	            this.slideForCollapsed(false);
+	        }
+	    };
+	    SkyTileComponent.prototype.slideForCollapsed = function (animate) {
+	        if (animate === void 0) { animate = true; }
+	        var direction = this.isCollapsed ? 'up' : 'down';
+	        this.slideService.slide(this.elementRef, '.sky-tile-content', direction, animate);
+	    };
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyTileComponent.prototype, "settingsClick", void 0);
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyTileComponent.prototype, "collapsedStateChange", void 0);
+	    SkyTileComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-tile',
+	            styles: [__webpack_require__(322)],
+	            template: __webpack_require__(323),
+	            directives: [chevron_component_1.SkyChevronComponent],
+	            pipes: [resources_pipe_1.SkyResourcesPipe],
+	            viewProviders: [slide_service_1.SkySlideService]
+	        }),
+	        __param(0, core_1.Optional()), 
+	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, slide_service_1.SkySlideService, core_1.ElementRef])
+	    ], SkyTileComponent);
+	    return SkyTileComponent;
+	}());
+	exports.SkyTileComponent = SkyTileComponent;
+	
+
+/***/ },
+/* 322 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-tile {\n  background-color: #fff;\n  margin-bottom: 20px; }\n\n.sky-tile-header {\n  border-color: #e7eaec;\n  border-style: solid solid none;\n  border-width: 4px 0 0;\n  display: flex; }\n\n.sky-tile-header-content {\n  display: flex;\n  flex: 1;\n  align-items: baseline;\n  cursor: pointer; }\n\n.sky-tile-title {\n  font-family: \"Oswald\", sans-serif;\n  font-size: 22px;\n  font-weight: 100;\n  margin: 0;\n  padding: 10px 15px; }\n\n.sky-tile-summary {\n  color: #1ab394;\n  font-family: \"Oswald\", sans-serif;\n  font-size: 18px;\n  font-weight: 400;\n  opacity: 0;\n  padding-right: 15px;\n  transition: opacity 250ms;\n  max-height: 30px;\n  overflow: hidden; }\n\n.sky-tile-collapsed .sky-tile-summary {\n  opacity: 1; }\n\n.sky-tile-header-column-tools {\n  flex-shrink: 0; }\n\n.sky-tile-content {\n  border-color: #e7eaec;\n  border-image: none;\n  border-style: solid solid none;\n  border-width: 1px 0; }\n\n:host /deep/ .sky-tile-tools .sky-chevron {\n  margin: 12px 9px 12px 0; }\n\n.sky-tile-settings {\n  color: #D1DADE;\n  height: 24px;\n  margin: 12px 9px 12px 0;\n  padding: 0;\n  background-color: transparent;\n  border: none;\n  width: 24px; }\n\n.sky-tile-grab-handle {\n  color: #E7EAEC;\n  cursor: move;\n  cursor: -webkit-grab;\n  cursor: -moz-grab;\n  font-size: 15px;\n  padding: 15px 15px 15px 0; }\n"
+
+/***/ },
+/* 323 */
+/***/ function(module, exports) {
+
+	module.exports = "<section\n    class=\"sky-tile\"\n    [attr.sky-tile-id]=\"tileId\"\n    [ngClass]=\"{\n      'sky-tile-collapsed': isCollapsed\n    }\"\n>\n  <header class=\"sky-tile-header\">\n    <div class=\"sky-tile-header-content\" (click)=\"titleClick()\">\n      <h1 class=\"sky-tile-title\">\n        <ng-content select=\"sky-tile-title\"></ng-content>\n      </h1>\n      <div class=\"sky-tile-summary\">\n        <ng-content select=\"sky-tile-summary\"></ng-content>\n      </div>\n    </div>\n    <div class=\"sky-tile-header-column-tools\">\n      <div class=\"sky-tile-tools\">\n        <sky-chevron\n            [direction]=\"isCollapsed ? 'down' : 'up'\"\n            (directionChange)=\"chevronDirectionChange($event)\"\n        >\n        </sky-chevron>\n        <button\n            type=\"button\"\n            *ngIf=\"hasSettings\"\n            class=\"sky-tile-settings fa fa-cog\"\n            (click)=\"settingsButtonClicked();\"\n        >\n        </button>\n        <i\n            class=\"sky-tile-grab-handle fa fa-th\"\n            *ngIf=\"isInDashboardColumn\"\n        >\n        </i>\n      </div>\n    </div>\n  </header>\n  <div class=\"sky-tile-content\">\n  <!-- <div class=\"sky-tile-content\" [hidden]=\"isCollapsed\"> -->\n    <ng-content select=\"sky-tile-content\"></ng-content>\n    {{isCollapsed}}\n  </div>\n</section>\n"
+
+/***/ },
+/* 324 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var SkyTileContentSectionComponent = (function () {
+	    function SkyTileContentSectionComponent() {
+	    }
+	    SkyTileContentSectionComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-tile-content-section',
+	            styles: [__webpack_require__(325)],
+	            template: __webpack_require__(326)
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], SkyTileContentSectionComponent);
+	    return SkyTileContentSectionComponent;
+	}());
+	exports.SkyTileContentSectionComponent = SkyTileContentSectionComponent;
+	
+
+/***/ },
+/* 325 */
+/***/ function(module, exports) {
+
+	module.exports = ".sky-tile-content-section {\n  padding: 15px; }\n"
+
+/***/ },
+/* 326 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"sky-tile-content-section\">\n  <ng-content></ng-content>\n</div>\n"
+
+/***/ },
+/* 327 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var ng2_dragula_1 = __webpack_require__(328);
+	var tile_dashboard_service_1 = __webpack_require__(320);
+	var columnIdIndex = 0;
+	var SkyTileDashboardColumnComponent = (function () {
+	    function SkyTileDashboardColumnComponent(dashboardService, dcl) {
+	        this.dashboardService = dashboardService;
+	        this.dcl = dcl;
+	        this.viewInitialized = false;
+	        columnIdIndex++;
+	        this.columnId = 'tile-dashboard-column-' + columnIdIndex;
+	        this.bagId = dashboardService.bagId;
+	    }
+	    Object.defineProperty(SkyTileDashboardColumnComponent.prototype, "tiles", {
+	        set: function (value) {
+	            this._tiles = value;
+	            this.updateTiles();
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    SkyTileDashboardColumnComponent.prototype.updateTiles = function () {
+	        var _this = this;
+	        if (this.viewInitialized && this._tiles) {
+	            var _loop_1 = function(tile) {
+	                this_1.dcl.loadNextToLocation(tile.component, this_1.content)
+	                    .then(function (componentRef) {
+	                    _this.dashboardService.addTileComponent(tile, componentRef);
+	                });
+	            };
+	            var this_1 = this;
+	            for (var _i = 0, _a = this._tiles; _i < _a.length; _i++) {
+	                var tile = _a[_i];
+	                _loop_1(tile);
+	            }
+	        }
+	    };
+	    SkyTileDashboardColumnComponent.prototype.ngAfterViewInit = function () {
+	        this.viewInitialized = true;
+	        this.updateTiles();
+	    };
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Array), 
+	        __metadata('design:paramtypes', [Array])
+	    ], SkyTileDashboardColumnComponent.prototype, "tiles", null);
+	    __decorate([
+	        core_1.ViewChild('content', { read: core_1.ViewContainerRef }), 
+	        __metadata('design:type', core_1.ViewContainerRef)
+	    ], SkyTileDashboardColumnComponent.prototype, "content", void 0);
+	    SkyTileDashboardColumnComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-tile-dashboard-column',
+	            styles: [__webpack_require__(340)],
+	            template: __webpack_require__(341),
+	            directives: [ng2_dragula_1.Dragula]
+	        }), 
+	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, core_1.DynamicComponentLoader])
+	    ], SkyTileDashboardColumnComponent);
+	    return SkyTileDashboardColumnComponent;
+	}());
+	exports.SkyTileDashboardColumnComponent = SkyTileDashboardColumnComponent;
+	
+
+/***/ },
+/* 328 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	function __export(m) {
+	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+	}
+	var dragula_directive_1 = __webpack_require__(329);
+	var dragula_provider_1 = __webpack_require__(330);
+	__export(__webpack_require__(329));
+	__export(__webpack_require__(330));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = {
+	    directives: [dragula_directive_1.Dragula],
+	    providers: [dragula_provider_1.DragulaService]
+	};
+
+
+/***/ },
+/* 329 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var __metadata = (this && this.__metadata) || function (k, v) {
+	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+	};
+	var core_1 = __webpack_require__(4);
+	var dragula_provider_1 = __webpack_require__(330);
+	var dragula = __webpack_require__(331);
+	var Dragula = (function () {
+	    function Dragula(el, dragulaService) {
+	        this.el = el;
+	        this.dragulaService = dragulaService;
+	        this.container = el.nativeElement;
+	    }
+	    Dragula.prototype.ngOnInit = function () {
+	        var _this = this;
+	        // console.log(this.bag);
+	        var bag = this.dragulaService.find(this.bag);
+	        var checkModel = function () {
+	            if (_this.dragulaModel) {
+	                if (_this.drake.models) {
+	                    _this.drake.models.push(_this.dragulaModel);
+	                }
+	                else {
+	                    _this.drake.models = [_this.dragulaModel];
+	                }
+	            }
+	        };
+	        if (bag) {
+	            this.drake = bag.drake;
+	            checkModel();
+	            this.drake.containers.push(this.container);
+	        }
+	        else {
+	            this.drake = dragula({
+	                containers: [this.container]
+	            });
+	            checkModel();
+	            this.dragulaService.add(this.bag, this.drake);
+	        }
+	    };
+	    Dragula.prototype.ngOnChanges = function (changes) {
+	        // console.log('dragula.directive: ngOnChanges');
+	        // console.log(changes);
+	        if (changes && changes['dragulaModel']) {
+	            if (this.drake) {
+	                if (this.drake.models) {
+	                    var modelIndex = this.drake.models.indexOf(changes['dragulaModel'].previousValue);
+	                    this.drake.models.splice(modelIndex, 1, changes['dragulaModel'].currentValue);
+	                }
+	                else {
+	                    this.drake.models = [changes['dragulaModel'].currentValue];
+	                }
+	            }
+	        }
+	    };
+	    __decorate([
+	        core_1.Input('dragula'), 
+	        __metadata('design:type', String)
+	    ], Dragula.prototype, "bag", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Object)
+	    ], Dragula.prototype, "dragulaModel", void 0);
+	    Dragula = __decorate([
+	        core_1.Directive({
+	            selector: '[dragula]'
+	        }), 
+	        __metadata('design:paramtypes', [core_1.ElementRef, dragula_provider_1.DragulaService])
+	    ], Dragula);
+	    return Dragula;
+	}());
+	exports.Dragula = Dragula;
+
+
+/***/ },
+/* 330 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+	    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+	    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+	    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+	    return c > 3 && r && Object.defineProperty(target, key, r), r;
+	};
+	var __metadata = (this && this.__metadata) || function (k, v) {
+	    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+	};
+	var dragula = __webpack_require__(331);
+	var core_1 = __webpack_require__(4);
+	var DragulaService = (function () {
+	    function DragulaService() {
+	        this.cancel = new core_1.EventEmitter();
+	        this.cloned = new core_1.EventEmitter();
+	        this.drag = new core_1.EventEmitter();
+	        this.dragend = new core_1.EventEmitter();
+	        this.drop = new core_1.EventEmitter();
+	        this.out = new core_1.EventEmitter();
+	        this.over = new core_1.EventEmitter();
+	        this.remove = new core_1.EventEmitter();
+	        this.shadow = new core_1.EventEmitter();
+	        this.dropModel = new core_1.EventEmitter();
+	        this.removeModel = new core_1.EventEmitter();
+	        this.events = [
+	            'cancel',
+	            'cloned',
+	            'drag',
+	            'dragend',
+	            'drop',
+	            'out',
+	            'over',
+	            'remove',
+	            'shadow',
+	            'dropModel',
+	            'removeModel'
+	        ];
+	        this.bags = [];
+	    }
+	    DragulaService.prototype.add = function (name, drake) {
+	        var bag = this.find(name);
+	        if (bag) {
+	            throw new Error('Bag named: "' + name + '" already exists.');
+	        }
+	        bag = {
+	            name: name,
+	            drake: drake
+	        };
+	        this.bags.push(bag);
+	        if (drake.models) {
+	            this.handleModels(name, drake);
+	        }
+	        if (!bag.initEvents) {
+	            this.setupEvents(bag);
+	        }
+	        return bag;
+	    };
+	    DragulaService.prototype.find = function (name) {
+	        for (var i = 0; i < this.bags.length; i++) {
+	            if (this.bags[i].name === name) {
+	                return this.bags[i];
+	            }
+	        }
+	    };
+	    DragulaService.prototype.destroy = function (name) {
+	        var bag = this.find(name);
+	        var i = this.bags.indexOf(bag);
+	        this.bags.splice(i, 1);
+	        bag.drake.destroy();
+	    };
+	    DragulaService.prototype.setOptions = function (name, options) {
+	        var bag = this.add(name, dragula(options));
+	        this.handleModels(name, bag.drake);
+	    };
+	    DragulaService.prototype.handleModels = function (name, drake) {
+	        var _this = this;
+	        var dragElm;
+	        var dragIndex;
+	        var dropIndex;
+	        var sourceModel;
+	        drake.on('remove', function (el, source) {
+	            if (!drake.models) {
+	                return;
+	            }
+	            sourceModel = drake.models[drake.containers.indexOf(source)];
+	            sourceModel.splice(dragIndex, 1);
+	            // console.log('REMOVE');
+	            // console.log(sourceModel);
+	            _this.removeModel.emit([name, el, source]);
+	        });
+	        drake.on('drag', function (el, source) {
+	            dragElm = el;
+	            dragIndex = _this.domIndexOf(el, source);
+	        });
+	        drake.on('drop', function (dropElm, target, source) {
+	            if (!drake.models || !target) {
+	                return;
+	            }
+	            dropIndex = _this.domIndexOf(dropElm, target);
+	            sourceModel = drake.models[drake.containers.indexOf(source)];
+	            // console.log('DROP');
+	            // console.log(sourceModel);
+	            if (target === source) {
+	                sourceModel.splice(dropIndex, 0, sourceModel.splice(dragIndex, 1)[0]);
+	            }
+	            else {
+	                var notCopy = dragElm === dropElm;
+	                var targetModel = drake.models[drake.containers.indexOf(target)];
+	                var dropElmModel = notCopy ? sourceModel[dragIndex] : JSON.parse(JSON.stringify(sourceModel[dragIndex]));
+	                if (notCopy) {
+	                    sourceModel.splice(dragIndex, 1);
+	                }
+	                targetModel.splice(dropIndex, 0, dropElmModel);
+	                target.removeChild(dropElm); // element must be removed for ngFor to apply correctly
+	            }
+	            _this.dropModel.emit([name, dropElm, target, source]);
+	        });
+	    };
+	    DragulaService.prototype.setupEvents = function (bag) {
+	        bag.initEvents = true;
+	        var that = this;
+	        var emitter = function (type) {
+	            function replicate() {
+	                var args = Array.prototype.slice.call(arguments);
+	                that[type].emit([bag.name].concat(args));
+	            }
+	            bag.drake.on(type, replicate);
+	        };
+	        this.events.forEach(emitter);
+	    };
+	    DragulaService.prototype.domIndexOf = function (child, parent) {
+	        return Array.prototype.indexOf.call(parent.children, child);
+	    };
+	    DragulaService = __decorate([
+	        core_1.Injectable(), 
+	        __metadata('design:paramtypes', [])
+	    ], DragulaService);
+	    return DragulaService;
+	}());
+	exports.DragulaService = DragulaService;
+
+
+/***/ },
+/* 331 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	var emitter = __webpack_require__(332);
+	var crossvent = __webpack_require__(336);
+	var classes = __webpack_require__(339);
+	var doc = document;
+	var documentElement = doc.documentElement;
+
+	function dragula (initialContainers, options) {
+	  var len = arguments.length;
+	  if (len === 1 && Array.isArray(initialContainers) === false) {
+	    options = initialContainers;
+	    initialContainers = [];
+	  }
+	  var _mirror; // mirror image
+	  var _source; // source container
+	  var _item; // item being dragged
+	  var _offsetX; // reference x
+	  var _offsetY; // reference y
+	  var _moveX; // reference move x
+	  var _moveY; // reference move y
+	  var _initialSibling; // reference sibling when grabbed
+	  var _currentSibling; // reference sibling now
+	  var _copy; // item used for copying
+	  var _renderTimer; // timer for setTimeout renderMirrorImage
+	  var _lastDropTarget = null; // last container item was over
+	  var _grabbed; // holds mousedown context until first mousemove
+
+	  var o = options || {};
+	  if (o.moves === void 0) { o.moves = always; }
+	  if (o.accepts === void 0) { o.accepts = always; }
+	  if (o.invalid === void 0) { o.invalid = invalidTarget; }
+	  if (o.containers === void 0) { o.containers = initialContainers || []; }
+	  if (o.isContainer === void 0) { o.isContainer = never; }
+	  if (o.copy === void 0) { o.copy = false; }
+	  if (o.copySortSource === void 0) { o.copySortSource = false; }
+	  if (o.revertOnSpill === void 0) { o.revertOnSpill = false; }
+	  if (o.removeOnSpill === void 0) { o.removeOnSpill = false; }
+	  if (o.direction === void 0) { o.direction = 'vertical'; }
+	  if (o.ignoreInputTextSelection === void 0) { o.ignoreInputTextSelection = true; }
+	  if (o.mirrorContainer === void 0) { o.mirrorContainer = doc.body; }
+
+	  var drake = emitter({
+	    containers: o.containers,
+	    start: manualStart,
+	    end: end,
+	    cancel: cancel,
+	    remove: remove,
+	    destroy: destroy,
+	    canMove: canMove,
+	    dragging: false
+	  });
+
+	  if (o.removeOnSpill === true) {
+	    drake.on('over', spillOver).on('out', spillOut);
+	  }
+
+	  events();
+
+	  return drake;
+
+	  function isContainer (el) {
+	    return drake.containers.indexOf(el) !== -1 || o.isContainer(el);
+	  }
+
+	  function events (remove) {
+	    var op = remove ? 'remove' : 'add';
+	    touchy(documentElement, op, 'mousedown', grab);
+	    touchy(documentElement, op, 'mouseup', release);
+	  }
+
+	  function eventualMovements (remove) {
+	    var op = remove ? 'remove' : 'add';
+	    touchy(documentElement, op, 'mousemove', startBecauseMouseMoved);
+	  }
+
+	  function movements (remove) {
+	    var op = remove ? 'remove' : 'add';
+	    crossvent[op](documentElement, 'selectstart', preventGrabbed); // IE8
+	    crossvent[op](documentElement, 'click', preventGrabbed);
+	  }
+
+	  function destroy () {
+	    events(true);
+	    release({});
+	  }
+
+	  function preventGrabbed (e) {
+	    if (_grabbed) {
+	      e.preventDefault();
+	    }
+	  }
+
+	  function grab (e) {
+	    _moveX = e.clientX;
+	    _moveY = e.clientY;
+
+	    var ignore = whichMouseButton(e) !== 1 || e.metaKey || e.ctrlKey;
+	    if (ignore) {
+	      return; // we only care about honest-to-god left clicks and touch events
+	    }
+	    var item = e.target;
+	    var context = canStart(item);
+	    if (!context) {
+	      return;
+	    }
+	    _grabbed = context;
+	    eventualMovements();
+	    if (e.type === 'mousedown') {
+	      if (isInput(item)) { // see also: https://github.com/bevacqua/dragula/issues/208
+	        item.focus(); // fixes https://github.com/bevacqua/dragula/issues/176
+	      } else {
+	        e.preventDefault(); // fixes https://github.com/bevacqua/dragula/issues/155
+	      }
+	    }
+	  }
+
+	  function startBecauseMouseMoved (e) {
+	    if (!_grabbed) {
+	      return;
+	    }
+	    if (whichMouseButton(e) === 0) {
+	      release({});
+	      return; // when text is selected on an input and then dragged, mouseup doesn't fire. this is our only hope
+	    }
+	    // truthy check fixes #239, equality fixes #207
+	    if (e.clientX !== void 0 && e.clientX === _moveX && e.clientY !== void 0 && e.clientY === _moveY) {
+	      return;
+	    }
+	    if (o.ignoreInputTextSelection) {
+	      var clientX = getCoord('clientX', e);
+	      var clientY = getCoord('clientY', e);
+	      var elementBehindCursor = doc.elementFromPoint(clientX, clientY);
+	      if (isInput(elementBehindCursor)) {
+	        return;
+	      }
+	    }
+
+	    var grabbed = _grabbed; // call to end() unsets _grabbed
+	    eventualMovements(true);
+	    movements();
+	    end();
+	    start(grabbed);
+
+	    var offset = getOffset(_item);
+	    _offsetX = getCoord('pageX', e) - offset.left;
+	    _offsetY = getCoord('pageY', e) - offset.top;
+
+	    classes.add(_copy || _item, 'gu-transit');
+	    renderMirrorImage();
+	    drag(e);
+	  }
+
+	  function canStart (item) {
+	    if (drake.dragging && _mirror) {
+	      return;
+	    }
+	    if (isContainer(item)) {
+	      return; // don't drag container itself
+	    }
+	    var handle = item;
+	    while (getParent(item) && isContainer(getParent(item)) === false) {
+	      if (o.invalid(item, handle)) {
+	        return;
+	      }
+	      item = getParent(item); // drag target should be a top element
+	      if (!item) {
+	        return;
+	      }
+	    }
+	    var source = getParent(item);
+	    if (!source) {
+	      return;
+	    }
+	    if (o.invalid(item, handle)) {
+	      return;
+	    }
+
+	    var movable = o.moves(item, source, handle, nextEl(item));
+	    if (!movable) {
+	      return;
+	    }
+
+	    return {
+	      item: item,
+	      source: source
+	    };
+	  }
+
+	  function canMove (item) {
+	    return !!canStart(item);
+	  }
+
+	  function manualStart (item) {
+	    var context = canStart(item);
+	    if (context) {
+	      start(context);
+	    }
+	  }
+
+	  function start (context) {
+	    if (isCopy(context.item, context.source)) {
+	      _copy = context.item.cloneNode(true);
+	      drake.emit('cloned', _copy, context.item, 'copy');
+	    }
+
+	    _source = context.source;
+	    _item = context.item;
+	    _initialSibling = _currentSibling = nextEl(context.item);
+
+	    drake.dragging = true;
+	    drake.emit('drag', _item, _source);
+	  }
+
+	  function invalidTarget () {
+	    return false;
+	  }
+
+	  function end () {
+	    if (!drake.dragging) {
+	      return;
+	    }
+	    var item = _copy || _item;
+	    drop(item, getParent(item));
+	  }
+
+	  function ungrab () {
+	    _grabbed = false;
+	    eventualMovements(true);
+	    movements(true);
+	  }
+
+	  function release (e) {
+	    ungrab();
+
+	    if (!drake.dragging) {
+	      return;
+	    }
+	    var item = _copy || _item;
+	    var clientX = getCoord('clientX', e);
+	    var clientY = getCoord('clientY', e);
+	    var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
+	    var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
+	    if (dropTarget && ((_copy && o.copySortSource) || (!_copy || dropTarget !== _source))) {
+	      drop(item, dropTarget);
+	    } else if (o.removeOnSpill) {
+	      remove();
+	    } else {
+	      cancel();
+	    }
+	  }
+
+	  function drop (item, target) {
+	    var parent = getParent(item);
+	    if (_copy && o.copySortSource && target === _source) {
+	      parent.removeChild(_item);
+	    }
+	    if (isInitialPlacement(target)) {
+	      drake.emit('cancel', item, _source, _source);
+	    } else {
+	      drake.emit('drop', item, target, _source, _currentSibling);
+	    }
+	    cleanup();
+	  }
+
+	  function remove () {
+	    if (!drake.dragging) {
+	      return;
+	    }
+	    var item = _copy || _item;
+	    var parent = getParent(item);
+	    if (parent) {
+	      parent.removeChild(item);
+	    }
+	    drake.emit(_copy ? 'cancel' : 'remove', item, parent, _source);
+	    cleanup();
+	  }
+
+	  function cancel (revert) {
+	    if (!drake.dragging) {
+	      return;
+	    }
+	    var reverts = arguments.length > 0 ? revert : o.revertOnSpill;
+	    var item = _copy || _item;
+	    var parent = getParent(item);
+	    var initial = isInitialPlacement(parent);
+	    if (initial === false && reverts) {
+	      if (_copy) {
+	        parent.removeChild(_copy);
+	      } else {
+	        _source.insertBefore(item, _initialSibling);
+	      }
+	    }
+	    if (initial || reverts) {
+	      drake.emit('cancel', item, _source, _source);
+	    } else {
+	      drake.emit('drop', item, parent, _source, _currentSibling);
+	    }
+	    cleanup();
+	  }
+
+	  function cleanup () {
+	    var item = _copy || _item;
+	    ungrab();
+	    removeMirrorImage();
+	    if (item) {
+	      classes.rm(item, 'gu-transit');
+	    }
+	    if (_renderTimer) {
+	      clearTimeout(_renderTimer);
+	    }
+	    drake.dragging = false;
+	    if (_lastDropTarget) {
+	      drake.emit('out', item, _lastDropTarget, _source);
+	    }
+	    drake.emit('dragend', item);
+	    _source = _item = _copy = _initialSibling = _currentSibling = _renderTimer = _lastDropTarget = null;
+	  }
+
+	  function isInitialPlacement (target, s) {
+	    var sibling;
+	    if (s !== void 0) {
+	      sibling = s;
+	    } else if (_mirror) {
+	      sibling = _currentSibling;
+	    } else {
+	      sibling = nextEl(_copy || _item);
+	    }
+	    return target === _source && sibling === _initialSibling;
+	  }
+
+	  function findDropTarget (elementBehindCursor, clientX, clientY) {
+	    var target = elementBehindCursor;
+	    while (target && !accepted()) {
+	      target = getParent(target);
+	    }
+	    return target;
+
+	    function accepted () {
+	      var droppable = isContainer(target);
+	      if (droppable === false) {
+	        return false;
+	      }
+
+	      var immediate = getImmediateChild(target, elementBehindCursor);
+	      var reference = getReference(target, immediate, clientX, clientY);
+	      var initial = isInitialPlacement(target, reference);
+	      if (initial) {
+	        return true; // should always be able to drop it right back where it was
+	      }
+	      return o.accepts(_item, target, _source, reference);
+	    }
+	  }
+
+	  function drag (e) {
+	    if (!_mirror) {
+	      return;
+	    }
+	    e.preventDefault();
+
+	    var clientX = getCoord('clientX', e);
+	    var clientY = getCoord('clientY', e);
+	    var x = clientX - _offsetX;
+	    var y = clientY - _offsetY;
+
+	    _mirror.style.left = x + 'px';
+	    _mirror.style.top = y + 'px';
+
+	    var item = _copy || _item;
+	    var elementBehindCursor = getElementBehindPoint(_mirror, clientX, clientY);
+	    var dropTarget = findDropTarget(elementBehindCursor, clientX, clientY);
+	    var changed = dropTarget !== null && dropTarget !== _lastDropTarget;
+	    if (changed || dropTarget === null) {
+	      out();
+	      _lastDropTarget = dropTarget;
+	      over();
+	    }
+	    var parent = getParent(item);
+	    if (dropTarget === _source && _copy && !o.copySortSource) {
+	      if (parent) {
+	        parent.removeChild(item);
+	      }
+	      return;
+	    }
+	    var reference;
+	    var immediate = getImmediateChild(dropTarget, elementBehindCursor);
+	    if (immediate !== null) {
+	      reference = getReference(dropTarget, immediate, clientX, clientY);
+	    } else if (o.revertOnSpill === true && !_copy) {
+	      reference = _initialSibling;
+	      dropTarget = _source;
+	    } else {
+	      if (_copy && parent) {
+	        parent.removeChild(item);
+	      }
+	      return;
+	    }
+	    if (
+	      (reference === null && changed) ||
+	      reference !== item &&
+	      reference !== nextEl(item)
+	    ) {
+	      _currentSibling = reference;
+	      dropTarget.insertBefore(item, reference);
+	      drake.emit('shadow', item, dropTarget, _source);
+	    }
+	    function moved (type) { drake.emit(type, item, _lastDropTarget, _source); }
+	    function over () { if (changed) { moved('over'); } }
+	    function out () { if (_lastDropTarget) { moved('out'); } }
+	  }
+
+	  function spillOver (el) {
+	    classes.rm(el, 'gu-hide');
+	  }
+
+	  function spillOut (el) {
+	    if (drake.dragging) { classes.add(el, 'gu-hide'); }
+	  }
+
+	  function renderMirrorImage () {
+	    if (_mirror) {
+	      return;
+	    }
+	    var rect = _item.getBoundingClientRect();
+	    _mirror = _item.cloneNode(true);
+	    _mirror.style.width = getRectWidth(rect) + 'px';
+	    _mirror.style.height = getRectHeight(rect) + 'px';
+	    classes.rm(_mirror, 'gu-transit');
+	    classes.add(_mirror, 'gu-mirror');
+	    o.mirrorContainer.appendChild(_mirror);
+	    touchy(documentElement, 'add', 'mousemove', drag);
+	    classes.add(o.mirrorContainer, 'gu-unselectable');
+	    drake.emit('cloned', _mirror, _item, 'mirror');
+	  }
+
+	  function removeMirrorImage () {
+	    if (_mirror) {
+	      classes.rm(o.mirrorContainer, 'gu-unselectable');
+	      touchy(documentElement, 'remove', 'mousemove', drag);
+	      getParent(_mirror).removeChild(_mirror);
+	      _mirror = null;
+	    }
+	  }
+
+	  function getImmediateChild (dropTarget, target) {
+	    var immediate = target;
+	    while (immediate !== dropTarget && getParent(immediate) !== dropTarget) {
+	      immediate = getParent(immediate);
+	    }
+	    if (immediate === documentElement) {
+	      return null;
+	    }
+	    return immediate;
+	  }
+
+	  function getReference (dropTarget, target, x, y) {
+	    var horizontal = o.direction === 'horizontal';
+	    var reference = target !== dropTarget ? inside() : outside();
+	    return reference;
+
+	    function outside () { // slower, but able to figure out any position
+	      var len = dropTarget.children.length;
+	      var i;
+	      var el;
+	      var rect;
+	      for (i = 0; i < len; i++) {
+	        el = dropTarget.children[i];
+	        rect = el.getBoundingClientRect();
+	        if (horizontal && (rect.left + rect.width / 2) > x) { return el; }
+	        if (!horizontal && (rect.top + rect.height / 2) > y) { return el; }
+	      }
+	      return null;
+	    }
+
+	    function inside () { // faster, but only available if dropped inside a child element
+	      var rect = target.getBoundingClientRect();
+	      if (horizontal) {
+	        return resolve(x > rect.left + getRectWidth(rect) / 2);
+	      }
+	      return resolve(y > rect.top + getRectHeight(rect) / 2);
+	    }
+
+	    function resolve (after) {
+	      return after ? nextEl(target) : target;
+	    }
+	  }
+
+	  function isCopy (item, container) {
+	    return typeof o.copy === 'boolean' ? o.copy : o.copy(item, container);
+	  }
+	}
+
+	function touchy (el, op, type, fn) {
+	  var touch = {
+	    mouseup: 'touchend',
+	    mousedown: 'touchstart',
+	    mousemove: 'touchmove'
+	  };
+	  var pointers = {
+	    mouseup: 'pointerup',
+	    mousedown: 'pointerdown',
+	    mousemove: 'pointermove'
+	  };
+	  var microsoft = {
+	    mouseup: 'MSPointerUp',
+	    mousedown: 'MSPointerDown',
+	    mousemove: 'MSPointerMove'
+	  };
+	  if (global.navigator.pointerEnabled) {
+	    crossvent[op](el, pointers[type], fn);
+	  } else if (global.navigator.msPointerEnabled) {
+	    crossvent[op](el, microsoft[type], fn);
+	  } else {
+	    crossvent[op](el, touch[type], fn);
+	    crossvent[op](el, type, fn);
+	  }
+	}
+
+	function whichMouseButton (e) {
+	  if (e.touches !== void 0) { return e.touches.length; }
+	  if (e.which !== void 0 && e.which !== 0) { return e.which; } // see https://github.com/bevacqua/dragula/issues/261
+	  if (e.buttons !== void 0) { return e.buttons; }
+	  var button = e.button;
+	  if (button !== void 0) { // see https://github.com/jquery/jquery/blob/99e8ff1baa7ae341e94bb89c3e84570c7c3ad9ea/src/event.js#L573-L575
+	    return button & 1 ? 1 : button & 2 ? 3 : (button & 4 ? 2 : 0);
+	  }
+	}
+
+	function getOffset (el) {
+	  var rect = el.getBoundingClientRect();
+	  return {
+	    left: rect.left + getScroll('scrollLeft', 'pageXOffset'),
+	    top: rect.top + getScroll('scrollTop', 'pageYOffset')
+	  };
+	}
+
+	function getScroll (scrollProp, offsetProp) {
+	  if (typeof global[offsetProp] !== 'undefined') {
+	    return global[offsetProp];
+	  }
+	  if (documentElement.clientHeight) {
+	    return documentElement[scrollProp];
+	  }
+	  return doc.body[scrollProp];
+	}
+
+	function getElementBehindPoint (point, x, y) {
+	  var p = point || {};
+	  var state = p.className;
+	  var el;
+	  p.className += ' gu-hide';
+	  el = doc.elementFromPoint(x, y);
+	  p.className = state;
+	  return el;
+	}
+
+	function never () { return false; }
+	function always () { return true; }
+	function getRectWidth (rect) { return rect.width || (rect.right - rect.left); }
+	function getRectHeight (rect) { return rect.height || (rect.bottom - rect.top); }
+	function getParent (el) { return el.parentNode === doc ? null : el.parentNode; }
+	function isInput (el) { return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || isEditable(el); }
+	function isEditable (el) {
+	  if (!el) { return false; } // no parents were editable
+	  if (el.contentEditable === 'false') { return false; } // stop the lookup
+	  if (el.contentEditable === 'true') { return true; } // found a contentEditable element in the chain
+	  return isEditable(getParent(el)); // contentEditable is set to 'inherit'
+	}
+
+	function nextEl (el) {
+	  return el.nextElementSibling || manually();
+	  function manually () {
+	    var sibling = el;
+	    do {
+	      sibling = sibling.nextSibling;
+	    } while (sibling && sibling.nodeType !== 1);
+	    return sibling;
+	  }
+	}
+
+	function getEventHost (e) {
+	  // on touchend event, we have to use `e.changedTouches`
+	  // see http://stackoverflow.com/questions/7192563/touchend-event-properties
+	  // see https://github.com/bevacqua/dragula/issues/34
+	  if (e.targetTouches && e.targetTouches.length) {
+	    return e.targetTouches[0];
+	  }
+	  if (e.changedTouches && e.changedTouches.length) {
+	    return e.changedTouches[0];
+	  }
+	  return e;
+	}
+
+	function getCoord (coord, e) {
+	  var host = getEventHost(e);
+	  var missMap = {
+	    pageX: 'clientX', // IE8
+	    pageY: 'clientY' // IE8
+	  };
+	  if (coord in missMap && !(coord in host) && missMap[coord] in host) {
+	    coord = missMap[coord];
+	  }
+	  return host[coord];
+	}
+
+	module.exports = dragula;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 332 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var atoa = __webpack_require__(333);
+	var debounce = __webpack_require__(334);
+
+	module.exports = function emitter (thing, options) {
+	  var opts = options || {};
+	  var evt = {};
+	  if (thing === undefined) { thing = {}; }
+	  thing.on = function (type, fn) {
+	    if (!evt[type]) {
+	      evt[type] = [fn];
+	    } else {
+	      evt[type].push(fn);
+	    }
+	    return thing;
+	  };
+	  thing.once = function (type, fn) {
+	    fn._once = true; // thing.off(fn) still works!
+	    thing.on(type, fn);
+	    return thing;
+	  };
+	  thing.off = function (type, fn) {
+	    var c = arguments.length;
+	    if (c === 1) {
+	      delete evt[type];
+	    } else if (c === 0) {
+	      evt = {};
+	    } else {
+	      var et = evt[type];
+	      if (!et) { return thing; }
+	      et.splice(et.indexOf(fn), 1);
+	    }
+	    return thing;
+	  };
+	  thing.emit = function () {
+	    var args = atoa(arguments);
+	    return thing.emitterSnapshot(args.shift()).apply(this, args);
+	  };
+	  thing.emitterSnapshot = function (type) {
+	    var et = (evt[type] || []).slice(0);
+	    return function () {
+	      var args = atoa(arguments);
+	      var ctx = this || thing;
+	      if (type === 'error' && opts.throws !== false && !et.length) { throw args.length === 1 ? args[0] : args; }
+	      et.forEach(function emitter (listen) {
+	        if (opts.async) { debounce(listen, args, ctx); } else { listen.apply(ctx, args); }
+	        if (listen._once) { thing.off(type, listen); }
+	      });
+	      return thing;
+	    };
+	  };
+	  return thing;
+	};
+
+
+/***/ },
+/* 333 */
+/***/ function(module, exports) {
+
+	module.exports = function atoa (a, n) { return Array.prototype.slice.call(a, n); }
+
+
+/***/ },
+/* 334 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var ticky = __webpack_require__(335);
+
+	module.exports = function debounce (fn, args, ctx) {
+	  if (!fn) { return; }
+	  ticky(function run () {
+	    fn.apply(ctx || null, args || []);
+	  });
+	};
+
+
+/***/ },
+/* 335 */
+/***/ function(module, exports) {
+
+	var si = typeof setImmediate === 'function', tick;
+	if (si) {
+	  tick = function (fn) { setImmediate(fn); };
+	} else {
+	  tick = function (fn) { setTimeout(fn, 0); };
+	}
+
+	module.exports = tick;
+
+/***/ },
+/* 336 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	var customEvent = __webpack_require__(337);
+	var eventmap = __webpack_require__(338);
+	var doc = global.document;
+	var addEvent = addEventEasy;
+	var removeEvent = removeEventEasy;
+	var hardCache = [];
+
+	if (!global.addEventListener) {
+	  addEvent = addEventHard;
+	  removeEvent = removeEventHard;
+	}
+
+	module.exports = {
+	  add: addEvent,
+	  remove: removeEvent,
+	  fabricate: fabricateEvent
+	};
+
+	function addEventEasy (el, type, fn, capturing) {
+	  return el.addEventListener(type, fn, capturing);
+	}
+
+	function addEventHard (el, type, fn) {
+	  return el.attachEvent('on' + type, wrap(el, type, fn));
+	}
+
+	function removeEventEasy (el, type, fn, capturing) {
+	  return el.removeEventListener(type, fn, capturing);
+	}
+
+	function removeEventHard (el, type, fn) {
+	  var listener = unwrap(el, type, fn);
+	  if (listener) {
+	    return el.detachEvent('on' + type, listener);
+	  }
+	}
+
+	function fabricateEvent (el, type, model) {
+	  var e = eventmap.indexOf(type) === -1 ? makeCustomEvent() : makeClassicEvent();
+	  if (el.dispatchEvent) {
+	    el.dispatchEvent(e);
+	  } else {
+	    el.fireEvent('on' + type, e);
+	  }
+	  function makeClassicEvent () {
+	    var e;
+	    if (doc.createEvent) {
+	      e = doc.createEvent('Event');
+	      e.initEvent(type, true, true);
+	    } else if (doc.createEventObject) {
+	      e = doc.createEventObject();
+	    }
+	    return e;
+	  }
+	  function makeCustomEvent () {
+	    return new customEvent(type, { detail: model });
+	  }
+	}
+
+	function wrapperFactory (el, type, fn) {
+	  return function wrapper (originalEvent) {
+	    var e = originalEvent || global.event;
+	    e.target = e.target || e.srcElement;
+	    e.preventDefault = e.preventDefault || function preventDefault () { e.returnValue = false; };
+	    e.stopPropagation = e.stopPropagation || function stopPropagation () { e.cancelBubble = true; };
+	    e.which = e.which || e.keyCode;
+	    fn.call(el, e);
+	  };
+	}
+
+	function wrap (el, type, fn) {
+	  var wrapper = unwrap(el, type, fn) || wrapperFactory(el, type, fn);
+	  hardCache.push({
+	    wrapper: wrapper,
+	    element: el,
+	    type: type,
+	    fn: fn
+	  });
+	  return wrapper;
+	}
+
+	function unwrap (el, type, fn) {
+	  var i = find(el, type, fn);
+	  if (i) {
+	    var wrapper = hardCache[i].wrapper;
+	    hardCache.splice(i, 1); // free up a tad of memory
+	    return wrapper;
+	  }
+	}
+
+	function find (el, type, fn) {
+	  var i, item;
+	  for (i = 0; i < hardCache.length; i++) {
+	    item = hardCache[i];
+	    if (item.element === el && item.type === type && item.fn === fn) {
+	      return i;
+	    }
+	  }
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 337 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {
+	var NativeCustomEvent = global.CustomEvent;
+
+	function useNative () {
+	  try {
+	    var p = new NativeCustomEvent('cat', { detail: { foo: 'bar' } });
+	    return  'cat' === p.type && 'bar' === p.detail.foo;
+	  } catch (e) {
+	  }
+	  return false;
+	}
+
+	/**
+	 * Cross-browser `CustomEvent` constructor.
+	 *
+	 * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent.CustomEvent
+	 *
+	 * @public
+	 */
+
+	module.exports = useNative() ? NativeCustomEvent :
+
+	// IE >= 9
+	'function' === typeof document.createEvent ? function CustomEvent (type, params) {
+	  var e = document.createEvent('CustomEvent');
+	  if (params) {
+	    e.initCustomEvent(type, params.bubbles, params.cancelable, params.detail);
+	  } else {
+	    e.initCustomEvent(type, false, false, void 0);
+	  }
+	  return e;
+	} :
+
+	// IE <= 8
+	function CustomEvent (type, params) {
+	  var e = document.createEventObject();
+	  e.type = type;
+	  if (params) {
+	    e.bubbles = Boolean(params.bubbles);
+	    e.cancelable = Boolean(params.cancelable);
+	    e.detail = params.detail;
+	  } else {
+	    e.bubbles = false;
+	    e.cancelable = false;
+	    e.detail = void 0;
+	  }
+	  return e;
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 338 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	var eventmap = [];
+	var eventname = '';
+	var ron = /^on/;
+
+	for (eventname in global) {
+	  if (ron.test(eventname)) {
+	    eventmap.push(eventname.slice(2));
+	  }
+	}
+
+	module.exports = eventmap;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 339 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var cache = {};
+	var start = '(?:^|\\s)';
+	var end = '(?:\\s|$)';
+
+	function lookupClass (className) {
+	  var cached = cache[className];
+	  if (cached) {
+	    cached.lastIndex = 0;
+	  } else {
+	    cache[className] = cached = new RegExp(start + className + end, 'g');
+	  }
+	  return cached;
+	}
+
+	function addClass (el, className) {
+	  var current = el.className;
+	  if (!current.length) {
+	    el.className = className;
+	  } else if (!lookupClass(className).test(current)) {
+	    el.className += ' ' + className;
+	  }
+	}
+
+	function rmClass (el, className) {
+	  el.className = el.className.replace(lookupClass(className), ' ').trim();
+	}
+
+	module.exports = {
+	  add: addClass,
+	  rm: rmClass
+	};
+
+
+/***/ },
+/* 340 */
+/***/ function(module, exports) {
+
+	module.exports = ":host {\n  flex: 1;\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 767px) {\n  :host {\n    padding: 0; }\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n\n.sky-tile-dashboard-column {\n  min-height: 100px;\n  width: 100%; }\n"
+
+/***/ },
+/* 341 */
+/***/ function(module, exports) {
+
+	module.exports = "<div class=\"sky-tile-dashboard-column\" [dragula]=\"bagId\">\n  <div #content></div>\n</div>\n"
+
+/***/ },
+/* 342 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var core_1 = __webpack_require__(4);
+	var ng2_dragula_1 = __webpack_require__(328);
+	var tile_dashboard_column_component_1 = __webpack_require__(327);
+	var tile_dashboard_service_1 = __webpack_require__(320);
+	var SkyTileDashboardComponent = (function () {
+	    function SkyTileDashboardComponent(dashboardService, dragulaService) {
+	        var _this = this;
+	        this.dashboardService = dashboardService;
+	        this.configChange = new core_1.EventEmitter();
+	        this.configSet = false;
+	        dashboardService.configChange.subscribe(function (config) {
+	            _this.configChange.emit(config);
+	        });
+	        dashboardService.setDragulaService(dragulaService);
+	    }
+	    Object.defineProperty(SkyTileDashboardComponent.prototype, "config", {
+	        set: function (config) {
+	            if (config && !this.configSet) {
+	                this.dashboardConfigForBinding = config;
+	                this.dashboardService.setConfig(config);
+	                this.configSet = true;
+	            }
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    __decorate([
+	        core_1.Output(), 
+	        __metadata('design:type', Object)
+	    ], SkyTileDashboardComponent.prototype, "configChange", void 0);
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Object), 
+	        __metadata('design:paramtypes', [Object])
+	    ], SkyTileDashboardComponent.prototype, "config", null);
+	    SkyTileDashboardComponent = __decorate([
+	        core_1.Component({
+	            selector: 'sky-tile-dashboard',
+	            styles: [__webpack_require__(343)],
+	            template: __webpack_require__(344),
+	            directives: [tile_dashboard_column_component_1.SkyTileDashboardColumnComponent],
+	            providers: [ng2_dragula_1.DragulaService, tile_dashboard_service_1.SkyTileDashboardService]
+	        }), 
+	        __metadata('design:paramtypes', [tile_dashboard_service_1.SkyTileDashboardService, ng2_dragula_1.DragulaService])
+	    ], SkyTileDashboardComponent);
+	    return SkyTileDashboardComponent;
+	}());
+	exports.SkyTileDashboardComponent = SkyTileDashboardComponent;
+	
+
+/***/ },
+/* 343 */
+/***/ function(module, exports) {
+
+	module.exports = ":host {\n  display: flex;\n  padding: 0 10px; }\n\n@media (max-width: 991px) {\n  :host {\n    display: block;\n    padding: 0; }\n  :host /deep/ .sky-tile-dashboard-column {\n    padding: 0; } }\n\n@media (max-width: 767px) {\n  :host /deep/ .sky-tile {\n    margin: 0; } }\n"
+
+/***/ },
+/* 344 */
+/***/ function(module, exports) {
+
+	module.exports = "<sky-tile-dashboard-column *ngFor=\"let column of dashboardConfigForBinding?.columns\" [tiles]=\"column.tiles\"></sky-tile-dashboard-column>\n<ng-content></ng-content>\n"
+
+/***/ },
+/* 345 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var checkModule = angular.module('barkbaud.skyux2.check', [])
+	    .directive('skyCheckbox', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyCheckboxComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = checkModule;
+	
 
 /***/ }
 /******/ ]);

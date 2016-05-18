@@ -30,7 +30,7 @@
     "grunt-skylint": "git+https://github.com/blackbaud/grunt-skylint",
     "es7-reflect-metadata": "1.6.0",
     "source-map-loader": "0.1.5",
-    "typescript": "^1.9.0-dev.20160409",
+    "typescript": "1.8.10",
     "typings": "0.8.1",
     "webpack": "1.13.0",
     "webpack-dev-server": "1.14.1",

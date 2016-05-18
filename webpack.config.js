@@ -86,7 +86,7 @@ defaultConfig = {
             '.js'
         ],
         alias: {
-            'blackbaud-skyux2': path.join(__dirname, 'node_modules', 'blackbaud-skyux2', 'src', 'modules', 'core.ts')
+            'blackbaud-skyux2': path.join(__dirname, 'node_modules', 'blackbaud-skyux2', 'src', 'core.ts')
         }
     },
 
