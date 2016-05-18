@@ -46,32 +46,6 @@
 
 	"use strict";
 	var upgrade_adapter_1 = __webpack_require__(1);
-	//import SkyUx2Adapter  from './skyux2port/core.ts';
-	var core_1 = __webpack_require__(4);
-	var SkyAlertComponent = (function () {
-	    function SkyAlertComponent() {
-	    }
-	    SkyAlertComponent.prototype.getCls = function () {
-	        var cls = 'sky-alert-' + this.alertType;
-	        return cls;
-	    };
-	    __decorate([
-	        core_1.Input(), 
-	        __metadata('design:type', String)
-	    ], SkyAlertComponent.prototype, "alertType", void 0);
-	    SkyAlertComponent = __decorate([
-	        core_1.Component({
-	            selector: 'sky-alert',
-	            styles: ["\n    .sky-alert {\n    padding: 10px;\n    margin-bottom: 20px;\n    border: solid 1px transparent;\n    border-radius: 4px;\n}\n\n// These alerts have the default Bootstrap colors.  We need to change them at some point.\n.sky-alert-info {\n    background-color: #d9edf7;\n    border-color: #bce8f1;\n    color: #31708f;\n}\n\n.sky-alert-success {\n    background-color: #dff0d8;\n    border-color: #d6e9c6;\n    color: #3c763d;\n}\n\n.sky-alert-warning {\n    background-color: #fcf8e3;\n    border-color: #faebcc;\n    color: #8a6d3b;\n}\n\n.sky-alert-danger {\n    background-color: #f2dede;\n    border-color: #ebccd1;\n    color: #ca2a2a;\n}\n\n}\n  "],
-	            template: "<div class=\"sky-alert\" [ngClass]=\"getCls()\" >\n  <ng-content></ng-content>\n</div>"
-	        }), 
-	        __metadata('design:paramtypes', [])
-	    ], SkyAlertComponent);
-	    return SkyAlertComponent;
-	}());
-	exports.SkyAlertComponent = SkyAlertComponent;
-	angular.module('barkbaud.skyux2', [])
-	    .directive('skyAlert', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(SkyAlertComponent));
 	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', 'barkbaud.skyux2' /*, SkyUx2Adapter.name*/], { strictDi: true });
 	
 
