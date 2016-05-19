@@ -13,13 +13,15 @@
         </div>
         <!--<div ng-switch-default class="bb-repeater">
           <div ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" class="bb-repeater-item">
-            <h4 class="bb-repeater-item-title">{{:: note.title }}</h4>
+            <h4 class="bb-repeater-item-title">{{ :: note.title }}</h4>
             <h5>{{:: dogNotesTile.getNoteDate(note.date) }}</h5>
             <p>{{:: note.description }}</p>
           </div>
         </div>-->
         <div ng-switch-default>
-          <sky-repeater [expand-mode]="'single'">
+          <bb-dog-note-repeater [notes]="dogNotesTile.notes">
+          </bb-dog-note-repeater>
+          <!--<sky-repeater [expand-mode]="'single'">
             <sky-repeater-item ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" [is-expanded]="item.expanded" [is-collapsible]="dogNotesTile.isCollapsible">
               <sky-repeater-item-title>
                 <div>
@@ -32,7 +34,7 @@
                 </div>
               </sky-repeater-item-content>
             </sky-repeater-item>
-          </sky-repeater>
+          </sky-repeater>-->
         </div>
       </div>
     </div>

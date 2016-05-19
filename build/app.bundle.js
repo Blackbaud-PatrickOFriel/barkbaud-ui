@@ -47,7 +47,8 @@
 	"use strict";
 	var upgrade_adapter_1 = __webpack_require__(1);
 	var core_ts_1 = __webpack_require__(289);
-	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', core_ts_1.default.name], { strictDi: true });
+	var dognoterepeater_down_ts_1 = __webpack_require__(346);
+	upgrade_adapter_1.upgradeAdapter.bootstrap(document.body, ['barkbaud', core_ts_1.default.name, dognoterepeater_down_ts_1.default.name], { strictDi: true });
 	
 
 /***/ },
@@ -40507,13 +40508,9 @@
 	"use strict";
 	var alert_module_ts_1 = __webpack_require__(290);
 	var check_module_ts_1 = __webpack_require__(345);
-	var repeater_module_ts_1 = __webpack_require__(346);
-	var repeater_item_module_ts_1 = __webpack_require__(347);
 	var skyUx2Adapter = angular.module('barkbaud.skyux2', [
 	    alert_module_ts_1.default.name,
-	    check_module_ts_1.default.name,
-	    repeater_module_ts_1.default.name,
-	    repeater_item_module_ts_1.default.name
+	    check_module_ts_1.default.name
 	]);
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = skyUx2Adapter;
@@ -41494,8 +41491,7 @@
 	            styles: [__webpack_require__(315)],
 	            template: __webpack_require__(316),
 	            directives: [chevron_component_1.SkyChevronComponent],
-	            viewProviders: [slide_service_1.SkySlideService],
-	            providers: [repeater_service_1.SkyRepeaterService]
+	            viewProviders: [slide_service_1.SkySlideService]
 	        }), 
 	        __metadata('design:paramtypes', [repeater_service_1.SkyRepeaterService, core_1.ElementRef, slide_service_1.SkySlideService])
 	    ], SkyRepeaterItemComponent);
@@ -43292,12 +43288,12 @@
 
 	"use strict";
 	/* global angular */
-	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var dognoterepeater_ts_1 = __webpack_require__(347);
 	var upgrade_adapter_1 = __webpack_require__(1);
-	var repeaterModule = angular.module('barkbaud.skyux2.repeater', [])
-	    .directive('skyRepeater', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyRepeaterComponent));
+	var dogNoteRepeaterModule = angular.module('barkbaud.dognoterepeater', [])
+	    .directive('bbDogNoteRepeater', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(dognoterepeater_ts_1.DogNoteRepeaterComponent));
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = repeaterModule;
+	exports.default = dogNoteRepeaterModule;
 	
 
 /***/ },
@@ -43305,13 +43301,27 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	/* global angular */
+	var core_1 = __webpack_require__(4);
 	var blackbaud_skyux2_1 = __webpack_require__(291);
-	var upgrade_adapter_1 = __webpack_require__(1);
-	var repeaterItemModule = angular.module('barkbaud.skyux2.repeateritem', [])
-	    .directive('skyRepeaterItem', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyRepeaterItemComponent));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = repeaterItemModule;
+	var DogNoteRepeaterComponent = (function () {
+	    function DogNoteRepeaterComponent() {
+	        this.collapsible = true;
+	    }
+	    __decorate([
+	        core_1.Input(), 
+	        __metadata('design:type', Object)
+	    ], DogNoteRepeaterComponent.prototype, "notes", void 0);
+	    DogNoteRepeaterComponent = __decorate([
+	        core_1.Component({
+	            selector: 'bb-dog-note-repeater',
+	            directives: [blackbaud_skyux2_1.SkyRepeaterComponent, blackbaud_skyux2_1.SkyRepeaterItemComponent],
+	            template: "\n  <sky-repeater [expandMode]=\"'single'\">\n    <sky-repeater-item *ngFor=\"let note of notes\" [isCollapsible]=\"collapsible\">\n      <sky-repeater-item-title>\n        <div>\n          {{ note.title }}\n        </div>\n      </sky-repeater-item-title>\n      <sky-repeater-item-content>\n        <div>\n          {{ note.description }}\n        </div>\n      </sky-repeater-item-content>\n    </sky-repeater-item>\n  </sky-repeater>\n\n  "
+	        }), 
+	        __metadata('design:paramtypes', [])
+	    ], DogNoteRepeaterComponent);
+	    return DogNoteRepeaterComponent;
+	}());
+	exports.DogNoteRepeaterComponent = DogNoteRepeaterComponent;
 	
 
 /***/ }

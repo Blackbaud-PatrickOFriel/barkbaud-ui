@@ -1415,26 +1415,28 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '        </div>\n' +
         '        <!--<div ng-switch-default class="bb-repeater">\n' +
         '          <div ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" class="bb-repeater-item">\n' +
-        '            <h4 class="bb-repeater-item-title">{{:: note.title }}</h4>\n' +
+        '            <h4 class="bb-repeater-item-title">{{ :: note.title }}</h4>\n' +
         '            <h5>{{:: dogNotesTile.getNoteDate(note.date) }}</h5>\n' +
         '            <p>{{:: note.description }}</p>\n' +
         '          </div>\n' +
         '        </div>-->\n' +
         '        <div ng-switch-default>\n' +
-        '          <sky-repeater [expand-mode]="\'single\'">\n' +
+        '          <bb-dog-note-repeater [notes]="dogNotesTile.notes">\n' +
+        '          </bb-dog-note-repeater>\n' +
+        '          <!--<sky-repeater [expand-mode]="\'single\'">\n' +
         '            <sky-repeater-item ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" [is-expanded]="item.expanded" [is-collapsible]="dogNotesTile.isCollapsible">\n' +
         '              <sky-repeater-item-title>\n' +
         '                <div>\n' +
-        '                  {{note.title}}\n' +
+        '                  {{ note.title }}\n' +
         '                </div>\n' +
         '              </sky-repeater-item-title>\n' +
         '              <sky-repeater-item-content>\n' +
         '                <div>\n' +
-        '                {{ note.description }}\n' +
-        '              </div>\n' +
+        '                  {{ note.description }}\n' +
+        '                </div>\n' +
         '              </sky-repeater-item-content>\n' +
         '            </sky-repeater-item>\n' +
-        '          </sky-repeater>\n' +
+        '          </sky-repeater>-->\n' +
         '        </div>\n' +
         '      </div>\n' +
         '    </div>\n' +
