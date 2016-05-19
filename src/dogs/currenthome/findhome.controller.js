@@ -3,7 +3,7 @@
 (function () {
     'use strict';
 
-    function FindHomeController($modalInstance, bbData, dogId) {
+    function FindHomeController($uibModalInstance, bbData, dogId) {
         var self = this;
 
         self.search = function (searchText) {
@@ -35,7 +35,7 @@
     }
 
     FindHomeController.$inject = [
-        '$modalInstance',
+        '$uibModalInstance',
         'bbData',
         'dogId'
     ];
