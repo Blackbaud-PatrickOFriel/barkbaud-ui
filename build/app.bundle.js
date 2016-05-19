@@ -43303,6 +43303,9 @@
 	"use strict";
 	var core_1 = __webpack_require__(4);
 	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var ContextMenu = upgrade_adapter_1.upgradeAdapter.upgradeNg1Component('bbContextMenu1');
+	var ContextMenuItem = upgrade_adapter_1.upgradeAdapter.upgradeNg1Component('bbContextMenuItem1');
 	var DogNoteRepeaterComponent = (function () {
 	    function DogNoteRepeaterComponent() {
 	        this.collapsible = true;
@@ -43314,8 +43317,8 @@
 	    DogNoteRepeaterComponent = __decorate([
 	        core_1.Component({
 	            selector: 'bb-dog-note-repeater',
-	            directives: [blackbaud_skyux2_1.SkyRepeaterComponent, blackbaud_skyux2_1.SkyRepeaterItemComponent],
-	            template: "\n  <sky-repeater [expandMode]=\"'single'\">\n    <sky-repeater-item *ngFor=\"let note of notes\" [isCollapsible]=\"collapsible\">\n      <sky-repeater-item-title>\n        <div>\n          {{ note.title }}\n        </div>\n      </sky-repeater-item-title>\n      <sky-repeater-item-content>\n        <div>\n          {{ note.description }}\n        </div>\n      </sky-repeater-item-content>\n    </sky-repeater-item>\n  </sky-repeater>\n\n  "
+	            directives: [blackbaud_skyux2_1.SkyRepeaterComponent, blackbaud_skyux2_1.SkyRepeaterItemComponent, ContextMenu, ContextMenuItem],
+	            template: "\n  <sky-repeater [expandMode]=\"'single'\">\n    <sky-repeater-item *ngFor=\"let note of notes\" [isCollapsible]=\"collapsible\">\n      <sky-repeater-item-context-menu>\n        <bb-context-menu1 bb-context-menu-label=\"Some label\">\n          <bb-context-menu-item1>Edit history</bb-context-menu-item1>\n          <bb-context-menu-item1>Remove History</bb-context-menu-item1>\n        </bb-context-menu1>\n      </sky-repeater-item-context-menu>\n      <sky-repeater-item-title>\n        <div>\n          {{ note.title }}\n        </div>\n      </sky-repeater-item-title>\n      <sky-repeater-item-content>\n        <div>\n          {{ note.description }}\n        </div>\n      </sky-repeater-item-content>\n    </sky-repeater-item>\n  </sky-repeater>\n\n  "
 	        }), 
 	        __metadata('design:paramtypes', [])
 	    ], DogNoteRepeaterComponent);
