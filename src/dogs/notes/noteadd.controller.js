@@ -3,7 +3,7 @@
 (function () {
     'use strict';
 
-    function NoteAddController($modalInstance, bbData, dogId) {
+    function NoteAddController($uibModalInstance, bbData, dogId) {
         var self = this;
 
         self.note = {};
@@ -21,7 +21,7 @@
     }
 
     NoteAddController.$inject = [
-        '$modalInstance',
+        '$uibModalInstance',
         'bbData',
         'dogId'
     ];
