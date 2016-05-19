@@ -40507,9 +40507,13 @@
 	"use strict";
 	var alert_module_ts_1 = __webpack_require__(290);
 	var check_module_ts_1 = __webpack_require__(345);
+	var repeater_module_ts_1 = __webpack_require__(346);
+	var repeater_item_module_ts_1 = __webpack_require__(347);
 	var skyUx2Adapter = angular.module('barkbaud.skyux2', [
 	    alert_module_ts_1.default.name,
-	    check_module_ts_1.default.name
+	    check_module_ts_1.default.name,
+	    repeater_module_ts_1.default.name,
+	    repeater_item_module_ts_1.default.name
 	]);
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = skyUx2Adapter;
@@ -41490,7 +41494,8 @@
 	            styles: [__webpack_require__(315)],
 	            template: __webpack_require__(316),
 	            directives: [chevron_component_1.SkyChevronComponent],
-	            viewProviders: [slide_service_1.SkySlideService]
+	            viewProviders: [slide_service_1.SkySlideService],
+	            providers: [repeater_service_1.SkyRepeaterService]
 	        }), 
 	        __metadata('design:paramtypes', [repeater_service_1.SkyRepeaterService, core_1.ElementRef, slide_service_1.SkySlideService])
 	    ], SkyRepeaterItemComponent);
@@ -43279,6 +43284,34 @@
 	    .directive('skyCheckbox', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyCheckboxComponent));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = checkModule;
+	
+
+/***/ },
+/* 346 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var repeaterModule = angular.module('barkbaud.skyux2.repeater', [])
+	    .directive('skyRepeater', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyRepeaterComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = repeaterModule;
+	
+
+/***/ },
+/* 347 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	/* global angular */
+	var blackbaud_skyux2_1 = __webpack_require__(291);
+	var upgrade_adapter_1 = __webpack_require__(1);
+	var repeaterItemModule = angular.module('barkbaud.skyux2.repeateritem', [])
+	    .directive('skyRepeaterItem', upgrade_adapter_1.upgradeAdapter.downgradeNg2Component(blackbaud_skyux2_1.SkyRepeaterItemComponent));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = repeaterItemModule;
 	
 
 /***/ }

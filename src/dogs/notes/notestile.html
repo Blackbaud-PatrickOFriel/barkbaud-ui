@@ -11,12 +11,28 @@
         <div bb-tile-section ng-switch-when="0" class="bb-no-records">
           This dog has no medical history.
         </div>
-        <div ng-switch-default class="bb-repeater">
+        <!--<div ng-switch-default class="bb-repeater">
           <div ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" class="bb-repeater-item">
             <h4 class="bb-repeater-item-title">{{:: note.title }}</h4>
             <h5>{{:: dogNotesTile.getNoteDate(note.date) }}</h5>
             <p>{{:: note.description }}</p>
           </div>
+        </div>-->
+        <div ng-switch-default>
+          <sky-repeater [expand-mode]="'single'">
+            <sky-repeater-item ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" [is-expanded]="item.expanded" [is-collapsible]="dogNotesTile.isCollapsible">
+              <sky-repeater-item-title>
+                <div>
+                  {{note.title}}
+                </div>
+              </sky-repeater-item-title>
+              <sky-repeater-item-content>
+                <div>
+                {{ note.description }}
+              </div>
+              </sky-repeater-item-content>
+            </sky-repeater-item>
+          </sky-repeater>
         </div>
       </div>
     </div>

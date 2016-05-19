@@ -557,7 +557,7 @@ angular.module('md5', []).constant('md5', (function() {
 
     MainController.$inject = ['barkbaudAuthService'];
 
-    angular.module('barkbaud', ['sky', 'ui.select', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
+    angular.module('barkbaud', ['sky', 'ui.bootstrap', 'ui.router', 'ngAnimate', 'barkbaud.templates', 'ui.gravatar'])
         .constant('barkbaudConfig', barkbaudConfig)
         .config(config)
         .run(run)
@@ -1073,6 +1073,8 @@ angular.module('md5', []).constant('md5', (function() {
     function DogNotesTileController($scope, bbData, bbMoment, barkNoteAdd, dogId) {
         var self = this;
 
+        self.isCollapsible = true;
+
         self.load = function () {
             $scope.$emit('bbBeginWait', { nonblocking: true });
             bbData.load({
@@ -1081,7 +1083,10 @@ angular.module('md5', []).constant('md5', (function() {
                 self.notes = result.data.data;
                 $scope.$emit('bbEndWait', { nonblocking: true });
             }).catch(function (result) {
-                self.error = result.data.error;
+                if (result.data && result.data.error) {
+                    self.error = result.data.error;
+                }
+
                 $scope.$emit('bbEndWait', { nonblocking: true });
             });
         };
@@ -1408,12 +1413,28 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '        <div bb-tile-section ng-switch-when="0" class="bb-no-records">\n' +
         '          This dog has no medical history.\n' +
         '        </div>\n' +
-        '        <div ng-switch-default class="bb-repeater">\n' +
+        '        <!--<div ng-switch-default class="bb-repeater">\n' +
         '          <div ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" class="bb-repeater-item">\n' +
         '            <h4 class="bb-repeater-item-title">{{:: note.title }}</h4>\n' +
         '            <h5>{{:: dogNotesTile.getNoteDate(note.date) }}</h5>\n' +
         '            <p>{{:: note.description }}</p>\n' +
         '          </div>\n' +
+        '        </div>-->\n' +
+        '        <div ng-switch-default>\n' +
+        '          <sky-repeater [expand-mode]="\'single\'">\n' +
+        '            <sky-repeater-item ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" [is-expanded]="item.expanded" [is-collapsible]="dogNotesTile.isCollapsible">\n' +
+        '              <sky-repeater-item-title>\n' +
+        '                <div>\n' +
+        '                  {{note.title}}\n' +
+        '                </div>\n' +
+        '              </sky-repeater-item-title>\n' +
+        '              <sky-repeater-item-content>\n' +
+        '                <div>\n' +
+        '                {{ note.description }}\n' +
+        '              </div>\n' +
+        '              </sky-repeater-item-content>\n' +
+        '            </sky-repeater-item>\n' +
+        '          </sky-repeater>\n' +
         '        </div>\n' +
         '      </div>\n' +
         '    </div>\n' +
@@ -1465,7 +1486,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '  <title>Barkbaud</title>\n' +
         '  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">\n' +
         '  <link rel="icon" type="image/png" href="images/favicon.ico">\n' +
-        '  <link rel="stylesheet" type="text/css" href="https://sky.blackbaudcdn.net/skyux/1.5.21/css/sky-bundle.css">\n' +
+        '  <link rel="stylesheet" type="text/css" href="https://sky.blackbaudcdn.net/skyux/1.6.0-5/css/sky-bundle.css">\n' +
         '  <link rel="stylesheet" type="text/css" href="css/app.css">\n' +
         '</head>\n' +
         '\n' +
@@ -1490,7 +1511,7 @@ angular.module('barkbaud.templates', []).run(['$templateCache', function($templa
         '  </div>\n' +
         '\n' +
         '\n' +
-        '  <script src="https://sky.blackbaudcdn.net/skyux/1.5.21/js/sky-bundle.min.js"></script>\n' +
+        '  <script src="https://sky.blackbaudcdn.net/skyux/1.6.0-5/js/sky-bundle.min.js"></script>\n' +
         '  <script src="js/app.min.js"></script>\n' +
         '  <script src="polyfills.bundle.js"></script>\n' +
         '  <script src="vendor.bundle.js"></script>\n' +

@@ -6,6 +6,8 @@
     function DogNotesTileController($scope, bbData, bbMoment, barkNoteAdd, dogId) {
         var self = this;
 
+        self.isCollapsible = true;
+
         self.load = function () {
             $scope.$emit('bbBeginWait', { nonblocking: true });
             bbData.load({
@@ -14,7 +16,10 @@
                 self.notes = result.data.data;
                 $scope.$emit('bbEndWait', { nonblocking: true });
             }).catch(function (result) {
-                self.error = result.data.error;
+                if (result.data && result.data.error) {
+                    self.error = result.data.error;
+                }
+
                 $scope.$emit('bbEndWait', { nonblocking: true });
             });
         };
