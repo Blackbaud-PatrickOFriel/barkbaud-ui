@@ -23,13 +23,13 @@
             <sky-repeater-item ng-repeat="note in ::dogNotesTile.notes.slice().reverse() track by $index" [is-expanded]="item.expanded" [is-collapsible]="dogNotesTile.isCollapsible">
               <sky-repeater-item-title>
                 <div>
-                  {{note.title}}
+                  {{ note.title }}
                 </div>
               </sky-repeater-item-title>
               <sky-repeater-item-content>
                 <div>
-                {{ note.description }}
-              </div>
+                  {{ note.description }}
+                </div>
               </sky-repeater-item-content>
             </sky-repeater-item>
           </sky-repeater>
